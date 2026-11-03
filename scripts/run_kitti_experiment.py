@@ -137,7 +137,9 @@ def main():
     for n in ["ESKF (纯惯导外推)", "InEKF+NHC", "InEKF+学习速度+相关膨胀[FT]", "v3(本文)[FT]",
               "InEKF+学习速度+相关膨胀+ACI(v1)[sim零样本]", "v3(本文)[sim零样本]"]:
         t, e = trace[n]
-        ax.plot(t, e, lw=1, label=n)
+        st = {"InEKF+NHC": dict(ls="--", lw=1.6, color="k"), "v3(本文)[sim零样本]": dict(ls=":", lw=1.6)}
+        ax.plot(t, e, label=n + (" (=NHC, 全程回退)" if n == "v3(本文)[sim零样本]" else ""),
+                **st.get(n, dict(lw=1)))
     for s, d in trace["outages"]:
         ax.axvspan(s, s + d, color="grey", alpha=0.2)
     ax.set_yscale("log")
