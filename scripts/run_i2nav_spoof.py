@@ -78,15 +78,8 @@ def test(a):
     return f"{name}/{fold}/{seed}", res
 
 
-def main():
-    runs = [(n, f, s) for n in I.IMUS for f in "AB" for s in SEEDS]
-    with Pool(8) as pool:
-        cal = pool.map(calib, runs)
-        H = {m: 1.5 * max(c[m] for c in cal) for m in ("single", "dual")}
-        print("calibrated h:", H, flush=True)
-        out = dict(pool.map(test, [(n, f, s, H) for n, f, s in runs]))
-    keys = list(out)
-    summ = {"h": H, "calib_max_g": cal, "false_alarms_clean": {}, "by_rate": {}}
+def _tbl(out, keys, H_desc):
+    summ = {"false_alarms_clean": {}, "by_rate": {}}
     for mon in ("single", "dual"):
         summ["false_alarms_clean"][mon] = int(sum(out[k]["clean"][mon] is not None for k in keys))
     lines = ["| 漂移速率[m/s] | 方法 | 检出率 | 平均检测延迟[s] | 欺骗前误报 | 欺骗后最大水平误差[m] |",
@@ -100,18 +93,41 @@ def main():
             det = [t - SPOOF_START for t in at if t is not None and t >= SPOOF_START]
             me = np.array([r["max_err_after"] for r in rs])
             d = {"detection_rate": len(det) / len(rs), "mean_delay_s": float(np.mean(det)) if det else None,
-                 "pre_spoof_alarms": early, "max_err_after_mean": float(me.mean()), "max_err_after_std": float(me.std())}
+                 "pre_spoof_alarms": int(early), "max_err_after_mean": float(me.mean()), "max_err_after_std": float(me.std())}
             summ["by_rate"][str(rate)][mon] = d
             nm = {"none": "无监测", "single": "单通道 NIS-CUSUM", "dual": "双通道 DR-CUSUM(本文)"}[mon]
             lines.append(f"| {rate} | {nm} | " + ("-" if mon == "none" else f"{d['detection_rate']:.0%}") + " | "
                          + (f"{d['mean_delay_s']:.1f}" if d["mean_delay_s"] is not None else "-")
                          + f" | {early if mon != 'none' else '-'} | {d['max_err_after_mean']:.2f}±{d['max_err_after_std']:.2f} |")
     fa = summ["false_alarms_clean"]
-    md = "\n".join(lines) + (f"\n\n真实 RTK 干净测试半段误报({len(keys)} 条, 各约 800 s): 单通道 {fa['single']}, 双通道 {fa['dual']}; "
-                             f"阈值 h(训练半段干净运行 1.5×最大值): 单通道 {H['single']:.1f}, 双通道 {H['dual']:.1f}\n")
+    md = (f"### 阈值：{H_desc}\n\n" + "\n".join(lines)
+          + f"\n\n真实 RTK 干净测试半段误报({len(keys)} 条, 各约 800 s): 单通道 {fa['single']}, 双通道 {fa['dual']}\n")
+    return summ, md
+
+
+def main():
+    runs = [(n, f, s) for n in I.IMUS for f in "AB" for s in SEEDS]
+    with Pool(8) as pool:
+        cal = pool.map(calib, runs)
+        calm = {f"{n}/{f}/{s}": c for (n, f, s), c in zip(runs, cal)}
+        Hg = {m: 1.5 * max(c[m] for c in cal) for m in ("single", "dual")}
+        # per-(IMU, fold) threshold: only that IMU's clean TRAINING-half runs of that fold (still held-out)
+        Hp = {(n, f): {m: 1.5 * max(calm[f"{n}/{f}/{s}"][m] for s in SEEDS) for m in ("single", "dual")}
+              for n in I.IMUS for f in "AB"}
+        print("calibrated h (global):", Hg, flush=True)
+        print("calib max per run:", json.dumps(calm), flush=True)
+        outg = dict(pool.map(test, [(n, f, s, Hg) for n, f, s in runs]))
+        outp = dict(pool.map(test, [(n, f, s, Hp[(n, f)]) for n, f, s in runs]))
+    keys = list(outg)
+    sg, mdg = _tbl(outg, keys, f"全局（全部 IMU 训练半段干净运行 1.5×最大值）：单通道 {Hg['single']:.1f}，双通道 {Hg['dual']:.1f}")
+    sp, mdp = _tbl(outp, keys, "按 IMU×折（该 IMU 该折训练半段干净运行 1.5×最大值）")
+    summ = {"h_global": Hg, "h_per_imu_fold": {f"{n}/{f}": v for (n, f), v in Hp.items()}, "calib_max_g": calm,
+            "global": sg, "per_imu": sp}
+    md = mdg + "\n" + mdp
     print(md)
     (OUT / "spoof_table.md").write_text(md)
-    (OUT / "spoof_metrics.json").write_text(json.dumps({"summary": summ, "per_run": out}, indent=1, ensure_ascii=False))
+    (OUT / "spoof_metrics.json").write_text(json.dumps({"summary": summ, "per_run_global": outg, "per_run_per_imu": outp},
+                                                       indent=1, ensure_ascii=False, default=float))
 
 
 if __name__ == "__main__":
