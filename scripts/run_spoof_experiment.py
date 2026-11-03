@@ -123,7 +123,7 @@ def main():
     print(md)
     Path("results/spoof_metrics.json").write_text(json.dumps({"seeds": seeds, "summary": summ,
                                                              "per_seed": {str(s): per[s] for s in seeds}},
-                                                            indent=1, ensure_ascii=False))
+                                                            indent=1, ensure_ascii=False, default=lambda o: o.item()))
     Path("results/spoof_table.md").write_text(md)
 
     import matplotlib
@@ -143,6 +143,7 @@ def main():
     ax[0].set_yscale("log")
     ax[0].set_ylabel("test statistic q")
     ax[1].set_yscale("symlog", linthresh=1)
+    ax[1].set_ylim(bottom=0)
     ax[1].set_ylabel("CUSUM g (dashed: h)")
     ax[2].set_ylabel("horizontal error [m]")
     ax[2].set_xlabel(f"time [s]; ramp spoof 0.5 m/s from {SPOOF_START:.0f} s, seed {TEST_SEEDS[0]}")
