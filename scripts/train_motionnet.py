@@ -38,11 +38,14 @@ for s in VAL_SEEDS:
     y = sc.truth.v_body[idx - 1]
     errs.append(mu - y)
     z2.append((mu - y) ** 2 / var)
+zs = [np.sign(e) * np.sqrt(q) for e, q in zip(errs, z2)]
+neff = np.mean([learning.correlation_factor(z) for z in zs], axis=0)
 errs, z2 = np.concatenate(errs), np.concatenate(z2)
 rep = {
     "val_rmse_fwd_lat_up": np.sqrt((errs**2).mean(0)).round(4).tolist(),
     "val_coverage95_raw_variance": (z2 <= chi2.ppf(0.95, 1)).mean(0).round(4).tolist(),
     "val_mean_normalized_sq_err": z2.mean(0).round(3).tolist(),
+    "neff_corr_scale": neff.round(2).tolist(),
 }
 print(json.dumps(rep, indent=1))
 Path("results/motionnet_val.json").write_text(json.dumps(rep, indent=1))

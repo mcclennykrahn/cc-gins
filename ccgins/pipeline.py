@@ -22,11 +22,12 @@ class Config:
     pseudo: str = "none"             # none | nhc | learned_nhc | learned_vel
     nhc_sigma: float = 0.1           # m/s, fixed NHC
     pseudo_every: int = 10           # IMU samples (10 Hz)
+    corr_scale: tuple | None = None  # per-channel variance inflation for temporally correlated errors (n_eff)
     aci: bool = False
     aci_alpha: float = 0.05
     aci_gamma: float = 0.01
     aci_window: int = 300
-    aci_beta: float = 0.5
+    aci_beta: float = 2.0             # chosen on VAL seeds (sweep 0.5/2/5/10, small effect)
     aci_t_ref: float = 60.0
     gnss_gate: float = float(chi2.ppf(0.999, 3))
     max_consecutive_rejects: int = 5
@@ -133,6 +134,8 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
                     cal.observe(z - h, s2, c)
                 out_t = 0.0 if tau < 1.5 else tau
                 var_eff = cal.effective_var(s2, out_t)
+                if cfg.corr_scale is not None and cfg.pseudo == "learned_vel":
+                    var_eff = var_eff * np.asarray(cfg.corr_scale, float)
                 A.update(z - h, H, np.diag(var_eff))
                 if B is not None:
                     hB, HB = B.body_vel_model(chans)

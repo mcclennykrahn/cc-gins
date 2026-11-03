@@ -97,3 +97,25 @@ def load(path):
     net.load_state_dict(torch.load(path, map_location="cpu"))
     net.eval()
     return net
+
+
+def correlation_factor(z: np.ndarray, max_lag: int = 100) -> np.ndarray:
+    """Effective-sample-size inflation n_eff = 1 + 2*sum_k rho_k of normalized errors z (T, C).
+
+    Learned pseudo-measurements at 10 Hz have strongly autocorrelated errors; a Kalman filter that
+    treats them as white becomes over-confident by roughly this factor. Sum is truncated at the
+    first non-positive autocorrelation (initial positive sequence) or max_lag.
+    """
+    z = z - z.mean(0)
+    out = []
+    for c in range(z.shape[1]):
+        x = z[:, c]
+        v = x.var()
+        tot = 1.0
+        for L in range(1, max_lag + 1):
+            r = float(np.mean(x[:-L] * x[L:]) / v)
+            if r <= 0:
+                break
+            tot += 2 * r
+        out.append(tot)
+    return np.array(out)
