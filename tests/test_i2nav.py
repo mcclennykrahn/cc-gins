@@ -103,10 +103,10 @@ def test_mount_matrix():
 
 def test_scenarios_fold_and_outages():
     from ccgins import i2nav_scenarios as I
-    (a0, a1), (b0, b1) = I.fold_ranges("A")
-    assert a1 < b0 and b0 - a1 >= 2 * I.GUARD - 1e-9
-    (c0, c1), (d0, d1) = I.fold_ranges("B")
-    assert (c0, c1) == (b0, b1) and (d0, d1) == (a0, a1)
+    trA, teA = I.fold_ranges("A")          # (train, test); fold A tests on the first half
+    assert teA[0] == 0.0 and teA[1] < trA[0] and trA[0] - teA[1] >= I.GUARD - 1e-9
+    trB, teB = I.fold_ranges("B")
+    assert trB == teA and teB == trA       # folds swap halves, no overlap
     outs = I.outage_schedule(800.0, first=50.0)
     assert [d for _, d in outs] == [30, 120, 60, 30, 120, 60]
     assert all(s2 >= s1 + d1 for (s1, d1), (s2, _) in zip(outs, outs[1:]))
