@@ -1,0 +1,56 @@
+{
+ "sim_only": {
+  "val_rmse_fwd_lat_up": [
+   4.1083,
+   0.1979,
+   0.1455
+  ],
+  "val_coverage95_raw_variance": [
+   0.1552,
+   0.0537,
+   0.0562
+  ],
+  "val_mean_normalized_sq_err": [
+   1062.221,
+   4644.94,
+   2497.51
+  ],
+  "neff_corr_scale": [
+   30.34,
+   57.84,
+   46.56
+  ]
+ },
+ "kitti_finetuned": {
+  "val_rmse_fwd_lat_up": [
+   2.0484,
+   0.0948,
+   0.0639
+  ],
+  "val_coverage95_raw_variance": [
+   0.6036,
+   0.7515,
+   0.9133
+  ],
+  "val_mean_normalized_sq_err": [
+   4.933,
+   2.868,
+   1.314
+  ],
+  "neff_corr_scale": [
+   61.74,
+   60.67,
+   35.47
+  ]
+ },
+ "train_drives": [
+  "2011_09_30_drive_0018",
+  "2011_09_30_drive_0027",
+  "2011_09_30_drive_0034",
+  "2011_10_03_drive_0027"
+ ],
+ "val_drives": [
+  "2011_09_30_drive_0033"
+ ],
+ "train_seconds": 928.3
+}

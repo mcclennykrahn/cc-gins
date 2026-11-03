@@ -62,9 +62,10 @@ def test_kitti_loader(tmp_path):
     for i in range(3):
         row = np.zeros(30)
         row[0], row[1], row[2] = 49.0 + i * 1e-5, 8.4, 110.0
-        row[8], row[14], row[16], row[22] = 10.0, 0.1, 9.81, 0.01
+        row[8], row[11], row[13], row[19] = 10.0, 0.1, 9.81, 0.01
         np.savetxt(d / f"{i:010d}.txt", row[None])
     o = load_oxts(tmp_path / "seq")
     assert o["imu6"].shape == (3, 6)
     assert np.allclose(o["v_body"][:, 0], 10.0)
+    assert np.allclose(o["imu6"][:, 5], 9.81) and np.allclose(o["imu6"][:, 2], 0.01)
     assert o["pos_enu"][2, 1] > 2.0
