@@ -1,3 +1,4 @@
+from pathlib import Path
 import numpy as np
 import pytest
 
@@ -111,3 +112,13 @@ def test_scenarios_fold_and_outages():
     assert [d for _, d in outs] == [30, 120, 60, 30, 120, 60]
     assert all(s2 >= s1 + d1 for (s1, d1), (s2, _) in zip(outs, outs[1:]))
     assert outs[-1][0] + outs[-1][1] <= 800.0
+
+
+@pytest.mark.skipif(not Path("data/i2nav/ADIS16460.npz").exists(), reason="i2Nav npz not prepared (raw data not in repo)")
+def test_mount_calibration_real_adis16460():
+    """Truth-free mounting calibration on a real 400 s segment: yaw ~2.8 deg (truth-consistent), and the
+    correlation-aware NHC sigma is much larger than the white-noise RMS."""
+    from ccgins import i2nav_scenarios as I
+    (p, y), sig, sig_eff, neff = I.calibrate_mount(I.segment("ADIS16460", 0.0, 400.0), return_eff=True)
+    assert 2.3 < np.degrees(y) < 3.3 and abs(np.degrees(p)) < 1.5
+    assert max(sig) < 0.15 and sig_eff > 2 * max(sig) and min(neff) >= 1.0
