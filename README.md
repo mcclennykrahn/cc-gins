@@ -2,7 +2,7 @@
 
 **cc-gins**（Consistency-Calibrated GNSS/INS）是一个可运行、可测试的松组合导航原型。它解决的问题是：在 GNSS 中断时，用学习得到的车辆运动伪观测来约束惯导漂移，同时保证滤波器给出的协方差仍然“可信”；在 GNSS 被慢漂移欺骗时，能够检测出来并把它剔除。
 
-> ⚠️ 本仓库的数值结果全部由下文脚本实际运行得到，分两部分：(a) **仿真数据**（`ccgins/sim.py`）；(b) **KITTI raw 真实 OXTS 数据**（真实 IMU 与真值轨迹，但 GNSS 为合成：1 Hz、带中断/欺骗；并在 OXTS IMU 上注入了 MEMS 级误差）。i2Nav 尚未验证，详见“局限性”。
+> ⚠️ 本仓库的数值结果全部由下文脚本实际运行得到，分三部分：(a) **仿真数据**（`ccgins/sim.py`）；(b) **KITTI raw 真实 OXTS 数据**（真实 IMU 与真值轨迹，但 GNSS 为合成：1 Hz、带中断/欺骗；并在 OXTS IMU 上注入了 MEMS 级误差）；(c) **i2Nav awesome-gins 真实数据**（真实 MEMS IMU×4 + 真实 RTK + 真值，第 6 节）。
 
 调研文档位于 `docs/`：`literature_review.md`（文献综述）、`improvement_opportunities.md`（可改进点）、`project_proposal.md`（方案）。
 
@@ -50,6 +50,14 @@ python scripts/sweep_bias_val.py                      # 在验证种子上选择
 python scripts/fetch_kitti_oxts.py                    # 仅下载 8 个 drive 的 oxts 部分（HTTP Range），转存 data/kitti/*.npz（已 gitignore）
 python scripts/train_motionnet_kitti.py               # 在 4 个训练 drive 上微调 MotionNet → results/kitti/motionnet_kitti.pt
 python scripts/run_kitti_experiment.py --workers 8    # 3 个测试 drive 上的中断实验 → results/kitti/
+
+# i2Nav awesome-gins（真实 MEMS + RTK）
+git clone https://github.com/i2Nav-WHU/awesome-gins-datasets   # 约 113 MB，解压其中的 7z（py7zr）到 /tmp/ag
+python scripts/prepare_i2nav.py /tmp/ag               # → data/i2nav/*.npz（已 gitignore，约 111 MB）
+python scripts/train_motionnet_i2nav.py               # 两折微调 → results/i2nav/motionnet_fold{A,B}.pt
+python scripts/run_i2nav_experiment.py --workers 8    # 中断实验（约 25 分钟）
+python scripts/run_i2nav_spoof.py                     # 真实 RTK 欺骗实验（约 9 分钟）
+python scripts/plot_i2nav_summary.py
 ```
 
 ## 实验设置
@@ -170,12 +178,88 @@ python scripts/run_kitti_experiment.py --workers 8    # 3 个测试 drive 上的
 
 **分段观察**：高速段 0042（约 26 m/s，超出训练速度范围）上 v3 前向回退比例 1.0，RMSE 3.25 m，与 NHC 相同；而不带监测的“学习速度+相关膨胀”在该段 RMSE 达 22.87 m。其它段 v3 对 NHC：0034#0 3.03 vs 3.25 m，0028#0 3.60 vs 3.62 m，0034#1 1.44 vs 1.54 m。
 
+### 6. i2Nav 真实数据验证：真实 MEMS IMU + 真实 RTK（`results/i2nav/`）
+
+**数据**：武汉大学 i2Nav [awesome-gins-datasets](https://github.com/i2Nav-WHU/awesome-gins-datasets)，同一辆车上同步记录的 4 个 IMU：ICM20602（消费级）、ADIS16460、ADIS16465、i300（工业级 MEMS），真实 RTK 定位（1 Hz，水平 σ 中位数约 1 cm），真值来自高精度 POS 后处理。一次约 1617 s 的开阔路段行驶，最高车速约 13.6 m/s。原始数据不入库，`data/i2nav/*.npz` 已 gitignore。
+
+**读取器**（`ccgins/data/i2nav.py`，`scripts/prepare_i2nav.py`）：
+- 坐标系：机体 FRD→FLU（D=diag(1,−1,−1)），导航 NED→ENU，R_enu_flu = T·R_ned_frd·D；经纬高→ECEF→以起点为原点的 ENU。
+- IMU 增量（Δθ、Δv）对累积量插值后重采样到 100 Hz；真值姿态用 SLERP，位置与速度线性插值；全部按 GPS 周内秒对齐。
+- 每个 IMU 的天线杆臂（FRD）来自数据集说明，转为 FLU；GNSS 使用逐历元标准差（下限 5 cm）。
+- 可选地球模型 `filters.set_earth()`：地球自转（姿态与 Coriolis）和当地重力（武汉约 9.7935 m/s²）。默认关闭，仿真与 KITTI 结果不变。
+- 真实 IMU 的上电零偏很大，没有标定（例如 ICM20602 x 轴陀螺约 −1267°/h），因此初始零偏先验统一设为 2000°/h、20 mg。
+
+**实验设计（时间留出）**：整段数据切成前后两半，中间留 10 s 隔离。A 折用后半段训练、在前半段测试，B 折反过来。
+- MotionNet 从仿真模型初始化，只用 ICM20602 和 ADIS16460 的训练半段微调；训练半段最后 150 s 作验证集，用来估计 n_eff。数据增强加入随机常值零偏，共 12 个 epoch，每折约 22 s。
+- ADIS16465 和 i300 **完全没有参与训练**。
+- 测试半段使用真实 RTK，并人为注入中断（30/120/60/30/120/60 s，起点 50/70/90 s）。2 折 × 4 个 IMU × 3 个起点 × 2 个初始误差种子，共 48 次运行，每种中断时长 96 次。
+- 统计：配对 bootstrap 95% CI、胜率、Wilcoxon 检验。
+- 复现：`python scripts/train_motionnet_i2nav.py && python scripts/run_i2nav_experiment.py --workers 8 && python scripts/run_i2nav_spoof.py`。
+
+**发现 1：原始 NHC 在真实数据上失效，原因是安装角。** 各 IMU 相对车体有 1.1–2.9° 的航向安装角和约 0.4° 的俯仰安装角，所以“侧向速度 = 0”的假设不成立：侧向残差 0.2–0.46 m/s，而 NHC 设定的 σ 是 0.1 m/s。
+- **修正方法（不用真值）**：在训练半段运行不带 NHC 的 RTK/INS 滤波器，用滤波器自己估计的机体系速度方向求出安装俯仰角和航向角。各折估计结果一致：ICM20602 航向 1.09–1.17°，ADIS16460 2.76–2.82°，ADIS16465 −1.22 至 −1.29°，i300 2.85–2.87°，与真值推算的角度相差约 0.1°。
+- 安装角作用于 NHC、混合和学习伪观测。在测试半段上，NHC 相比未标定版本的变化为 −6.4 / −14.5 / −11.3 m（30/60/120 s，p<1e-7）。
+
+**发现 2：NHC 的 σ=0.1 在真实车辆上过度自信，原因是误差强时间相关。** 标定后侧向/垂向残差的 RMS 只有约 0.035–0.055 m/s，但 10 Hz 下 n_eff 约 47–137。
+- 本仓库对学习伪观测已经做了相关性膨胀，这里用**同一套方法**处理 NHC：σ_eff = max_c RMS_c·√n_eff,c，同样只用训练半段估计，不用真值。各 IMU 得到 σ_eff ≈ 0.27–0.65 m/s。
+- 效果：中断内 95% 覆盖率从 0.58 提高到 0.92，120 s 中断最大误差从 30.4 m 降到 20.6 m。
+
+**中断结果（48 次运行均值±标准差，每种时长 n=96；完整表见 `results/i2nav/outage_table.md`）**
+
+| 方法 | 水平RMSE[m] | 30 s | 60 s | 120 s | 中断内95%覆盖率 |
+|---|---|---|---|---|---|
+| ESKF 纯惯导 | 31.47±27.26 | 6.09 | 26.30 | 126.77 | 0.874 |
+| InEKF+NHC（未标定安装角） | 13.65±7.90 | 9.01 | 31.92 | 41.68 | 0.232 |
+| InEKF+NHC+安装角标定（基线） | 9.19±11.03 | 2.59 | 17.43 | 30.39 | 0.579 |
+| InEKF+NHC+安装角+相关σ（更强基线） | 5.60±5.86 | 2.77 | 15.07 | 20.61 | 0.924 |
+| InEKF+学习速度+相关膨胀[FT] | 8.77±4.00 | 7.44 | 15.28 | 25.70 | 0.422 |
+| v1（全通道 ACI）[FT] | 15.00±24.63 | 8.06 | 19.06 | 41.94 | 0.629 |
+| v3+安装角标定[FT] | 5.53±4.41 | 2.58 | 8.90 | 18.62 | 0.574 |
+| **v3+安装角+相关σ（本文）[FT]** | **4.25±2.67** | 2.60 | **8.59** | **14.62** | 0.887 |
+| v1 [仿真零样本] | 1172±1117 | 821 | 1481 | 3074 | 0.004 |
+| v3+安装角 [仿真零样本] | 9.19±11.03 | 2.59 | 17.43 | 30.39 | 0.579（前向 100% 回退） |
+| v3+安装角 [KITTI 模型零样本] | 9.14±11.04 | 2.59 | 17.08 | 30.20 | 0.583（回退 67.5%） |
+
+**配对比较（各中断时长的最大误差，n=96；详见 `outage_paired.md`）**
+
+| 比较 | 60 s 差值 (95% CI) | 120 s 差值 (95% CI) |
+|---|---|---|
+| v3+安装角+相关σ vs NHC+安装角 | −8.83 m [−16.80, −2.41]，−50.7%，胜率 0.56，p=0.043 | −15.78 m [−28.47, −5.61]，−51.9%，胜率 0.65，p=0.0018 |
+| v3+安装角+相关σ vs NHC+安装角+相关σ | −6.48 m [−12.13, −1.87]，−43.0%，胜率 0.46，p=0.24 | −5.99 m [−13.19, −0.56]，−29.1%，胜率 0.54，p=0.23 |
+| NHC+安装角+相关σ vs NHC+安装角 | −2.36 m [−5.17, +0.23]，p=0.0079 | −9.78 m [−17.32, −3.20]，p=0.00099 |
+
+30 s 中断时各种 NHC 类方法之间没有实质差别（约 ±0.2 m）。
+
+**按 IMU 拆开看（相对 NHC+安装角）。改进主要来自消费级 ICM20602：**
+- ICM20602（参与训练）：v3+安装角+相关σ 在 60 s 中断下 −34.1 m（−71%），120 s 下 −60.1 m（−70%），p≤0.005。
+- ADIS16460（参与训练）：60 s 下 −2.9 m（p=0.75，不显著）；120 s 下 **+1.45 m（+12%，略差，p=0.1）**。
+- ADIS16465（未参与训练）：60 s 下 **+1.9 m（+35%，略差，p=0.97）**；120 s 下 −2.1 m（−19%，p=0.015）。不带“相关σ”的 v3 在 60 s 下更差（+2.9 m，+53%，p=0.06）。
+- i300（未参与训练）：60 s 下 −0.2 m；120 s 下 −2.3 m（p=0.1）。
+- 对两个工业级的未见过 IMU，单独的“NHC+安装角+相关σ”就已经拿到大部分收益：ADIS16465 在 60 s 和 120 s 下分别 −35% 和 −27%，i300 在 120 s 下 −17%，与 v3 相当甚至更好。**学习前向速度只在零偏最大的 ICM20602 上明显有用**；在工业级 IMU 上基本持平，个别情况略差。
+
+**欺骗（真实 RTK + 叠加斜坡漂移，`results/i2nav/spoof_table.md`）**
+- 底座为 v3+安装角+相关σ。在测试半段的第 300 s 开始注入 45° 方向的斜坡漂移；阈值取训练半段干净运行统计量最大值的 1.5 倍；共 16 次测试。
+
+| 漂移速率 | 单通道 NIS-CUSUM：检出率 / 延迟 / 欺骗后最大误差 | 双通道 DR-CUSUM：检出率 / 延迟 / 欺骗后最大误差 | 不监测 |
+|---|---|---|---|
+| 0.2 m/s | 50% / 38.5 s / 81.2 m | 50% / 273.1 s / 84.7 m | 100.5 m |
+| 0.5 m/s | 100% / 3.2 s / 45.5 m | 100% / 89.0 s / 132.9 m | 251.4 m |
+| 1.0 m/s | 100% / 2.0 s / 45.5 m | 100% / 17.5 s / 196.9 m | 502.7 m |
+
+- 两种监测在干净测试数据上的误报都是 0/16。
+- **在 RTK 精度下，本文的 DR-CUSUM 不如单通道 NIS-CUSUM**，这与仿真中的结论（GNSS σ=1 m）相反。原因：RTK 的厘米级新息让 NIS 对漂移极其敏感；而真实 MEMS 的航位推算通道 B 在 30 s 内会漂移若干米，使干净数据上的统计量最大值很大（ICM20602 约 8000–10000），全局阈值被抬到 15422。
+- 尝试过的修正：改为按 IMU×折分别标定阈值。结果在留出的测试半段上误报升到 7/16（单通道 6/16），因此**未采用**。
+- “欺骗后最大误差”在检测到之后基本由剩余约 500 s 没有 GNSS 的推算误差决定，因为报警会锁存，不会恢复使用 GNSS。
+
+图：`results/i2nav/outage_error.png`（ADIS16465，A 折，起点 50 s 的误差曲线）；`results/i2nav/per_imu_summary.png`（各 IMU 在 120 s 中断下的最大误差与覆盖率）。
+
 ### 图
 
 - `results/outage_error.png`：种子 900 的水平误差，以及误差与 σ 之比（灰色区域为 GNSS 中断）
 - `results/outage_consistency.png`：各方法 120 s 中断的最大误差，以及中断内的 95% 覆盖率
 - `results/outage_shift_error.png`、`results/outage_shift_consistency.png`：分布偏移下的对应图
 - `results/spoof_stats.png`：欺骗场景下的检验统计量、CUSUM 和水平误差（v3 底座）
+- `results/i2nav/outage_error.png`、`results/i2nav/per_imu_summary.png`：i2Nav 真实数据（第 6 节）
 - `results/kitti/outage_error.png`：KITTI 测试段 0028#0 的水平误差（灰色为中断；黑色虚线为 InEKF+NHC，与“v3 仿真零样本”重合）
 
 ## 结论（如实陈述）
@@ -190,7 +274,12 @@ python scripts/run_kitti_experiment.py --workers 8    # 3 个测试 drive 上的
 4. **KITTI 真实数据**：微调后的 v3 相比 NHC 有**小幅但一致**的改进（RMSE 2.83 vs 2.92 m；120 s 中断 12.37 vs 13.08 m，10/10 配对更好）。不带保护的学习方法在真实数据上都不可靠（例如“学习速度+相关膨胀” RMSE 7.78 m，主要坏在高速段）。仅用仿真训练的网络直接用于 KITTI 时，v3 全部回退，等于 NHC，这正是保护机制的作用；v1/v2 零样本则明显差于 NHC。
 5. **一致性未达标。** 仿真中带伪观测的方法（白噪声方案除外）全程覆盖率约 0.62–0.73；KITTI 上中断内覆盖率约 0.67（包括 NHC），说明 NHC 的 σ=0.1 m/s 对真实车辆偏紧（真实侧向/垂向机体速度 RMS 约 0.08–0.2 m/s）。
 6. **InEKF 与 ESKF** 在两类数据上精度几乎相同（良好初始化下）。
-7. **欺骗检测**（v3 底座）：双通道 DR-CUSUM 在 0.2 m/s 和 1.0 m/s 漂移下检测更快（53.4 vs 85.9 s，11.6 vs 18.0 s），0.5 m/s 时相当（22.8 vs 26.6 s）；两者误报为 0；欺骗后最大误差比不监测下降约 2.5–14 倍。
+7. **欺骗检测**（v3 底座，仿真）：双通道 DR-CUSUM 在 0.2 m/s 和 1.0 m/s 漂移下检测更快（53.4 vs 85.9 s，11.6 vs 18.0 s），0.5 m/s 时相当（22.8 vs 26.6 s）；两者误报为 0；欺骗后最大误差比不监测下降约 2.5–14 倍。**但在 i2Nav 真实 RTK 上结论相反**：单通道 NIS-CUSUM 更快，例如 0.5 m/s 时延迟 3.2 s，而 DR-CUSUM 为 89 s（见第 6 节）。
+8. **i2Nav 真实 MEMS + RTK**：
+   - 真实数据中最关键的两点：(a) 不用真值的安装角标定；(b) 对 NHC 也做相关性膨胀（σ_eff）。两者合起来，120 s 中断从 41.7 m（原始 NHC）降到 20.6 m，覆盖率从 0.23 升到 0.92。
+   - 在此基础上，微调的 v3 再降到 14.6 m（相对 NHC+安装角 −52%，p=0.0018；相对更强的 NHC+安装角+相关σ −29%，p=0.23，不显著）。
+   - 改进主要来自消费级 ICM20602。在未见过的工业级 IMU 上，v3 与更强基线基本持平。
+   - 仿真零样本网络直接用在真实数据上会灾难性失败（v1 误差达千米级），v3 的保护机制把它全部回退为 NHC。
 
 ## 局限性
 
@@ -200,8 +289,12 @@ python scripts/run_kitti_experiment.py --workers 8    # 3 个测试 drive 上的
 - OXTS 真值本身有质量问题（drive 0028 有 30 m 级跳变），已用跳变检测剔除，但可能仍有残余误差。
 - 仿真器假设振动幅度随车速增大，使前向速度在仿真中更可观；KITTI 结果证实真实情况要差得多。
 - v3 的偏差监测在 GNSS 健康期才能工作；若一开始就没有 GNSS，则一直使用 NHC。锁存后不会恢复。
-- i2Nav 数据读取与验证尚未实现。
-- 未建模安装角、地球自转、杆臂误差状态，以及 GNSS 有色噪声。
+- **i2Nav 只有一次约 1617 s 的开阔路段行驶**，最高车速约 13.6 m/s。留出方式是同一次行驶内的时间切分，4 个 IMU 共享同一条轨迹，并非独立场景，因此跨场景泛化（城市峡谷、高速、不同车辆）未验证。
+- **i2Nav-Robot 数据集未使用**：数据托管在 OneDrive，访问未获批准。KF-GINS 示例数据是 Leador-A15（战术级，非 MEMS），因此也未使用。
+- i2Nav 上 MotionNet 的前向速度 RMSE 仍有约 1.2–1.4 m/s；在 ADIS16465（安装航向角方向与训练 IMU 相反）上侧向 RMSE 为 0.38 m/s。仿真零样本网络的前向 RMSE 约 44 m/s，完全不可用。
+- i2Nav 欺骗阈值用训练半段的干净运行标定，其中 v3 前向通道使用的是该网络在训练数据上的预测（样本内），可能偏乐观；而且 DR-CUSUM 在 RTK 上本身就不占优。
+- 安装角在训练半段估计一次后固定，没有在线估计；σ_eff 取两个通道中的较大者，为全局常数。
+- 安装角与地球自转目前只在 i2Nav 流程中使用（离线标定 / 可选开关），未作为滤波状态；也未建模杆臂误差状态和 GNSS 有色噪声。
 - 双通道 B 由 A 周期性重置，存在“极慢漂移”盲区（实验最低速率 0.2 m/s）；CUSUM 报警为锁存式，无恢复逻辑。
 - 仿真每个测试只用 10 个种子，标准差较大。
 - 单步耗时为 Python 实现的数值（约 40–110 µs/步，100 Hz IMU），不代表嵌入式 C 实现。
@@ -209,10 +302,10 @@ python scripts/run_kitti_experiment.py --workers 8    # 3 个测试 drive 上的
 ## 目录
 
 ```
-ccgins/      核心库（geometry, sim, filters, aci, integrity, learning, pipeline, metrics, scenarios, kitti_scenarios, data/kitti）
+ccgins/      核心库（geometry, sim, filters, aci, integrity, learning, pipeline, metrics, scenarios, kitti_scenarios, i2nav_scenarios, data/kitti, data/i2nav）
 scripts/     训练与实验脚本
 tests/       pytest 单元测试
-results/     模型、指标 JSON/MD、图（results/kitti/ 为 KITTI 结果；模型与图已纳入版本库）
-data/        KITTI 原始数据（不入库）
+results/     模型、指标 JSON/MD、图（results/kitti/ 为 KITTI 结果，results/i2nav/ 为 i2Nav 结果；模型与图已纳入版本库）
+data/        KITTI / i2Nav 预处理数据（不入库）
 docs/        调研与方案文档
 ```
