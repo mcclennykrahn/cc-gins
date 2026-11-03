@@ -19,7 +19,9 @@ from ccgins.pipeline import Config, run
 from ccgins.scenarios import CALIB_SEEDS, TEST_SEEDS, make_scenario
 
 NEFF = tuple(json.loads(Path("results/motionnet_val.json").read_text())["neff_corr_scale"])
-BASE = dict(filter="inekf", pseudo="learned_vel", corr_scale=NEFF, aci=True)
+# aiding = v3 (hybrid + corr inflation + fast ACI + kappa fallback + latched bias monitor)
+BASE = dict(filter="inekf", pseudo="hybrid", corr_scale=NEFF, aci=True, aci_gamma=0.05, aci_window=100,
+            hybrid_max_kappa=10.0, hybrid_bias_z=4.0, hybrid_bias_latch=True)
 SPOOF_START = 300.0
 RATES = [0.2, 0.5, 1.0]
 _net = None
