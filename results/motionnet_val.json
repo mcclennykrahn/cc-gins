@@ -1,0 +1,17 @@
+{
+ "val_rmse_fwd_lat_up": [
+  0.7515,
+  0.0033,
+  0.003
+ ],
+ "val_coverage95_raw_variance": [
+  0.9394,
+  0.935,
+  0.9414
+ ],
+ "val_mean_normalized_sq_err": [
+  1.129,
+  1.05,
+  0.992
+ ]
+}
