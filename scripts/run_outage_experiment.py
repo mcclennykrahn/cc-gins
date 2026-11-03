@@ -21,6 +21,11 @@ from ccgins.scenarios import OUTAGES, TEST_SEEDS, make_scenario
 
 NEFF = tuple(json.loads(Path("results/motionnet_val.json").read_text())["neff_corr_scale"])
 LV = dict(filter="inekf", pseudo="learned_vel")
+# v2 (selected on VAL seeds, see scripts/sweep_hybrid_val.py): hybrid pseudo-measurement,
+# faster ACI (gamma=0.05, window=100 obs = 10 s) and fallback to NHC-only when kappa_fwd > 10
+V2 = dict(pseudo="hybrid", corr_scale=NEFF, aci=True, aci_gamma=0.05, aci_window=100, hybrid_max_kappa=10.0)
+# v3 (selected on VAL seeds, see scripts/sweep_bias_val.py): v2 + latched residual-bias monitor
+V3 = dict(V2, hybrid_bias_z=4.0, hybrid_bias_latch=True)
 METHODS = {
     "ESKF (纯惯导外推)": dict(filter="eskf", pseudo="none"),
     "ESKF+NHC": dict(filter="eskf", pseudo="nhc"),
@@ -30,7 +35,10 @@ METHODS = {
     "InEKF+学习速度+相关膨胀": dict(LV, corr_scale=NEFF),
     "InEKF+学习速度+相关膨胀+ACI(β=0)": dict(LV, corr_scale=NEFF, aci=True, aci_beta=0.0),
     "ESKF+学习速度+相关膨胀+ACI": dict(LV, filter="eskf", corr_scale=NEFF, aci=True),
-    "InEKF+学习速度+相关膨胀+ACI(本文)": dict(LV, corr_scale=NEFF, aci=True),
+    "InEKF+学习速度+相关膨胀+ACI(v1)": dict(LV, corr_scale=NEFF, aci=True),
+    "InEKF+混合(NHC侧/垂+学习前向)+相关膨胀": dict(filter="inekf", pseudo="hybrid", corr_scale=NEFF),
+    "InEKF+混合+相关膨胀+快速ACI+κ回退(v2)": dict(filter="inekf", **V2),
+    "InEKF+v2+偏差监测锁存回退(v3,本文)": dict(filter="inekf", **V3),
 }
 SHIFT_SPEC = ImuSpec(vib_accel_per_mps=0.03, vib_gyro_per_mps=0.003, accel_bias_sigma=8.0)
 SHIFT = os.environ.get("CCGINS_SHIFT", "0") == "1"
@@ -55,6 +63,7 @@ def one_seed(seed):
         cfg = Config(init_seed=seed, label=name, **kw)
         log = run(sc.truth, sc.imu, sc.gnss, sc.imu_spec, sc.gnss_spec, cfg, pred=(idx, mu, var))
         res[name] = summarize(log, OUTAGES)
+        res[name]["fallback_frac"] = float(log.extra.get("fallback_frac", 0.0))
         if seed == TEST_SEEDS[0]:
             traces[name] = dict(t=log.t, eh=np.linalg.norm(log.p_est[:, :2] - log.p_true[:, :2], axis=1),
                                 sig=np.sqrt(np.trace(log.P_pos[:, :2, :2], axis1=1, axis2=2)),
@@ -110,7 +119,7 @@ def main():
     import matplotlib.pyplot as plt
     plt.rcParams["font.sans-serif"] = ["Noto Sans CJK SC", "WenQuanYi Zen Hei", "DejaVu Sans"]
     plt.rcParams["axes.unicode_minus"] = False
-    show = ["ESKF+NHC", "InEKF+学习速度(白噪声假设)", "InEKF+学习速度+相关膨胀", "InEKF+学习速度+相关膨胀+ACI(本文)"]
+    show = ["ESKF+NHC", "InEKF+学习速度(白噪声假设)", "InEKF+学习速度+相关膨胀+ACI(v1)", "InEKF+混合+相关膨胀+快速ACI+κ回退(v2)", "InEKF+v2+偏差监测锁存回退(v3,本文)"]
     fig, ax = plt.subplots(2, 1, figsize=(11, 7), sharex=True)
     for name in show:
         tr = traces[name]

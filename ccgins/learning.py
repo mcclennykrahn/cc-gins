@@ -42,7 +42,8 @@ def beta_nll(mu, logvar, y, beta: float = 0.5):
 
 
 def train_motionnet(imu_list, vb_list, epochs: int = 6, batch: int = 512, lr: float = 2e-3,
-                    stride: int = 10, seed: int = 0, log=print):
+                    stride: int = 10, seed: int = 0, log=print, init: "MotionNet | None" = None):
+    """Train from scratch, or fine-tune a copy of `init` (keeping its input normalization)."""
     torch.manual_seed(seed)
     np.random.seed(seed)
     X, Y = [], []
@@ -52,10 +53,14 @@ def train_motionnet(imu_list, vb_list, epochs: int = 6, batch: int = 512, lr: fl
         Y.append(vb[idx - 1].astype(np.float32))
     X = torch.from_numpy(np.concatenate(X))
     Y = torch.from_numpy(np.concatenate(Y))
-    net = MotionNet()
-    flat = X.reshape(-1, 6)
-    net.x_mean.copy_(flat.mean(0))
-    net.x_std.copy_(flat.std(0) + 1e-6)
+    if init is not None:
+        import copy
+        net = copy.deepcopy(init)
+    else:
+        net = MotionNet()
+        flat = X.reshape(-1, 6)
+        net.x_mean.copy_(flat.mean(0))
+        net.x_std.copy_(flat.std(0) + 1e-6)
     opt = torch.optim.Adam(net.parameters(), lr=lr)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
     n = len(X)

@@ -19,7 +19,21 @@ from .sim import DEG
 @dataclass
 class Config:
     filter: str = "inekf"            # eskf | inekf
-    pseudo: str = "none"             # none | nhc | learned_nhc | learned_vel
+    pseudo: str = "none"             # none | nhc | learned_nhc | learned_vel | hybrid
+    # hybrid: NHC (fixed sigma) for lateral/vertical + learned forward speed (corr-inflated, ACI-
+    # calibrated); forward channel dropped (fallback to pure NHC) when its calibrated std exceeds
+    # hybrid_max_std.
+    hybrid_max_std: float = 1e9
+    hybrid_max_kappa: float = 1e9    # fallback to NHC when ACI scale kappa (forward) exceeds this
+    # bias monitor (v3): while GNSS is healthy, test the windowed MEAN of the forward residual
+    # (learned speed - GNSS-constrained filter speed) against its correlation-aware std
+    # sqrt(mean(var) * n_eff / W). |z| > hybrid_bias_z -> drop the forward channel (latched,
+    # re-enabled below hybrid_bias_z/2; frozen during outages). ACI only rescales variance and
+    # cannot see a bias that the inflated variance already "covers"; this test can. 0 = off.
+    hybrid_bias_z: float = 0.0
+    hybrid_bias_window: int = 100     # pseudo-measurement epochs (10 Hz -> 10 s)
+    hybrid_bias_min: int = 30         # need this many residuals before trusting the forward channel
+    hybrid_bias_latch: bool = False   # once a bias is detected, never re-enable the forward channel
     nhc_sigma: float = 0.1           # m/s, fixed NHC
     pseudo_every: int = 10           # IMU samples (10 Hz)
     corr_scale: tuple | None = None  # per-channel variance inflation for temporally correlated errors (n_eff)
@@ -86,7 +100,16 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
             pred_map[int(k)] = (pred[1][i], pred[2][i])
 
     chans = (1, 2) if cfg.pseudo in ("nhc", "learned_nhc") else (0, 1, 2)
-    cal = ACICalibrator(len(chans), alpha=cfg.aci_alpha, gamma=cfg.aci_gamma, window=cfg.aci_window,
+    cal_dim = 1 if cfg.pseudo == "hybrid" else len(chans)
+    n_fallback = 0
+    n_pseudo = 0
+    from collections import deque
+    bias_r = deque(maxlen=cfg.hybrid_bias_window)
+    bias_v = deque(maxlen=cfg.hybrid_bias_window)
+    bias_bad = cfg.hybrid_bias_z > 0
+    bias_latched = False
+    n_eff_f = float(cfg.corr_scale[0]) if cfg.corr_scale is not None else 1.0
+    cal = ACICalibrator(cal_dim, alpha=cfg.aci_alpha, gamma=cfg.aci_gamma, window=cfg.aci_window,
                         beta=cfg.aci_beta, t_ref=cfg.aci_t_ref, enabled=cfg.aci)
 
     gnss_at = {int(k): m for m, k in enumerate(gnss.idx)}
@@ -126,7 +149,39 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
                     else:
                         z = mu.copy()
                         s2 = var.copy()
-            if ok:
+            if ok and cfg.pseudo == "hybrid":
+                n_pseudo += 1
+                h, H = A.body_vel_model((0, 1, 2))
+                healthy_ref = (tau < 1.5) and (t > 30.0) and (alarm_time is None)
+                if cfg.aci and healthy_ref:
+                    c = np.einsum("ij,jk,ik->i", H[:1], A.P, H[:1])
+                    cal.observe(z[:1] - h[:1], s2[:1], c)
+                if cfg.hybrid_bias_z > 0 and healthy_ref:
+                    bias_r.append(float(z[0] - h[0]))
+                    bias_v.append(float(s2[0]))
+                    if len(bias_r) >= cfg.hybrid_bias_min:
+                        zb = abs(np.mean(bias_r)) / np.sqrt(np.mean(bias_v) * n_eff_f / len(bias_r))
+                        if zb > cfg.hybrid_bias_z:
+                            bias_bad = True
+                            bias_latched = cfg.hybrid_bias_latch
+                        elif zb < 0.5 * cfg.hybrid_bias_z and not bias_latched:
+                            bias_bad = False
+                out_t = 0.0 if tau < 1.5 else tau
+                vf = cal.effective_var(s2[:1], out_t)
+                if cfg.corr_scale is not None:
+                    vf = vf * float(cfg.corr_scale[0])
+                zz = np.array([z[0], 0.0, 0.0])
+                vv = np.array([vf[0], cfg.nhc_sigma**2, cfg.nhc_sigma**2])
+                sel = [0, 1, 2]
+                if np.sqrt(vf[0]) > cfg.hybrid_max_std or float(np.atleast_1d(cal.kappa)[0]) > cfg.hybrid_max_kappa \
+                        or bias_bad:
+                    sel = [1, 2]
+                    n_fallback += 1
+                A.update(zz[sel] - h[sel], H[sel], np.diag(vv[sel]))
+                if B is not None:
+                    hB, HB = B.body_vel_model((0, 1, 2))
+                    B.update(zz[sel] - hB[sel], HB[sel], np.diag(vv[sel]))
+            elif ok:
                 h, H = A.body_vel_model(chans)
                 healthy_ref = (tau < 1.5) and (t > 30.0) and (alarm_time is None)
                 if cfg.aci and healthy_ref:
@@ -193,4 +248,5 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
         P_pos=np.array(logs["P"]), v_est=np.array(logs["ve"]), v_true=np.array(logs["vt"]),
         gnss_t=np.array(gq["t"]), stat_q=np.array(gq["q"]), stat_g=np.array(gq["g"]),
         alarm_time=alarm_time, kappa_hist=np.array(cal.history), runtime_per_step_us=rt,
+        extra={"fallback_frac": n_fallback / max(n_pseudo, 1)},
     )
