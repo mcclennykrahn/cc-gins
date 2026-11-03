@@ -51,6 +51,14 @@ class Config:
     dr_reset_period: float = 30.0
     exclude_on_alarm: bool = True
     init_seed: int = 0
+    # real data: use the receiver's per-epoch std (GnssData.sigma_ep) floored at gnss_sigma_floor
+    use_epoch_sigma: bool = False
+    gnss_sigma_floor: float = 0.0
+    # IMU-to-vehicle mounting (real data): (pitch, yaw) [rad] of the vehicle forward axis seen in the
+    # IMU body frame. NHC / hybrid lateral-vertical constraints are applied in the VEHICLE frame
+    # v_veh = C_vb v_body. None = IMU assumed aligned with the vehicle (simulation / KITTI).
+    mount_py: tuple | None = None
+    p0_bias: tuple | None = None      # (gyro rad/s, accel m/s^2) initial bias std; None = legacy
     label: str = ""
 
 
@@ -71,7 +79,7 @@ class RunLog:
     extra: dict = field(default_factory=dict)
 
 
-def initial_state(truth, seed):
+def initial_state(truth, seed, p0_bias=None):
     rng = np.random.default_rng(seed + 30_000)
     att_sig = np.array([0.5, 0.5, 3.0]) * DEG
     datt = rng.standard_normal(3) * att_sig
@@ -81,13 +89,31 @@ def initial_state(truth, seed):
     P0 = np.diag(np.r_[(np.array([1.0, 1.0, 5.0]) * DEG) ** 2, np.full(3, 0.3**2),
                        np.array([2.0, 2.0, 4.0]) ** 2,
                        np.full(3, (40 * DEG / 3600) ** 2), np.full(3, (8e-3 * 9.81) ** 2)])
+    if p0_bias is not None:
+        P0[9:12, 9:12] = np.eye(3) * p0_bias[0] ** 2
+        P0[12:15, 12:15] = np.eye(3) * p0_bias[1] ** 2
     return R0, v0, p0, P0
+
+
+def mount_matrix(pitch, yaw):
+    """C_vb (body -> vehicle). Vehicle x-axis expressed in body FLU = (cp*cy, cp*sy, sp)."""
+    from .geometry import so3_exp
+    C_bv = so3_exp(np.array([0.0, 0.0, yaw])) @ so3_exp(np.array([0.0, -pitch, 0.0]))
+    return C_bv.T
 
 
 def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog:
     """pred: (idx, mu, var) learned predictions at pseudo epochs (idx = IMU end index)."""
     noise = NoiseParams.from_spec(imu_spec)
-    R0, v0, p0, P0 = initial_state(truth, cfg.init_seed)
+    C_vb = None if cfg.mount_py is None else mount_matrix(*cfg.mount_py)
+
+    def bvm(F, ch):
+        h, H = F.body_vel_model((0, 1, 2))
+        if C_vb is not None and cfg.pseudo in ("nhc", "hybrid", "learned_nhc"):
+            h, H = C_vb @ h, C_vb @ H
+        ch = list(ch)
+        return h[ch], H[ch]
+    R0, v0, p0, P0 = initial_state(truth, cfg.init_seed, cfg.p0_bias)
     A = make_filter(cfg.filter, R0, v0, p0, P0, noise)
     lever = gnss_spec.lever_arm
     Rm = np.diag(gnss.sigma**2)
@@ -120,7 +146,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
     t_last_reset = 0.0
     alarm_time = None
 
-    logs = {k: [] for k in ("t", "pe", "pt", "P", "ve", "vt")}
+    logs = {k: [] for k in ("t", "pe", "pt", "P", "ve", "vt", "vb", "tg")}
     gq = {"t": [], "q": [], "g": []}
     t0 = time.perf_counter()
 
@@ -151,7 +177,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
                         s2 = var.copy()
             if ok and cfg.pseudo == "hybrid":
                 n_pseudo += 1
-                h, H = A.body_vel_model((0, 1, 2))
+                h, H = bvm(A, (0, 1, 2))
                 healthy_ref = (tau < 1.5) and (t > 30.0) and (alarm_time is None)
                 if cfg.aci and healthy_ref:
                     c = np.einsum("ij,jk,ik->i", H[:1], A.P, H[:1])
@@ -179,10 +205,10 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
                     n_fallback += 1
                 A.update(zz[sel] - h[sel], H[sel], np.diag(vv[sel]))
                 if B is not None:
-                    hB, HB = B.body_vel_model((0, 1, 2))
+                    hB, HB = bvm(B, (0, 1, 2))
                     B.update(zz[sel] - hB[sel], HB[sel], np.diag(vv[sel]))
             elif ok:
-                h, H = A.body_vel_model(chans)
+                h, H = bvm(A, chans)
                 healthy_ref = (tau < 1.5) and (t > 30.0) and (alarm_time is None)
                 if cfg.aci and healthy_ref:
                     c = np.einsum("ij,jk,ik->i", H, A.P, H)
@@ -193,7 +219,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
                     var_eff = var_eff * np.asarray(cfg.corr_scale, float)
                 A.update(z - h, H, np.diag(var_eff))
                 if B is not None:
-                    hB, HB = B.body_vel_model(chans)
+                    hB, HB = bvm(B, chans)
                     B.update(z - hB, HB, np.diag(var_eff))
 
         # ---------- GNSS ----------
@@ -201,6 +227,8 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
             m = gnss_at[kk]
             if gnss.valid[m]:
                 zg = gnss.pos[m]
+                if cfg.use_epoch_sigma and gnss.sigma_ep is not None:
+                    Rm = np.diag(np.maximum(gnss.sigma_ep[m], cfg.gnss_sigma_floor) ** 2)
                 # integrity statistic
                 if cfg.monitor == "dual":
                     q = dr_statistic(B, zg, lever, Rm)
@@ -241,6 +269,8 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
             logs["P"].append(A.pos_cov())
             logs["ve"].append(A.v.copy())
             logs["vt"].append(truth.v[kk].copy())
+            logs["vb"].append(A.R.T @ A.v)
+            logs["tg"].append(tau)
 
     rt = (time.perf_counter() - t0) / (n - 1) * 1e6
     return RunLog(
@@ -248,5 +278,6 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
         P_pos=np.array(logs["P"]), v_est=np.array(logs["ve"]), v_true=np.array(logs["vt"]),
         gnss_t=np.array(gq["t"]), stat_q=np.array(gq["q"]), stat_g=np.array(gq["g"]),
         alarm_time=alarm_time, kappa_hist=np.array(cal.history), runtime_per_step_us=rt,
-        extra={"fallback_frac": n_fallback / max(n_pseudo, 1)},
+        extra={"fallback_frac": n_fallback / max(n_pseudo, 1), "vb_est": np.array(logs["vb"]),
+               "since_gnss": np.array(logs["tg"])},
     )

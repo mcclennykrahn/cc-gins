@@ -17,12 +17,29 @@ from .sim import G_NAV
 I3 = np.eye(3)
 
 
+# Optional earth model (real data). Default: earth rate neglected, g = G_NAV (simulation / KITTI
+# results are unchanged). For real MEMS data set_earth(w_ie_enu, g_local) enables a fixed local-level
+# ENU frame with earth rotation (attitude transport + Coriolis) and local normal gravity; transport
+# rate is neglected (local tangent frame, short drives).
+EARTH = {"w_ie": None, "g": G_NAV.copy()}
+
+
+def set_earth(w_ie_enu=None, g_local=None):
+    EARTH["w_ie"] = None if w_ie_enu is None else np.asarray(w_ie_enu, float)
+    EARTH["g"] = G_NAV.copy() if g_local is None else np.array([0.0, 0.0, -float(g_local)])
+
+
 def mechanize(R, v, p, gyro, accel, dt):
-    """Single discrete strapdown step (nav = local-level, earth rate neglected)."""
-    a = R @ accel + G_NAV
+    """Single discrete strapdown step (nav = local-level ENU; earth rate optional via set_earth)."""
+    w = EARTH["w_ie"]
+    a = R @ accel + EARTH["g"]
+    if w is not None:
+        a = a - 2.0 * np.cross(w, v)
     p_new = p + v * dt + 0.5 * a * dt * dt
     v_new = v + a * dt
     R_new = R @ so3_exp(gyro * dt)
+    if w is not None:
+        R_new = so3_exp(-w * dt) @ R_new
     return R_new, v_new, p_new
 
 
@@ -174,7 +191,7 @@ class InEKF(NavFilter):
     def _jacobians(self, w, f):
         R, v, p = self.R, self.v, self.p
         F = np.zeros((15, 15))
-        F[3:6, 0:3] = skew(G_NAV)
+        F[3:6, 0:3] = skew(EARTH["g"])
         F[6:9, 3:6] = I3
         F[0:3, 9:12] = -R
         F[3:6, 9:12] = -skew(v) @ R

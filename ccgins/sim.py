@@ -84,6 +84,7 @@ class GnssData:
     valid: np.ndarray    # (M,) bool, False during outages
     spoofed: np.ndarray  # (M,) bool
     sigma: np.ndarray    # (3,) nominal sigma
+    sigma_ep: np.ndarray | None = None  # (M,3) optional per-epoch reported sigma (real data)
 
 
 def _smooth(x: np.ndarray, tau_samples: float) -> np.ndarray:
