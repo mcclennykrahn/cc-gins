@@ -99,3 +99,15 @@ def test_mount_matrix():
     pitch, yaw = np.radians(0.5), np.radians(2.0)
     fwd_b = np.array([np.cos(pitch) * np.cos(yaw), np.cos(pitch) * np.sin(yaw), np.sin(pitch)])
     assert np.allclose(mount_matrix(pitch, yaw) @ fwd_b, [1, 0, 0], atol=1e-12)
+
+
+def test_scenarios_fold_and_outages():
+    from ccgins import i2nav_scenarios as I
+    (a0, a1), (b0, b1) = I.fold_ranges("A")
+    assert a1 < b0 and b0 - a1 >= 2 * I.GUARD - 1e-9
+    (c0, c1), (d0, d1) = I.fold_ranges("B")
+    assert (c0, c1) == (b0, b1) and (d0, d1) == (a0, a1)
+    outs = I.outage_schedule(800.0, first=50.0)
+    assert [d for _, d in outs] == [30, 120, 60, 30, 120, 60]
+    assert all(s2 >= s1 + d1 for (s1, d1), (s2, _) in zip(outs, outs[1:]))
+    assert outs[-1][0] + outs[-1][1] <= 800.0
