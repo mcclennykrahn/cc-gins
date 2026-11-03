@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ccgins"
+version = "0.1.0"
+description = "Consistency-Calibrated GNSS/INS integration (InEKF + learned motion pseudo-measurements + ACI + DR-CUSUM integrity)"
+requires-python = ">=3.10"
+dependencies = ["numpy", "scipy", "matplotlib", "torch", "pyyaml"]
+
+[tool.setuptools]
+packages = ["ccgins"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
