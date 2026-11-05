@@ -16,6 +16,7 @@
 | ESKF 基线 | `ccgins/filters.py::ESKF` | 15 维误差状态，使用 Joseph 形式更新，支持 χ² 门限 |
 | InEKF 松组合 | `ccgins/filters.py::InEKF` | 右不变 SE₂(3) 误差加可加性零偏，GNSS 观测带杆臂 |
 | **零速检测 / ZUPT / 里程计** | `ccgins/zupt.py` | 陀螺/加速度滑窗方差阈值检测静止段（可设最短持续时间）；提供导航系零速 ZUPT 与机体系里程计速度更新，复用 `NavFilter.update` 的 Joseph 形式更新和 χ² 门限 |
+| **实时流式封装** | `ccgins/stream.py` | `StreamingNavigator`：`push_imu` / `push_gnss` 增量处理，乱序 GNSS 缓存后按时间戳插入，`get_state` 返回位置、速度、姿态与协方差；复用现有 ESKF/InEKF |
 | NHC 基线 | `pipeline.py`（`pseudo="nhc"`） | 侧向和垂向速度为 0，σ 固定为 0.1 m/s |
 | 学习速度伪观测 | `ccgins/learning.py` | 1D-CNN（MotionNet）：输入 1 s 原始 IMU（100 个采样），输出机体系速度（前、左、上）的均值和方差，用 β-NLL 训练 |
 | **相关性膨胀** | `learning.correlation_factor` | 网络误差存在强时间相关性，用验证集估计 n_eff = 1+2Σρ_k，再按 n_eff 放大伪观测方差 |
@@ -60,6 +61,38 @@ python scripts/run_i2nav_experiment.py --workers 8    # 中断实验（约 25 �
 python scripts/run_i2nav_spoof.py                     # 真实 RTK 欺骗实验（约 9 分钟）
 python scripts/plot_i2nav_summary.py
 ```
+
+### 实时流式导航（StreamingNavigator）
+
+`ccgins/stream.py` 把批量滤波器封装为增量接口，可用于在线回放或实时数据。IMU 与 GNSS 都按各自时间戳喂入，GNSS 可以乱序到达：
+
+```python
+import numpy as np
+from ccgins.pipeline import Config
+from ccgins.sim import GnssSpec, ImuSpec, generate_trajectory, simulate_gnss, simulate_imu
+from ccgins.stream import StreamingNavigator
+
+truth = generate_trajectory(60.0, seed=0)
+imu_spec, gnss_spec = ImuSpec(), GnssSpec()
+imu = simulate_imu(truth, imu_spec, seed=0)
+gnss = simulate_gnss(truth, gnss_spec, seed=0)
+
+nav = StreamingNavigator.from_truth(
+    truth, imu_spec, gnss_spec, Config(pseudo="none", monitor="none"))
+
+# 乱序：全部倒序喂入；内部缓存并按时间戳插入
+for m in range(len(gnss.t) - 1, -1, -1):
+    nav.push_gnss(gnss.t[m], gnss.pos[m], np.diag(gnss.sigma ** 2))
+
+for k in range(len(imu.t)):
+    nav.push_imu(imu.t[k], imu.accel[k], imu.gyro[k])
+
+state = nav.get_state()
+print(state.t, state.position, state.velocity, state.attitude)
+print(state.position_covariance)
+```
+
+滤波器推进时会按时间顺序应用缓冲的 GNSS；若 GNSS 历元落在两个 IMU 采样之间，会在该时刻切分积分区间，因此结果与 `pipeline.run` 的批处理顺序一致。`tests/test_stream.py` 验证了同一仿真数据上的批处理一致性（位置/速度/位置协方差）以及乱序 GNSS 的等价性。流式接口只封装 IMU+GNSS；伪观测、ACI、完整性监测与自适应 R 仍使用批量 `pipeline.run` 的选项。已经推进过去的 GNSS 历元无法回溯，会抛出 `ValueError`。
 
 ## 实验设置
 
@@ -304,7 +337,7 @@ python scripts/plot_i2nav_summary.py
 ## 目录
 
 ```
-ccgins/      核心库（geometry, sim, filters, zupt, aci, integrity, learning, pipeline, metrics, scenarios, kitti_scenarios, i2nav_scenarios, data/kitti, data/i2nav）
+ccgins/      核心库（geometry, sim, filters, zupt, stream, aci, integrity, learning, pipeline, metrics, scenarios, kitti_scenarios, i2nav_scenarios, data/kitti, data/i2nav）
 scripts/     训练与实验脚本
 tests/       pytest 单元测试
 results/     模型、指标 JSON/MD、图（results/kitti/ 为 KITTI 结果，results/i2nav/ 为 i2Nav 结果；模型与图已纳入版本库）
