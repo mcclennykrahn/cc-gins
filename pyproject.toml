@@ -9,6 +9,9 @@ description = "Consistency-Calibrated GNSS/INS integration (InEKF + learned moti
 requires-python = ">=3.10"
 dependencies = ["numpy", "scipy", "matplotlib", "torch", "pyyaml"]
 
+[project.scripts]
+ccgins = "ccgins.cli:main"
+
 [tool.setuptools]
 packages = ["ccgins"]
 

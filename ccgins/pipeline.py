@@ -9,6 +9,7 @@ import numpy as np
 from scipy.stats import chi2
 
 from .aci import ACICalibrator
+from .adaptive import AdaptiveR
 from .filters import NoiseParams, make_filter
 from .geometry import euler_to_rot
 from .integrity import Cusum, dr_statistic
@@ -54,6 +55,8 @@ class Config:
     # real data: use the receiver's per-epoch std (GnssData.sigma_ep) floored at gnss_sigma_floor
     use_epoch_sigma: bool = False
     gnss_sigma_floor: float = 0.0
+    # opt-in innovation-based R estimation (ccgins/adaptive.py); off = existing behaviour
+    adaptive_r: bool = False
     # IMU-to-vehicle mounting (real data): (pitch, yaw) [rad] of the vehicle forward axis seen in the
     # IMU body frame. NHC / hybrid lateral-vertical constraints are applied in the VEHICLE frame
     # v_veh = C_vb v_body. None = IMU assumed aligned with the vehicle (simulation / KITTI).
@@ -117,6 +120,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
     A = make_filter(cfg.filter, R0, v0, p0, P0, noise)
     lever = gnss_spec.lever_arm
     Rm = np.diag(gnss.sigma**2)
+    adaptive = AdaptiveR(Rm) if cfg.adaptive_r else None
     n = len(truth.t)
     dt = truth.dt
 
@@ -250,7 +254,8 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
                 if use:
                     h, H = A.gnss_model(lever)
                     force = rejects >= cfg.max_consecutive_rejects
-                    info = A.update(zg - h, H, Rm, gate=cfg.gnss_gate, force=force)
+                    Rm_eff = Rm if adaptive is None else adaptive.update(zg - h, H, A.P)
+                    info = A.update(zg - h, H, Rm_eff, gate=cfg.gnss_gate, force=force)
                     if info.accepted:
                         rejects = 0
                         t_last_gnss = t

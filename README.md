@@ -17,6 +17,8 @@
 | InEKF 松组合 | `ccgins/filters.py::InEKF` | 右不变 SE₂(3) 误差加可加性零偏，GNSS 观测带杆臂 |
 | **零速检测 / ZUPT / 里程计** | `ccgins/zupt.py` | 陀螺/加速度滑窗方差阈值检测静止段（可设最短持续时间）；提供导航系零速 ZUPT 与机体系里程计速度更新，复用 `NavFilter.update` 的 Joseph 形式更新和 χ² 门限 |
 | **实时流式封装** | `ccgins/stream.py` | `StreamingNavigator`：`push_imu` / `push_gnss` 增量处理，乱序 GNSS 缓存后按时间戳插入，`get_state` 返回位置、速度、姿态与协方差；复用现有 ESKF/InEKF |
+| **自适应 GNSS 量测噪声 R** | `ccgins/adaptive.py` | 基于新息的 Sage-Husa 滑窗估计（遗忘因子加权），按 `[min_scale, max_scale] × R_nominal` 逐轴夹紧；`Config.adaptive_r=False`（默认）时不启用 |
+| **配置驱动 CLI** | `ccgins/cli.py` | `ccgins run --config … --out …`（或 `python -m ccgins.cli`）跑仿真/中断场景，写出 `report.md` 与 `metrics.json`；示例配置 `configs/example_sim.yaml` |
 | NHC 基线 | `pipeline.py`（`pseudo="nhc"`） | 侧向和垂向速度为 0，σ 固定为 0.1 m/s |
 | 学习速度伪观测 | `ccgins/learning.py` | 1D-CNN（MotionNet）：输入 1 s 原始 IMU（100 个采样），输出机体系速度（前、左、上）的均值和方差，用 β-NLL 训练 |
 | **相关性膨胀** | `learning.correlation_factor` | 网络误差存在强时间相关性，用验证集估计 n_eff = 1+2Σρ_k，再按 n_eff 放大伪观测方差 |
@@ -93,6 +95,26 @@ print(state.position_covariance)
 ```
 
 滤波器推进时会按时间顺序应用缓冲的 GNSS；若 GNSS 历元落在两个 IMU 采样之间，会在该时刻切分积分区间，因此结果与 `pipeline.run` 的批处理顺序一致。`tests/test_stream.py` 验证了同一仿真数据上的批处理一致性（位置/速度/位置协方差）以及乱序 GNSS 的等价性。流式接口只封装 IMU+GNSS；伪观测、ACI、完整性监测与自适应 R 仍使用批量 `pipeline.run` 的选项。已经推进过去的 GNSS 历元无法回溯，会抛出 `ValueError`。
+
+### 自适应 GNSS 量测噪声 R（可选，默认关闭）
+
+`ccgins/adaptive.py` 提供 `AdaptiveR`：利用 GNSS 位置新息 `r = z − h` 的协方差 `S = H P Hᵀ + R`，在滑窗内对 `r rᵀ − H P Hᵀ` 做遗忘因子加权平均，得到逐轴 R 估计，并夹紧到 `[min_scale, max_scale] × R_nominal`，避免异常新息把 R 推到 0 或无穷。`gnss_update(..., estimator=None)` 与原有 `nav.update` 完全一致；主流程仅在 `Config(adaptive_r=True)` 时于 GNSS 更新前调用它，因此所有已发表结果不受影响。`tests/test_adaptive.py` 验证了 4 倍 R 噪声下的收敛与上下限夹紧。
+
+### 配置驱动的命令行仿真（`ccgins.cli`）
+
+`ccgins/cli.py` 读取 YAML（也接受 JSON）配置，运行一次仿真/中断场景，并把结果写入 `--out`：
+
+```bash
+python -m ccgins.cli run --config configs/example_sim.yaml --out results/cli_demo
+# 安装后等价的 console script：
+ccgins run --config configs/example_sim.yaml --out results/cli_demo
+```
+
+配置段包括 `scenario`、`imu`、`gnss`（含 `outages`）、`filter`（任意 `Config` 字段）、可选 `learning.model`，以及 `metrics.t_start`。`--seed` / `--duration` 可覆盖配置。输出：
+- `report.md`：RMSE、最大水平误差、NEES 一致性（ANEES、95% 覆盖率）、耗时、中断表
+- `metrics.json`：指标与解析后的配置
+
+示例配置见 `configs/example_sim.yaml`。冒烟测试：`python -m pytest -q tests/test_cli.py`。
 
 ## 实验设置
 
@@ -337,7 +359,7 @@ print(state.position_covariance)
 ## 目录
 
 ```
-ccgins/      核心库（geometry, sim, filters, zupt, stream, aci, integrity, learning, pipeline, metrics, scenarios, kitti_scenarios, i2nav_scenarios, data/kitti, data/i2nav）
+ccgins/      核心库（geometry, sim, filters, zupt, adaptive, stream, cli, aci, integrity, learning, pipeline, metrics, scenarios, kitti_scenarios, i2nav_scenarios, data/kitti, data/i2nav）
 scripts/     训练与实验脚本
 tests/       pytest 单元测试
 results/     模型、指标 JSON/MD、图（results/kitti/ 为 KITTI 结果，results/i2nav/ 为 i2Nav 结果；模型与图已纳入版本库）
