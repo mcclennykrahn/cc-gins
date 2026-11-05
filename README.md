@@ -15,6 +15,7 @@
 | 惯导机械编排 | `ccgins/filters.py::mechanize` | 采用 ENU 导航系与 FLU 机体系，不考虑地球自转（局部、短时假设） |
 | ESKF 基线 | `ccgins/filters.py::ESKF` | 15 维误差状态，使用 Joseph 形式更新，支持 χ² 门限 |
 | InEKF 松组合 | `ccgins/filters.py::InEKF` | 右不变 SE₂(3) 误差加可加性零偏，GNSS 观测带杆臂 |
+| **零速检测 / ZUPT / 里程计** | `ccgins/zupt.py` | 陀螺/加速度滑窗方差阈值检测静止段（可设最短持续时间）；提供导航系零速 ZUPT 与机体系里程计速度更新，复用 `NavFilter.update` 的 Joseph 形式更新和 χ² 门限 |
 | NHC 基线 | `pipeline.py`（`pseudo="nhc"`） | 侧向和垂向速度为 0，σ 固定为 0.1 m/s |
 | 学习速度伪观测 | `ccgins/learning.py` | 1D-CNN（MotionNet）：输入 1 s 原始 IMU（100 个采样），输出机体系速度（前、左、上）的均值和方差，用 β-NLL 训练 |
 | **相关性膨胀** | `learning.correlation_factor` | 网络误差存在强时间相关性，用验证集估计 n_eff = 1+2Σρ_k，再按 n_eff 放大伪观测方差 |
@@ -289,6 +290,7 @@ python scripts/plot_i2nav_summary.py
 - OXTS 真值本身有质量问题（drive 0028 有 30 m 级跳变），已用跳变检测剔除，但可能仍有残余误差。
 - 仿真器假设振动幅度随车速增大，使前向速度在仿真中更可观；KITTI 结果证实真实情况要差得多。
 - v3 的偏差监测在 GNSS 健康期才能工作；若一开始就没有 GNSS，则一直使用 NHC。锁存后不会恢复。
+- **ZUPT/里程计目前是独立模块**：静止检测使用固定滑窗方差阈值，未按 IMU 噪声或车辆振动自适应，也未接入 `pipeline.py` 的主实验；里程计速度更新假设无杆臂/安装角误差，且未建模轮速滑移。
 - **i2Nav 只有一次约 1617 s 的开阔路段行驶**，最高车速约 13.6 m/s。留出方式是同一次行驶内的时间切分，4 个 IMU 共享同一条轨迹，并非独立场景，因此跨场景泛化（城市峡谷、高速、不同车辆）未验证。
 - **i2Nav-Robot 数据集未使用**：数据托管在 OneDrive，访问未获批准。KF-GINS 示例数据是 Leador-A15（战术级，非 MEMS），因此也未使用。
 - i2Nav 上 MotionNet 的前向速度 RMSE 仍有约 1.2–1.4 m/s；在 ADIS16465（安装航向角方向与训练 IMU 相反）上侧向 RMSE 为 0.38 m/s。仿真零样本网络的前向 RMSE 约 44 m/s，完全不可用。
@@ -302,7 +304,7 @@ python scripts/plot_i2nav_summary.py
 ## 目录
 
 ```
-ccgins/      核心库（geometry, sim, filters, aci, integrity, learning, pipeline, metrics, scenarios, kitti_scenarios, i2nav_scenarios, data/kitti, data/i2nav）
+ccgins/      核心库（geometry, sim, filters, zupt, aci, integrity, learning, pipeline, metrics, scenarios, kitti_scenarios, i2nav_scenarios, data/kitti, data/i2nav）
 scripts/     训练与实验脚本
 tests/       pytest 单元测试
 results/     模型、指标 JSON/MD、图（results/kitti/ 为 KITTI 结果，results/i2nav/ 为 i2Nav 结果；模型与图已纳入版本库）
