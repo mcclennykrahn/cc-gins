@@ -15,6 +15,7 @@
 | 惯导机械编排 | `ccgins/filters.py::mechanize` | 采用 ENU 导航系与 FLU 机体系，支持每滤波器地球自转、Coriolis 与当地重力；对应 ESKF/InEKF 协方差动力学；`i2nav_scenarios.earth_config(seq)` 从实测元数据配置，默认仿真关闭 |
 | **稳健 GNSS 更新** | `NavFilter.update_gnss` | ESKF/InEKF 共用白化新息 Huber 权重与协方差膨胀；`Config.robust_gnss_delta=1.5` 启用，默认关闭 |
 | ESKF 基线 | `ccgins/filters.py::ESKF` | 15 维误差状态，使用 Joseph 形式更新，支持 χ² 门限 |
+| **基线伪距耦合原型** | `ccgins/range_coupling.py` | `Config.baseline_range_anchor`：每历元将 RTK 基线及其协方差投影为单个距离，与 IMU 预测天线位置耦合；预更新标量 CUSUM 捕获径向杆臂误差。仅径向可观，替代原 RTK 更新，不重复融合；非原始卫星伪距 |
 | InEKF 松组合 | `ccgins/filters.py::InEKF` | 右不变 SE₂(3) 误差加可加性零偏，GNSS 观测带杆臂 |
 | **零速检测 / ZUPT / 里程计** | `ccgins/zupt.py` | 陀螺/加速度滑窗方差阈值检测静止段（可设最短持续时间）；提供导航系零速 ZUPT 与机体系里程计速度更新，复用 `NavFilter.update` 的 Joseph 形式更新和 χ² 门限 |
 | **实时流式封装** | `ccgins/stream.py` | `StreamingNavigator`：`push_imu` / `push_gnss` 增量处理，乱序 GNSS 缓存后按时间戳插入，`get_state` 返回位置、速度、姿态与协方差；复用现有 ESKF/InEKF |
@@ -368,3 +369,11 @@ results/     模型、指标 JSON/MD、图（results/kitti/ 为 KITTI 结果，r
 data/        KITTI / i2Nav 预处理数据（不入库）
 docs/        调研与方案文档
 ```
+
+### ADIS16465 基线伪距实验
+
+`OPENBLAS_NUM_THREADS=1 python -m ccgins.range_experiment` 运行实测 ADIS16465 + RTK，
+将 RTK 相对固定 ENU 锚点的基线长度作为单个伪距，并通过几何雅可比传播 RTK 协方差。
+结果位于 `results/range_coupling/`。注入项是沿机体前向缓慢增长的天线杆臂误差；
+对照使用相同 IMU 与初值。标量残差只能检测不一致，不能唯一归因于杆臂，也不能独立约束切向位置。
+这一步没有原始卫星观测、接收机钟差或多星几何，不代表完整 GNSS 紧组合。

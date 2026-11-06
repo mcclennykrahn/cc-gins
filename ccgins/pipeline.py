@@ -15,6 +15,7 @@ from .geometry import euler_to_rot
 from .integrity import Cusum, dr_statistic
 from .learning import WINDOW
 from .sim import DEG
+from .range_coupling import BaselineRangeCoupler
 
 
 @dataclass
@@ -63,6 +64,8 @@ class Config:
     # v_veh = C_vb v_body. None = IMU assumed aligned with the vehicle (simulation / KITTI).
     mount_py: tuple | None = None
     p0_bias: tuple | None = None      # (gyro rad/s, accel m/s^2) initial bias std; None = legacy
+    baseline_range_start_s: float = 0.0  # optional vector-RTK warmup
+    baseline_range_anchor: tuple | None = None  # replace RTK vector by one scalar range
     earth_rate_enu: tuple | None = None
     local_gravity: float | None = None
     label: str = ""
@@ -128,6 +131,9 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
     lever = gnss_spec.lever_arm
     Rm = np.diag(gnss.sigma**2)
     adaptive = AdaptiveR(Rm) if cfg.adaptive_r else None
+    coupler = None if cfg.baseline_range_anchor is None else BaselineRangeCoupler(cfg.baseline_range_anchor)
+    range_alarm_time = None
+    range_trace = []
     n = len(truth.t)
     dt = truth.dt
 
@@ -262,8 +268,15 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
                     h, H = A.gnss_model(lever)
                     force = rejects >= cfg.max_consecutive_rejects
                     Rm_eff = Rm if adaptive is None else adaptive.update(zg - h, H, A.P)
-                    info = A.update_gnss(zg, lever, Rm_eff, gate=cfg.gnss_gate, force=force,
-                                         robust_delta=cfg.robust_gnss_delta)
+                    if coupler is None or t < cfg.baseline_range_start_s:
+                        info = A.update_gnss(zg, lever, Rm_eff, gate=cfg.gnss_gate, force=force,
+                                             robust_delta=cfg.robust_gnss_delta)
+                    else:
+                        info = coupler.update(A, zg, lever, Rm_eff,
+                                              gate=float(chi2.ppf(0.999, 1)), force=force)
+                        range_trace.append((float(t), coupler.last_residual, info.nis))
+                        if coupler.monitor.alarm and range_alarm_time is None:
+                            range_alarm_time = float(t)
                     if info.accepted:
                         rejects = 0
                         t_last_gnss = t
@@ -291,6 +304,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
         P_pos=np.array(logs["P"]), v_est=np.array(logs["ve"]), v_true=np.array(logs["vt"]),
         gnss_t=np.array(gq["t"]), stat_q=np.array(gq["q"]), stat_g=np.array(gq["g"]),
         alarm_time=alarm_time, kappa_hist=np.array(cal.history), runtime_per_step_us=rt,
-        extra={"fallback_frac": n_fallback / max(n_pseudo, 1), "vb_est": np.array(logs["vb"]),
+        extra={"range_alarm_time": range_alarm_time, "range_trace": range_trace,
+               "fallback_frac": n_fallback / max(n_pseudo, 1), "vb_est": np.array(logs["vb"]),
                "since_gnss": np.array(logs["tg"])},
     )
