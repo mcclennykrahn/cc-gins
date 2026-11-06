@@ -210,3 +210,24 @@ def correlation_factor(z: np.ndarray, max_lag: int = 100) -> np.ndarray:
             tot += 2 * r
         out.append(tot)
     return np.array(out)
+
+
+def grouped_correlation_factor(groups, max_lag=100):
+    """Equal-drive mean of within-drive correlation inflations (legacy n_eff).
+
+    Never concatenate independent drives: center each drive independently, and
+    never create cross-boundary lag pairs. Effective independent count is N/factor;
+    this factor itself is NOT a sample count. Constant channels have factor one.
+    """
+    groups = [np.asarray(g, float) for g in groups]
+    if not groups or any(g.ndim != 2 or len(g) < 2 or not np.isfinite(g).all() for g in groups):
+        raise ValueError('finite groups of at least two samples required')
+    if len({g.shape[1] for g in groups}) != 1:
+        raise ValueError('same channels required')
+    factors = []
+    for g in groups:
+        active = g.var(0) > 0
+        f = np.ones(g.shape[1])
+        f[active] = correlation_factor(g[:, active], min(max_lag, len(g)-1))
+        factors.append(f)
+    return np.mean(factors, axis=0)

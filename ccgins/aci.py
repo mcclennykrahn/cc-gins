@@ -76,3 +76,57 @@ class ACICalibrator:
             hi = np.where(too_big, hi, mid)
         self.kappa = np.exp(0.5 * (lo + hi))
         self.history.append(self.kappa.copy())
+
+
+class GNSSACICalibrator:
+    """One joint scale for a vector GNSS innovation (proposal §3.5).
+
+    Recompute NIS(kappa)=r.T inv(C+kappa R) r from stored *pre-update*
+    innovations and projected state covariances. The target is chi-square(dim),
+    equivalently NIS/dim against chi-square(dim)/dim, never scalar chi-square(1).
+    observe() affects the NEXT measurement. Call only for healthy eligible fixes;
+    rejected, excluded and outage epochs must not enter its reference buffer.
+    """
+
+    def __init__(self, dim=3, alpha=.05, gamma=.01, window=300,
+                 min_samples=30, update_every=5, kappa_bounds=(.01, 1e4)):
+        self.dim, self.alpha, self.gamma = dim, alpha, gamma
+        self.alpha_t = alpha
+        self.kappa = 1.0
+        self.q_target = float(chi2.ppf(1-alpha, dim))
+        self.buf = deque(maxlen=window)
+        self.min_samples, self.update_every = min_samples, update_every
+        self.kb = kappa_bounds
+        self.n = 0
+
+    @staticmethod
+    def _nis(r, R, C, kappa):
+        return np.einsum('...i,...i->...', r, np.linalg.solve(C+kappa*R, r[..., None])[..., 0])
+
+    def effective_cov(self, nominal):
+        return self.kappa * np.asarray(nominal)
+
+    def observe(self, residual, nominal, projected):
+        r, R, C = (np.asarray(x, float) for x in (residual, nominal, projected))
+        if r.shape != (self.dim,) or R.shape != (self.dim, self.dim) or C.shape != R.shape:
+            raise ValueError('GNSS ACI vector/covariance shape mismatch')
+        if not all(np.isfinite(x).all() for x in (r, R, C)):
+            raise ValueError('finite GNSS ACI inputs required')
+        # Cholesky also rejects a non-positive nominal measurement covariance.
+        np.linalg.cholesky(R)
+        err = float(self._nis(r, R, C, self.kappa)) > self.q_target
+        self.alpha_t = float(np.clip(self.alpha_t+self.gamma*(self.alpha-err), .001, .5))
+        self.buf.append((r.copy(), R.copy(), C.copy()))
+        self.n += 1
+        if len(self.buf) < self.min_samples or self.n % self.update_every:
+            return
+        rs, Rs, Cs = (np.asarray(x) for x in zip(*self.buf))
+        lo, hi = np.log(self.kb)
+        for _ in range(30):
+            mid = (lo+hi)/2
+            q = np.quantile(self._nis(rs, Rs, Cs, np.exp(mid)), 1-self.alpha_t)
+            if q > self.q_target:
+                lo = mid
+            else:
+                hi = mid
+        self.kappa = float(np.exp((lo+hi)/2))

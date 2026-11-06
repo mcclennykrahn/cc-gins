@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 import numpy as np
 from scipy.stats import chi2
 
-from .aci import ACICalibrator
+from .aci import ACICalibrator, GNSSACICalibrator
 from .adaptive import AdaptiveR
 from .filters import NoiseParams, make_filter
 from .geometry import euler_to_rot
@@ -46,6 +46,7 @@ class Config:
     aci_window: int = 300
     aci_beta: float = 2.0             # chosen on VAL seeds (sweep 0.5/2/5/10, small effect)
     aci_t_ref: float = 60.0
+    gnss_aci: bool = False  # joint vector NIS scale; opt-in, next-fix application
     gnss_gate: float = float(chi2.ppf(0.999, 3))
     max_consecutive_rejects: int = 5
     monitor: str = "none"            # none | single | dual
@@ -135,6 +136,8 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
         raise ValueError("model requires a learned pseudo mode")
     if cfg.motion_every < 1 or not np.isfinite(cfg.zupt_sigma) or cfg.zupt_sigma <= 0:
         raise ValueError("positive motion cadence and ZUPT sigma required")
+    if cfg.gnss_aci and (cfg.adaptive_r or cfg.baseline_range_anchor is not None):
+        raise ValueError("GNSS ACI cannot be combined with adaptive R or scalar range coupling")
     noise = NoiseParams.from_spec(imu_spec)
     C_vb = None if cfg.mount_py is None else mount_matrix(*cfg.mount_py)
 
@@ -199,6 +202,8 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
     cal = ACICalibrator(cal_dim, alpha=cfg.aci_alpha, gamma=cfg.aci_gamma, window=cfg.aci_window,
                         beta=cfg.aci_beta, t_ref=cfg.aci_t_ref, enabled=cfg.aci)
 
+    gnss_cal = GNSSACICalibrator(alpha=cfg.aci_alpha, gamma=cfg.aci_gamma, window=cfg.aci_window) if cfg.gnss_aci else None
+    gnss_cal_trace = []
     gnss_at = {int(k): m for m, k in enumerate(gnss.idx)}
     t_last_gnss = 0.0
     rejects = 0
@@ -377,12 +382,14 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                         stop_confirmations = 0
                         stop_verified = False
                     previous_fix = (t, zg.copy(), Rm.copy())
+                Rg = Rm if gnss_cal is None else gnss_cal.effective_cov(Rm)
+                # Monitor and update use the same PREVIOUS scale.
                 # integrity statistic
                 if cfg.monitor == "dual":
-                    q = dr_statistic(B, zg, lever, Rm)
+                    q = dr_statistic(B, zg, lever, Rg)
                 elif cfg.monitor == "single":
                     h, H = A.gnss_model(lever)
-                    S = H @ A.P @ H.T + Rm
+                    S = H @ A.P @ H.T + Rg
                     q = float((zg - h) @ np.linalg.solve(S, zg - h))
                 else:
                     q = np.nan
@@ -398,7 +405,10 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                 if use:
                     h, H = A.gnss_model(lever)
                     force = rejects >= cfg.max_consecutive_rejects
-                    Rm_eff = Rm if adaptive is None else adaptive.update(zg - h, H, A.P)
+                    Rm_eff = Rg if adaptive is None else adaptive.update(zg - h, H, A.P)
+                    projected = H @ A.P @ H.T
+                    residual = zg - h
+                    kappa_used = 1.0 if gnss_cal is None else gnss_cal.kappa
                     if coupler is None or t < cfg.baseline_range_start_s:
                         info = A.update_gnss(zg, lever, Rm_eff, gate=cfg.gnss_gate, force=force,
                                              robust_delta=cfg.robust_gnss_delta)
@@ -408,6 +418,13 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                         range_trace.append((float(t), coupler.last_residual, info.nis))
                         if coupler.monitor.alarm and range_alarm_time is None:
                             range_alarm_time = float(t)
+                    if gnss_cal is not None:
+                        eligible = info.accepted and not force and not cus.alarm and t > 30.0
+                        if eligible:
+                            gnss_cal.observe(residual, Rm, projected)
+                        gnss_cal_trace.append(dict(t=float(t), kappa_used=kappa_used,
+                            kappa_next=gnss_cal.kappa, eligible=bool(eligible),
+                            accepted=bool(info.accepted), nis=float(info.nis)))
                     if info.accepted:
                         if detector is not None and cfg.zupt_require_gnss_stop:
                             stop_confirmations = stop_confirmations + 1 if slow_fix else 0
@@ -440,7 +457,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
         P_pos=np.array(logs["P"]), v_est=np.array(logs["ve"]), v_true=np.array(logs["vt"]),
         gnss_t=np.array(gq["t"]), stat_q=np.array(gq["q"]), stat_g=np.array(gq["g"]),
         alarm_time=alarm_time, kappa_hist=np.array(cal.history), runtime_per_step_us=rt,
-        extra={"covariance": np.array(full_cov) if log_covariance else None,
+        extra={"gnss_aci": gnss_cal_trace, "covariance": np.array(full_cov) if log_covariance else None,
                "motion": motion, "range_alarm_time": range_alarm_time, "range_trace": range_trace,
                "fallback_frac": n_fallback / max(n_pseudo, 1), "vb_est": np.array(logs["vb"]),
                "since_gnss": np.array(logs["tg"])},

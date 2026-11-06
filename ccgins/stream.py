@@ -72,7 +72,7 @@ class StreamingNavigator:
         from .zupt import AdaptiveZeroVelocity, OdometryStopGuard
         self.cfg = Config() if motion_cfg is None else motion_cfg
         if (self.cfg.pseudo not in ('none', 'nhc') or self.cfg.aci or
-                self.cfg.monitor != 'none' or self.cfg.adaptive_r or
+                self.cfg.monitor != 'none' or self.cfg.adaptive_r or self.cfg.gnss_aci or
                 self.cfg.baseline_range_anchor is not None):
             raise ValueError("streaming supports none/fixed NHC, without ACI, monitoring, adaptive R or range coupling")
         if self.cfg.pseudo_every < 1:
