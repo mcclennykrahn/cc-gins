@@ -9,7 +9,7 @@ from dataclasses import replace
 import numpy as np
 
 from .aci import ACICalibrator, GNSSACICalibrator
-from .integrity import Cusum, dr_statistic
+from .integrity import Cusum, GuardReferenceHealth, dr_statistic
 from .learning import WINDOW, predict, roll_pitch
 from .stream import StreamingNavigator, _EPS
 
@@ -58,6 +58,11 @@ class LearnedStreamingNavigator(StreamingNavigator):
             window=cfg.aci_window) if cfg.gnss_aci else None
         self.cusum = Cusum(cfg.cusum_k, cfg.cusum_h, recovery_epochs=cfg.recovery_epochs,
                            recovery_q=cfg.recovery_q)
+        self.guard_ref = (GuardReferenceHealth(cfg.guard_ref_max_age)
+                          if cfg.guard_ref_health else None)
+        self.next_reset = None
+        self.guard_ref_fallbacks = 0
+        self.guard_ref_first_fallback = None
         self.last_gnss = -np.inf
         self.last_reset = None
         self.start_time = None
@@ -144,6 +149,9 @@ class LearnedStreamingNavigator(StreamingNavigator):
         if self.t is None:
             self.last_reset = t
             self.start_time = t
+            if self.guard_ref is not None:
+                self.guard_ref.begin(t)
+                self.next_reset = t + self.cfg.dr_reset_period
         else:
             self._raw.append(np.r_[self._last_imu[2], self._last_imu[1]])
             self._att.append(roll_pitch(self.filter.R))
@@ -183,7 +191,8 @@ class LearnedStreamingNavigator(StreamingNavigator):
         s2 = var[1:]+mu[1:]**2 if nhc else var
         h, H = self._body(self.filter, ch)
         tau = t-self.last_gnss
-        healthy = tau < 1.5 and t > 30. and not self.cusum.alarm
+        ref_ok = self._guard_ref_ok(t)
+        healthy = tau < 1.5 and t > 30. and not self.cusum.alarm and ref_ok
         before = self.cal.kappa.copy()
         if healthy:
             self.cal.observe(z-h, s2, np.einsum('ij,jk,ik->i', H, self.filter.P, H))
@@ -193,32 +202,56 @@ class LearnedStreamingNavigator(StreamingNavigator):
             outage = t-self.start_time
             if outage < 1.5:
                 outage = 0.
-        effective = self.cal.effective_var(s2, outage)
-        if not nhc and self.cfg.corr_scale is not None:
-            effective *= np.asarray(self.cfg.corr_scale)
-        info = self.filter.update(z-h, H, np.diag(effective))
+        ref_fallback = (not nhc) and self.guard_ref is not None and not ref_ok
+        if ref_fallback:
+            # Untrustworthy reference: retain lateral/vertical fixed NHC and drop
+            # the learned forward channel; ACI/biasing above did not update.
+            sel = [1, 2]
+            self.filter.update(-h[sel], H[sel], np.eye(2) * self.cfg.nhc_sigma**2)
+            effective = np.array([self.cfg.nhc_sigma**2, self.cfg.nhc_sigma**2])
+            info = None
+            self.guard_ref_fallbacks += 1
+            if self.guard_ref_first_fallback is None:
+                self.guard_ref_first_fallback = float(t)
+        else:
+            effective = self.cal.effective_var(s2, outage)
+            if not nhc and self.cfg.corr_scale is not None:
+                effective *= np.asarray(self.cfg.corr_scale)
+            info = self.filter.update(z-h, H, np.diag(effective))
         if self.guard is not None:
             mb, vb = predict(self.model, raw, np.array([WINDOW]), attitude=np.asarray(self._att_b),
                              bias=np.r_[self.guard.bg, self.guard.ba])
             zb = np.zeros(2) if nhc else mb[0]
             sb = vb[0, 1:]+mb[0, 1:]**2 if nhc else vb[0]
-            ev = self.cal.effective_var(sb, outage)
-            if not nhc and self.cfg.corr_scale is not None:
-                ev *= np.asarray(self.cfg.corr_scale)
-            hb, Hb = self._body(self.guard, ch)
-            self.guard.update(zb-hb, Hb, np.diag(ev))
+            if ref_fallback:
+                hb, Hb = self._body(self.guard, ch)
+                self.guard.update(-hb[1:], Hb[1:], np.eye(2) * self.cfg.nhc_sigma**2)
+            else:
+                ev = self.cal.effective_var(sb, outage)
+                if not nhc and self.cfg.corr_scale is not None:
+                    ev *= np.asarray(self.cfg.corr_scale)
+                hb, Hb = self._body(self.guard, ch)
+                self.guard.update(zb-hb, Hb, np.diag(ev))
         self._record(self.decisions, dict(t=float(t), window_start=float(t-WINDOW*self.dt),
             feature_mean=raw.mean(0).tolist(), attitude_mean=np.asarray(self._att).mean(0).tolist(),
             estimated_bias=inference_bias.tolist(),
             mu=mu.tolist(), variance=var.tolist(),
             effective_variance=effective.tolist(), eligible=bool(healthy and self.cfg.aci),
             observations=self.cal._n, kappa_before=before.tolist(), kappa=self.cal.kappa.tolist(),
-            accepted=bool(info.accepted), alarm=bool(self.cusum.alarm)))
+            accepted=bool(info.accepted) if info is not None else False,
+            guard_ref_healthy=bool(ref_ok), guard_ref_fallback=bool(ref_fallback),
+            alarm=bool(self.cusum.alarm)))
+
+    def _guard_ref_ok(self, t):
+        if self.guard_ref is None:
+            return True
+        return bool(self.guard_ref.check_fresh(t))
 
     def _hybrid(self, t, raw, mu, var):
         h, H = self._body(self.filter, [0, 1, 2])
         tau = t-self.last_gnss
-        healthy = tau < 1.5 and t > 30. and not self.cusum.alarm
+        ref_ok = self._guard_ref_ok(t)
+        healthy = tau < 1.5 and t > 30. and not self.cusum.alarm and ref_ok
         if healthy:
             self.cal.observe(mu[:1]-h[:1], var[:1],
                 np.einsum('ij,jk,ik->i', H[:1], self.filter.P, H[:1]))
@@ -243,10 +276,16 @@ class LearnedStreamingNavigator(StreamingNavigator):
                 forward *= self.cfg.corr_scale[0]
             return np.array([forward, self.cfg.nhc_sigma**2, self.cfg.nhc_sigma**2])
         ev = variance(var)
-        fallback = self.bias_bad or np.sqrt(ev[0]) > self.cfg.hybrid_max_std or self.cal.kappa[0] > self.cfg.hybrid_max_kappa
+        ref_fallback = self.guard_ref is not None and not ref_ok
+        fallback = (self.bias_bad or np.sqrt(ev[0]) > self.cfg.hybrid_max_std or
+                    self.cal.kappa[0] > self.cfg.hybrid_max_kappa or ref_fallback)
         sel = [1, 2] if fallback else [0, 1, 2]
         z = np.array([mu[0], 0., 0.])
         info = self.filter.update((z-h)[sel], H[sel], np.diag(ev[sel]))
+        if ref_fallback:
+            self.guard_ref_fallbacks += 1
+            if self.guard_ref_first_fallback is None:
+                self.guard_ref_first_fallback = float(t)
         if self.guard is not None:
             mb, vb = predict(self.model, raw, np.array([WINDOW]), attitude=np.asarray(self._att_b),
                              bias=np.r_[self.guard.bg, self.guard.ba])
@@ -254,7 +293,8 @@ class LearnedStreamingNavigator(StreamingNavigator):
             zb = np.array([mb[0, 0], 0., 0.])
             self.guard.update((zb-hb)[sel], Hb[sel], np.diag(variance(vb[0])[sel]))
         self._record(self.decisions, dict(t=float(t), fallback=bool(fallback), accepted=bool(info.accepted),
-            eligible=bool(healthy and self.cfg.aci), effective_variance=ev.tolist()))
+            eligible=bool(healthy and self.cfg.aci), effective_variance=ev.tolist(),
+            guard_ref_healthy=bool(ref_ok), guard_ref_fallback=bool(ref_fallback)))
 
     def _record(self, history, event):
         # Calibration adaptation uses cal.buf, not this diagnostic history.
@@ -289,6 +329,7 @@ class LearnedStreamingNavigator(StreamingNavigator):
                 self.alarm_time = float(self.t)
         use = not ((was or self.cusum.alarm) and self.cfg.exclude_on_alarm)
         forced = self._rejects >= self.max_consecutive_rejects
+        recovered = bool(was and not self.cusum.alarm)
         accepted, eligible = False, False
         scale = 1. if self.gnss_cal is None else self.gnss_cal.kappa
         if use:
@@ -301,14 +342,36 @@ class LearnedStreamingNavigator(StreamingNavigator):
             eligible = accepted and not forced and not self.cusum.alarm and self.t > 30.
             if self.gnss_cal is not None and eligible:
                 self.gnss_cal.observe(residual, cov, C)
+        if self.guard_ref is not None:
+            self.guard_ref.observe(self.t, accepted=accepted, q=q, forced=forced,
+                                   alarm=bool(was or self.cusum.alarm), recovery=recovered)
         self._record(self.gnss_decisions, dict(t=float(self.t), arrival_time=self._active_arrival, processed_arrival_time=self._arrival_t, alarm=bool(self.cusum.alarm), status='accepted' if accepted else ('excluded' if not use else 'rejected'), nis=nis, q=q, g=float(self.cusum.g),
             recoveries=self.cusum.recoveries, healthy_streak=self.cusum.healthy_streak,
             excluded=not use, accepted=accepted, eligible=bool(eligible), kappa_used=scale,
+            guard_ref_healthy=(None if self.guard_ref is None else bool(self.guard_ref.healthy)),
+            guard_ref_fallback_epochs=self.guard_ref_fallbacks,
             kappa_next=1. if self.gnss_cal is None else self.gnss_cal.kappa))
         if self.callback is not None:
             self.callback(dict(event='gnss', **self.gnss_decisions[-1]))
-        if (self.guard is not None and self.t-self.last_reset >= self.cfg.dr_reset_period
-                and not self.cusum.alarm and self.cusum.g < .25*self.cfg.cusum_h
-                and self.t-self.last_gnss < 1.5):
-            self.guard = self.filter.copy()
-            self.last_reset = self.t
+        if self.guard is not None and self.t-self.last_reset >= self.cfg.dr_reset_period:
+            if self.guard_ref is None:
+                if (not self.cusum.alarm and self.cusum.g < .25*self.cfg.cusum_h
+                        and self.t-self.last_gnss < 1.5):
+                    self.guard = self.filter.copy()
+                    self.last_reset = self.t
+            else:
+                self.guard_ref.check_fresh(self.t)
+                if (self.guard_ref.healthy and not self.cusum.alarm and
+                        self.cusum.g < .25*self.cfg.cusum_h and
+                        self.t-self.last_gnss < 1.5):
+                    self.guard = self.filter.copy()
+                    self.guard_ref.resets += 1
+                else:
+                    self.guard_ref.reset_skips += 1
+                # Every scheduled boundary opens a fresh assessment interval,
+                # reseeded or not, avoiding a permanent outage deadlock.
+                self.guard_ref.begin(self.t)
+                if accepted and not forced and not self.cusum.alarm and not recovered:
+                    self.guard_ref.observe(self.t, accepted=True, q=q, forced=False,
+                                           alarm=False, recovery=False)
+                self.last_reset = self.t

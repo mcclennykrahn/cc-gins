@@ -12,7 +12,7 @@ from .aci import ACICalibrator, GNSSACICalibrator
 from .adaptive import AdaptiveR
 from .filters import NoiseParams, make_filter
 from .geometry import euler_to_rot
-from .integrity import Cusum, dr_statistic
+from .integrity import Cusum, GuardReferenceHealth, dr_statistic
 from .learning import WINDOW
 from .sim import DEG
 from .range_coupling import BaselineRangeCoupler
@@ -54,6 +54,14 @@ class Config:
     cusum_h: float = 50.0
     recovery_epochs: int = 0       # 0 preserves permanent historical latch
     recovery_q: float = 3.0        # heuristic agreement threshold, not FA calibration
+    # opt-in whole-DR-interval guard-reference health (ccgins.integrity). When a
+    # scheduled reset interval contains any rejected/forced/stale/missing/nonfinite
+    # or alarm/recovery epoch, the interval stays unhealthy: bias-monitor/ACI
+    # reference updates are held, learned forward aiding falls back to fixed NHC,
+    # and DR is not reseeded until the next scheduled boundary opens a new interval.
+    # False preserves every historical default exactly.
+    guard_ref_health: bool = False
+    guard_ref_max_age: float = 1.5
     dr_reset_period: float = 30.0
     exclude_on_alarm: bool = True
     init_seed: int = 0
@@ -215,6 +223,9 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
     t_last_reset = 0.0
     alarm_time = None
     recovery_times = []
+    grh = GuardReferenceHealth(cfg.guard_ref_max_age) if cfg.guard_ref_health else None
+    guard_ref_fallbacks = 0
+    guard_ref_first_fallback = None
 
     logs = {k: [] for k in ("t", "pe", "pt", "P", "ve", "vt", "vb", "tg")}
     gq = {"t": [], "q": [], "g": []}
@@ -302,10 +313,14 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                     else:
                         z = mu.copy()
                         s2 = var.copy()
+            ref_ok = True
+            if grh is not None:
+                grh.check_fresh(t)
+                ref_ok = grh.healthy
             if ok and cfg.pseudo == "hybrid":
                 n_pseudo += 1
                 h, H = bvm(A, (0, 1, 2))
-                healthy_ref = (tau < 1.5) and (t > 30.0) and (not cus.alarm)
+                healthy_ref = (tau < 1.5) and (t > 30.0) and (not cus.alarm) and ref_ok
                 if cfg.aci and healthy_ref:
                     c = np.einsum("ij,jk,ik->i", H[:1], A.P, H[:1])
                     cal.observe(z[:1] - h[:1], s2[:1], c)
@@ -326,10 +341,16 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                 zz = np.array([z[0], 0.0, 0.0])
                 vv = np.array([vf[0], cfg.nhc_sigma**2, cfg.nhc_sigma**2])
                 sel = [0, 1, 2]
-                if np.sqrt(vf[0]) > cfg.hybrid_max_std or float(np.atleast_1d(cal.kappa)[0]) > cfg.hybrid_max_kappa \
-                        or bias_bad:
+                ref_fallback = grh is not None and not ref_ok
+                if (np.sqrt(vf[0]) > cfg.hybrid_max_std or
+                        float(np.atleast_1d(cal.kappa)[0]) > cfg.hybrid_max_kappa or
+                        bias_bad or ref_fallback):
                     sel = [1, 2]
                     n_fallback += 1
+                    if ref_fallback:
+                        guard_ref_fallbacks += 1
+                        if guard_ref_first_fallback is None:
+                            guard_ref_first_fallback = float(t)
                 A.update(zz[sel] - h[sel], H[sel], np.diag(vv[sel]))
                 if B is not None:
                     hB, HB = bvm(B, (0, 1, 2))
@@ -344,26 +365,40 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                     B.update(zzB[sel] - hB[sel], HB[sel], np.diag(vvB[sel]))
             elif ok:
                 h, H = bvm(A, chans)
-                healthy_ref = (tau < 1.5) and (t > 30.0) and (not cus.alarm)
+                healthy_ref = (tau < 1.5) and (t > 30.0) and (not cus.alarm) and ref_ok
                 if cfg.aci and healthy_ref:
                     c = np.einsum("ij,jk,ik->i", H, A.P, H)
                     cal.observe(z - h, s2, c)
                 out_t = 0.0 if tau < 1.5 else tau
-                var_eff = cal.effective_var(s2, out_t)
-                if cfg.corr_scale is not None and cfg.pseudo == "learned_vel":
-                    var_eff = var_eff * np.asarray(cfg.corr_scale, float)
-                A.update(z - h, H, np.diag(var_eff))
-                if B is not None:
-                    hB, HB = bvm(B, chans)
-                    zB, varB = z, var_eff
-                    if guard_prediction is not None:
-                        mb, vb = guard_prediction
-                        zB = np.zeros(2) if cfg.pseudo == "learned_nhc" else mb
-                        sb = vb[1:] + mb[1:]**2 if cfg.pseudo == "learned_nhc" else vb
-                        varB = cal.effective_var(sb, out_t)
-                        if cfg.corr_scale is not None and cfg.pseudo == "learned_vel":
-                            varB *= np.asarray(cfg.corr_scale, float)
-                    B.update(zB - hB, HB, np.diag(varB))
+                ref_fallback = cfg.pseudo == "learned_vel" and grh is not None and not ref_ok
+                if ref_fallback:
+                    # No trustworthy reference: drop learned forward aiding and
+                    # retain lateral/vertical fixed NHC.  No ACI/bias update above.
+                    sel = [1, 2]
+                    A.update(-h[sel], H[sel], np.eye(2) * cfg.nhc_sigma**2)
+                    if B is not None:
+                        hB, HB = bvm(B, chans)
+                        B.update(-hB[sel], HB[sel], np.eye(2) * cfg.nhc_sigma**2)
+                    n_fallback += 1
+                    guard_ref_fallbacks += 1
+                    if guard_ref_first_fallback is None:
+                        guard_ref_first_fallback = float(t)
+                else:
+                    var_eff = cal.effective_var(s2, out_t)
+                    if cfg.corr_scale is not None and cfg.pseudo == "learned_vel":
+                        var_eff = var_eff * np.asarray(cfg.corr_scale, float)
+                    A.update(z - h, H, np.diag(var_eff))
+                    if B is not None:
+                        hB, HB = bvm(B, chans)
+                        zB, varB = z, var_eff
+                        if guard_prediction is not None:
+                            mb, vb = guard_prediction
+                            zB = np.zeros(2) if cfg.pseudo == "learned_nhc" else mb
+                            sb = vb[1:] + mb[1:]**2 if cfg.pseudo == "learned_nhc" else vb
+                            varB = cal.effective_var(sb, out_t)
+                            if cfg.corr_scale is not None and cfg.pseudo == "learned_vel":
+                                varB *= np.asarray(cfg.corr_scale, float)
+                        B.update(zB - hB, HB, np.diag(varB))
 
         # ---------- GNSS ----------
         if kk in gnss_at:
@@ -408,9 +443,13 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                     gq["q"].append(q)
                     gq["g"].append(cus.g)
                 use = not ((was or cus.alarm) and cfg.exclude_on_alarm)
+                recovered = bool(was and not cus.alarm)
+                forced = rejects >= cfg.max_consecutive_rejects
+                fix_accepted = False
+                q_obs = q if cfg.monitor != "none" else None
                 if use:
                     h, H = A.gnss_model(lever)
-                    force = rejects >= cfg.max_consecutive_rejects
+                    force = forced
                     Rm_eff = Rg if adaptive is None else adaptive.update(zg - h, H, A.P)
                     projected = H @ A.P @ H.T
                     residual = zg - h
@@ -432,6 +471,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                             kappa_next=gnss_cal.kappa, eligible=bool(eligible),
                             accepted=bool(info.accepted), nis=float(info.nis)))
                     if info.accepted:
+                        fix_accepted = True
                         if detector is not None and cfg.zupt_require_gnss_stop:
                             stop_confirmations = stop_confirmations + 1 if slow_fix else 0
                             stop_verified = stop_confirmations >= 2
@@ -439,11 +479,31 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                         t_last_gnss = t
                     else:
                         rejects += 1
+                if grh is not None:
+                    grh.observe(t, accepted=fix_accepted, q=q_obs, forced=forced,
+                                alarm=bool(was or cus.alarm), recovery=recovered)
             # DR channel re-seeding
-            if B is not None and (t - t_last_reset) >= cfg.dr_reset_period and not cus.alarm \
-                    and cus.g < 0.25 * cfg.cusum_h and (t - t_last_gnss) < 1.5:
-                B = A.copy()
-                t_last_reset = t
+            if B is not None and (t - t_last_reset) >= cfg.dr_reset_period:
+                if grh is None:
+                    if not cus.alarm and cus.g < 0.25 * cfg.cusum_h and (t - t_last_gnss) < 1.5:
+                        B = A.copy()
+                        t_last_reset = t
+                else:
+                    grh.check_fresh(t)
+                    if (grh.healthy and not cus.alarm and cus.g < 0.25 * cfg.cusum_h
+                            and (t - t_last_gnss) < 1.5):
+                        B = A.copy()
+                        grh.resets += 1
+                    else:
+                        grh.reset_skips += 1
+                    # A scheduled boundary always opens a new interval, even when
+                    # the previous was unhealthy, so an outage cannot deadlock
+                    # reseeding forever.
+                    grh.begin(t)
+                    if fix_accepted and not forced and not cus.alarm and not recovered:
+                        grh.observe(t, accepted=True, q=q_obs, forced=False,
+                                    alarm=False, recovery=False)
+                    t_last_reset = t
 
         if kk % 10 == 0:
             if log_covariance:
@@ -466,5 +526,8 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
         extra={"recovery_times": recovery_times, "gnss_aci": gnss_cal_trace, "covariance": np.array(full_cov) if log_covariance else None,
                "motion": motion, "range_alarm_time": range_alarm_time, "range_trace": range_trace,
                "fallback_frac": n_fallback / max(n_pseudo, 1), "vb_est": np.array(logs["vb"]),
-               "since_gnss": np.array(logs["tg"])},
+               "since_gnss": np.array(logs["tg"]),
+               "guard_ref_health": None if grh is None else grh.summary(),
+               "guard_ref_fallback_epochs": guard_ref_fallbacks,
+               "guard_ref_first_fallback": guard_ref_first_fallback},
     )
