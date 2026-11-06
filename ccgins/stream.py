@@ -53,8 +53,8 @@ class StreamingNavigator:
 
     def __init__(self, R, v, p, P0, noise: NoiseParams, kind: str = "inekf",
                  bg=None, ba=None, lever_arm=None, gate: float | None = None,
-                 max_consecutive_rejects: int = 5, robust_gnss_delta=None):
-        self.filter = make_filter(kind, R, v, p, P0, noise, bg=bg, ba=ba)
+                 max_consecutive_rejects: int = 5, robust_gnss_delta=None, earth=None):
+        self.filter = make_filter(kind, R, v, p, P0, noise, bg=bg, ba=ba, earth=earth)
         self.lever_arm = np.zeros(3) if lever_arm is None else np.asarray(lever_arm, float)
         self.robust_gnss_delta = robust_gnss_delta
         self.gate = float(chi2.ppf(0.999, 3)) if gate is None else gate
@@ -84,7 +84,10 @@ class StreamingNavigator:
                    lever_arm=getattr(gnss_spec, "lever_arm", None),
                    gate=cfg.gnss_gate,
                    max_consecutive_rejects=cfg.max_consecutive_rejects,
-                   robust_gnss_delta=cfg.robust_gnss_delta)
+                   robust_gnss_delta=cfg.robust_gnss_delta,
+                   earth=None if cfg.earth_rate_enu is None and cfg.local_gravity is None else
+                   {"w_ie": None if cfg.earth_rate_enu is None else np.asarray(cfg.earth_rate_enu),
+                    "g": np.array([0., 0., -(9.81 if cfg.local_gravity is None else cfg.local_gravity)])})
 
     # ------------------------------------------------------------------ streaming API
     def push_imu(self, t: float, acc, gyro) -> None:

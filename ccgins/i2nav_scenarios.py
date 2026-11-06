@@ -136,3 +136,8 @@ def calibrate_mount(seq, seed: int = 0, t_skip: float = 60.0, v_min: float = 3.0
     neff = correlation_factor(vv[:, 1:] / rms)
     sig_eff = float(np.max(rms * np.sqrt(neff)))
     return (pitch, yaw), tuple(float(x) for x in sig), sig_eff, tuple(float(x) for x in neff)
+
+
+def earth_config(seq):
+    """Explicit per-run Earth parameters from loader metadata, with no global mutation."""
+    return dict(earth_rate_enu=tuple(seq.w_ie_enu), local_gravity=seq.g_local)

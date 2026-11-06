@@ -12,7 +12,7 @@
 |---|---|---|
 | SO(3) 工具 | `ccgins/geometry.py` | Exp/Log、左雅可比、欧拉角 |
 | 仿真器 | `ccgins/sim.py` | 车辆轨迹（含停车与转弯，侧偏角）；MEMS IMU（零偏、零偏随机游走、ARW/VRW、随速度增大的振动）；1 Hz GNSS（多路径 Gauss-Markov 误差、杆臂、可配置中断、斜坡式慢漂移欺骗） |
-| 惯导机械编排 | `ccgins/filters.py::mechanize` | 采用 ENU 导航系与 FLU 机体系，不考虑地球自转（局部、短时假设） |
+| 惯导机械编排 | `ccgins/filters.py::mechanize` | 采用 ENU 导航系与 FLU 机体系，支持每滤波器地球自转、Coriolis 与当地重力；对应 ESKF/InEKF 协方差动力学；`i2nav_scenarios.earth_config(seq)` 从实测元数据配置，默认仿真关闭 |
 | **稳健 GNSS 更新** | `NavFilter.update_gnss` | ESKF/InEKF 共用白化新息 Huber 权重与协方差膨胀；`Config.robust_gnss_delta=1.5` 启用，默认关闭 |
 | ESKF 基线 | `ccgins/filters.py::ESKF` | 15 维误差状态，使用 Joseph 形式更新，支持 χ² 门限 |
 | InEKF 松组合 | `ccgins/filters.py::InEKF` | 右不变 SE₂(3) 误差加可加性零偏，GNSS 观测带杆臂 |

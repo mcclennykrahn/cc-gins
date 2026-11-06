@@ -19,7 +19,7 @@ def compare(seq, outages, seeds=(0, 1)):
             sc = I.make_scenario(seq, seed, outages)
             row = {'seed': seed, 'filters': {}}
             for kind in ('eskf', 'inekf'):
-                cfg = Config(filter=kind, pseudo='none', init_seed=seed, **I.REAL_CFG)
+                cfg = Config(filter=kind, pseudo='none', init_seed=seed, **I.REAL_CFG, **I.earth_config(seq))
                 log = run(sc.truth, sc.imu, sc.gnss, sc.imu_spec, sc.gnss_spec, cfg)
                 metrics = summarize(log, outages, t_start=30.0)
                 metrics.pop('runtime_us')  # machine timing is not a reproducible metric

@@ -7,8 +7,8 @@ Receiver epoch sigma floor: 0.05 m. Initialization excluded for first 30 s.
 
 | Filter | Horizontal RMSE (m) | 95% horizontal coverage | Outage coverage | Position ANEES | Outage ANEES |
 |---|---:|---:|---:|---:|---:|
-| eskf | 4.4696 | 0.9539 | 0.8807 | 0.7718 | 1.3151 |
-| inekf | 4.6424 | 0.9513 | 0.8738 | 0.7868 | 1.3430 |
+| eskf | 4.4747 | 0.9539 | 0.8807 | 0.7695 | 1.3090 |
+| inekf | 4.6711 | 0.9512 | 0.8738 | 0.7840 | 1.3356 |
 
 Coverage uses the 2D position covariance ellipse and chi-square threshold 5.9915.
 ANEES is mean 3D position NEES divided by 3 (ideal 1).

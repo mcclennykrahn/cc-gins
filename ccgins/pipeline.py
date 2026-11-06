@@ -63,6 +63,8 @@ class Config:
     # v_veh = C_vb v_body. None = IMU assumed aligned with the vehicle (simulation / KITTI).
     mount_py: tuple | None = None
     p0_bias: tuple | None = None      # (gyro rad/s, accel m/s^2) initial bias std; None = legacy
+    earth_rate_enu: tuple | None = None
+    local_gravity: float | None = None
     label: str = ""
 
 
@@ -118,7 +120,11 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
         ch = list(ch)
         return h[ch], H[ch]
     R0, v0, p0, P0 = initial_state(truth, cfg.init_seed, cfg.p0_bias)
-    A = make_filter(cfg.filter, R0, v0, p0, P0, noise)
+    earth = None
+    if cfg.earth_rate_enu is not None or cfg.local_gravity is not None:
+        earth = {"w_ie": None if cfg.earth_rate_enu is None else np.asarray(cfg.earth_rate_enu),
+                 "g": np.array([0., 0., -(9.81 if cfg.local_gravity is None else cfg.local_gravity)])}
+    A = make_filter(cfg.filter, R0, v0, p0, P0, noise, earth=earth)
     lever = gnss_spec.lever_arm
     Rm = np.diag(gnss.sigma**2)
     adaptive = AdaptiveR(Rm) if cfg.adaptive_r else None
