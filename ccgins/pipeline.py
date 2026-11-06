@@ -120,12 +120,19 @@ def mount_matrix(pitch, yaw):
 
 
 def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=None,
-        log_covariance=False) -> RunLog:
+        log_covariance=False, model=None) -> RunLog:
     """pred: (idx, mu, var) learned predictions at pseudo epochs (IMU end index).
+
+    model: optional live MotionNet/TCN; trailing filter attitude and current bias
+    estimates feed inference (guard uses its own estimates). Mutually exclusive with pred.
 
     log_covariance adds full internal 15x15 covariance at the existing every-tenth-sample
     log epochs to extra['covariance']; otherwise that entry is None.
     """
+    if model is not None and pred is not None:
+        raise ValueError("supply model or precomputed pred, not both")
+    if model is not None and cfg.pseudo not in ("learned_vel", "learned_nhc", "hybrid"):
+        raise ValueError("model requires a learned pseudo mode")
     if cfg.motion_every < 1 or not np.isfinite(cfg.zupt_sigma) or cfg.zupt_sigma <= 0:
         raise ValueError("positive motion cadence and ZUPT sigma required")
     noise = NoiseParams.from_spec(imu_spec)
@@ -205,7 +212,14 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
     full_cov = []  # opt-in parity diagnostics
     t0 = time.perf_counter()
 
+    attitude_window = deque(maxlen=WINDOW)
+    guard_attitude_window = deque(maxlen=WINDOW)
     for k in range(n - 1):
+        if model is not None:
+            from .learning import roll_pitch
+            attitude_window.append(roll_pitch(A.R))
+            if B is not None:
+                guard_attitude_window.append(roll_pitch(B.R))
         A.propagate(imu.gyro[k], imu.accel[k], dt)
         if B is not None:
             B.propagate(imu.gyro[k], imu.accel[k], dt)
@@ -246,6 +260,22 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                         motion['odometry_accepted'] += int(info.accepted)
                         odo_stop.observe(t, odometry.speed[j], odometry.sigma[j], info.accepted)
 
+        # On-path inference uses only propagated IMU samples, historical filter
+        # roll/pitch, and CURRENT estimated biases applied to the trailing window.
+        live_prediction = None
+        guard_prediction = None
+        if model is not None and kk >= WINDOW and kk % cfg.pseudo_every == 0:
+            from .learning import predict
+            raw = np.concatenate([imu.gyro[kk-WINDOW:kk], imu.accel[kk-WINDOW:kk]], axis=1)
+            mu_live, var_live = predict(model, raw, np.array([WINDOW]),
+                attitude=np.asarray(attitude_window), bias=np.r_[A.bg, A.ba])
+            live_prediction = (mu_live[0], var_live[0])
+            if B is not None:
+                # Guard inference must not consume A's GNSS-constrained attitude/bias.
+                mu_b, var_b = predict(model, raw, np.array([WINDOW]),
+                    attitude=np.asarray(guard_attitude_window), bias=np.r_[B.bg, B.ba])
+                guard_prediction = (mu_b[0], var_b[0])
+
         # ---------- motion pseudo-measurement ----------
         if cfg.pseudo != "none" and kk % cfg.pseudo_every == 0 and kk >= WINDOW:
             ok = True
@@ -253,10 +283,10 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                 z = np.zeros(2)
                 s2 = np.full(2, cfg.nhc_sigma**2)
             else:
-                if kk not in pred_map:
+                if kk not in pred_map and live_prediction is None:
                     ok = False
                 else:
-                    mu, var = pred_map[kk]
+                    mu, var = live_prediction if live_prediction is not None else pred_map[kk]
                     if cfg.pseudo == "learned_nhc":
                         z = np.zeros(2)
                         s2 = var[1:] + mu[1:] ** 2
@@ -294,7 +324,15 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                 A.update(zz[sel] - h[sel], H[sel], np.diag(vv[sel]))
                 if B is not None:
                     hB, HB = bvm(B, (0, 1, 2))
-                    B.update(zz[sel] - hB[sel], HB[sel], np.diag(vv[sel]))
+                    zzB, vvB = zz, vv
+                    if guard_prediction is not None:
+                        mb, vb = guard_prediction
+                        vfb = cal.effective_var(vb[:1], out_t)
+                        if cfg.corr_scale is not None:
+                            vfb *= float(cfg.corr_scale[0])
+                        zzB = np.array([mb[0], 0., 0.])
+                        vvB = np.array([vfb[0], cfg.nhc_sigma**2, cfg.nhc_sigma**2])
+                    B.update(zzB[sel] - hB[sel], HB[sel], np.diag(vvB[sel]))
             elif ok:
                 h, H = bvm(A, chans)
                 healthy_ref = (tau < 1.5) and (t > 30.0) and (alarm_time is None)
@@ -308,7 +346,15 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                 A.update(z - h, H, np.diag(var_eff))
                 if B is not None:
                     hB, HB = bvm(B, chans)
-                    B.update(z - hB, HB, np.diag(var_eff))
+                    zB, varB = z, var_eff
+                    if guard_prediction is not None:
+                        mb, vb = guard_prediction
+                        zB = np.zeros(2) if cfg.pseudo == "learned_nhc" else mb
+                        sb = vb[1:] + mb[1:]**2 if cfg.pseudo == "learned_nhc" else vb
+                        varB = cal.effective_var(sb, out_t)
+                        if cfg.corr_scale is not None and cfg.pseudo == "learned_vel":
+                            varB *= np.asarray(cfg.corr_scale, float)
+                    B.update(zB - hB, HB, np.diag(varB))
 
         # ---------- GNSS ----------
         if kk in gnss_at:

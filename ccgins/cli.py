@@ -180,7 +180,7 @@ def _predictions(raw: dict, truth, imu, cfg: Config, config_path: Path):
     if cfg.pseudo not in {"learned_nhc", "learned_vel", "hybrid"}:
         return None
     learn_raw = _as_mapping(raw.get("learning", {}), "learning")
-    _unknown_keys(learn_raw, {"model"}, "learning")
+    _unknown_keys(learn_raw, {"model", "architecture"}, "learning")
     model = learn_raw.get("model")
     if not model:
         raise CliError(f"filter.pseudo={cfg.pseudo!r} requires learning.model")
@@ -188,7 +188,12 @@ def _predictions(raw: dict, truth, imu, cfg: Config, config_path: Path):
 
     if len(truth.t) <= learning.WINDOW:
         raise CliError("scenario is shorter than one MotionNet window (100 samples)")
-    net = learning.load(_resolve_model(str(model), config_path))
+    arch = learn_raw.get("architecture")
+    if arch not in (None, "legacy_cnn", "proposal_tcn"):
+        raise CliError("learning.architecture must be legacy_cnn or proposal_tcn")
+    net = learning.load(_resolve_model(str(model), config_path), expected_architecture=arch)
+    if learning.architecture(net) == "proposal_tcn":
+        return net  # filter attitude/bias are available inside pipeline.run only
     idx = np.arange(learning.WINDOW, len(truth.t), cfg.pseudo_every)
     imu6 = np.concatenate([imu.gyro, imu.accel], axis=1)
     import torch
@@ -311,6 +316,9 @@ def run_command(args: argparse.Namespace) -> int:
     out_dir = Path(args.out)
     try:
         raw = load_config(config_path)
+        if getattr(args, "architecture", None) is not None:
+            raw["learning"] = {**_as_mapping(raw.get("learning", {}), "learning"),
+                               "architecture": args.architecture}
         cfg = _filter_config(raw)
         truth, imu, gnss, imu_spec, gnss_spec = _build_inputs(
             raw, seed_override=args.seed, duration_override=args.duration)
@@ -320,7 +328,10 @@ def run_command(args: argparse.Namespace) -> int:
             raise CliError("metrics.t_start must be non-negative")
 
         t0 = time.perf_counter()
-        log = run(truth, imu, gnss, imu_spec, gnss_spec, cfg, pred=pred)
+        from .learning import MotionNetTCN
+        log = run(truth, imu, gnss, imu_spec, gnss_spec, cfg,
+                  model=pred if isinstance(pred, MotionNetTCN) else None,
+                  pred=None if isinstance(pred, MotionNetTCN) else pred)
         wall_time_s = time.perf_counter() - t0
         metrics = _extend_metrics(log, gnss_spec.outages, t_start)
         metrics["runtime_total_s"] = wall_time_s
@@ -374,6 +385,8 @@ def build_parser() -> argparse.ArgumentParser:
     run_p.add_argument("--out", required=True, help="output directory for report.md and metrics.json")
     run_p.add_argument("--seed", type=int, help="override scenario.seed")
     run_p.add_argument("--duration", type=float, help="override scenario.duration [s]")
+    run_p.add_argument("--architecture", choices=["legacy_cnn", "proposal_tcn"],
+                       help="require this learning checkpoint architecture (overrides config)")
     run_p.add_argument("--quiet", action="store_true", help="suppress summary output")
     run_p.set_defaults(func=run_command)
     return parser

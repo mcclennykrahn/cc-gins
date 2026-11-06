@@ -11,21 +11,26 @@ from ccgins import learning
 from ccgins.scenarios import TRAIN_SEEDS, VAL_SEEDS, make_scenario
 
 ap = argparse.ArgumentParser()
+ap.add_argument("--architecture", choices=["legacy_cnn", "proposal_tcn"], default="proposal_tcn")
 ap.add_argument("--epochs", type=int, default=8)
 ap.add_argument("--n-train", type=int, default=len(TRAIN_SEEDS))
-ap.add_argument("--out", default="results/motionnet.pt")
+ap.add_argument("--out", default="results/proposal_alignment/motionnet_tcn.pt")
 args = ap.parse_args()
 Path(args.out).parent.mkdir(parents=True, exist_ok=True)
 
 t0 = time.time()
-imus, vbs = [], []
+imus, vbs, attitudes, biases = [], [], [], []
 for s in TRAIN_SEEDS[: args.n_train]:
     sc = make_scenario(s)
     imus.append(sc.imu6())
     vbs.append(sc.truth.v_body)
+    attitudes.append(learning.roll_pitch(sc.truth.R))
+    biases.append(np.concatenate([sc.imu.gyro_bias, sc.imu.accel_bias], axis=1))
 print(f"generated {len(imus)} training trajectories in {time.time() - t0:.1f}s")
 t0 = time.time()
-net = learning.train_motionnet(imus, vbs, epochs=args.epochs)
+net = learning.train_motionnet(imus, vbs, epochs=args.epochs, architecture=args.architecture,
+    attitude_list=attitudes if args.architecture == "proposal_tcn" else None,
+    bias_list=biases if args.architecture == "proposal_tcn" else None)
 print(f"trained in {time.time() - t0:.1f}s")
 learning.save(net, args.out)
 
@@ -34,7 +39,8 @@ errs, z2 = [], []
 for s in VAL_SEEDS:
     sc = make_scenario(s)
     idx = np.arange(learning.WINDOW, len(sc.truth.t), 10)
-    mu, var = learning.predict(net, sc.imu6(), idx)
+    mu, var = learning.predict(net, sc.imu6(), idx, attitude=learning.roll_pitch(sc.truth.R),
+        bias=np.concatenate([sc.imu.gyro_bias, sc.imu.accel_bias], axis=1))
     y = sc.truth.v_body[idx - 1]
     errs.append(mu - y)
     z2.append((mu - y) ** 2 / var)
@@ -48,4 +54,4 @@ rep = {
     "neff_corr_scale": neff.round(2).tolist(),
 }
 print(json.dumps(rep, indent=1))
-Path("results/motionnet_val.json").write_text(json.dumps(rep, indent=1))
+Path(args.out).with_suffix(".val.json").write_text(json.dumps(rep, indent=1))
