@@ -500,3 +500,21 @@ ADIS16460/B **4.5441→5.4187 m**。这不是普遍精度改进。
 中断停车确认、GNSS 拒绝运动证据仍撤销停车，以及轮速时序/有效性防护。
 剩余限制：没有真实轮速精度评估；滑移标识假定已知，几何/同步/比例不确定性未估计，
 默认 GNSS-only 保护仍无法确认中断中新停车；大漂移后的滤波速度防护和陀螺零偏仍会漏检。
+
+### 主报告配置的流式/批量一致性复核
+
+[完整报告](results/stream_batch_parity/report.md) / [逐配置结果](results/stream_batch_parity/metrics.json)：
+冻结此前报告设置，运行 **88 组完整 batch + stream 配对 / 706,552 个日志历元**：
+64 个 guarded motion 配置（4 IMU × 2 折 × 2 滤波器 × clean/outage × baseline/ZUPT），
+加上 24 个 **NO-NHC、SYNTHETIC 轮速**实验配置。每第 10 个 IMU 历元检查位置、速度、
+导航系位置协方差及全部 15×15 内部误差协方差（含速度/位置及其交叉块）；
+所有最大绝对差均为 **0**，运动计数/接受时刻完全相同，容差为 `atol=1e-12, rtol=0`。
+此前 batch RMSE、Coverage95、ANEES 数字完全不变，未修改默认 GNSS 停车确认或 NHC 基线。
+
+修复了流式静默忽略 mounted NHC，以及固定网格浮点时间差与批量 nominal dt 不一致的问题。
+离网格 GNSS 切分、起始历元 GNSS 等有意差异仍显式保留；流式不支持的批量选项会报错。
+新增 16 个测试，最终完整验证 **112 passed in 42.98s**，此前 96 个全部通过。
+这只证明数值一致，不修复 SYNTHETIC 轮速导致的覆盖率/ANEES 退化；
+没有新增独立道路或真实轮速证据，也不主张轮速零值停车辅助具有普遍收益。
+
+复现：`OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.parity_experiment --workers 4`
