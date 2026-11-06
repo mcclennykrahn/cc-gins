@@ -66,7 +66,7 @@ def test_main_pipeline_applies_motion_and_odometry(kind):
     imu.gyro[:] = 0; imu.accel[:] = [0, 0, 9.81]
     gn = simulate_gnss(tr, gs, seed=0); gn.valid[:] = False
     odo = OdometryData([1., 2., 3.], [0, 0, 0], .1, np.eye(3), np.zeros(3), [True, False, True])
-    log = run(tr, imu, gn, spec, gs, Config(filter=kind, zupt=True), odometry=odo)
+    log = run(tr, imu, gn, spec, gs, Config(filter=kind, zupt=True, zupt_require_gnss_stop=False), odometry=odo)
     m = log.extra['motion']
     assert m['zupt_accepted'] > 20
     assert m['odometry_attempted'] == m['odometry_accepted'] == 2
@@ -100,3 +100,24 @@ def test_odometry_turn_lever_correction_and_outlier_gate(kind):
     assert np.allclose(f.v, v)
     assert not mounted_odometry_update(f, 100., .1, gyro, C, lever).accepted
     assert np.allclose(f.v, v)
+
+
+def test_default_zupt_requires_independent_stop_confirmation():
+    tr = generate_trajectory(5, seed=0)
+    tr.v[:] = 0; tr.p[:] = 0; tr.R[:] = np.eye(3)
+    spec, gs = ImuSpec(), GnssSpec()
+    imu = simulate_imu(tr, spec, seed=0)
+    imu.gyro[:] = 0; imu.accel[:] = [0, 0, 9.81]
+    gn = simulate_gnss(tr, gs, seed=0); gn.valid[:] = False
+    log = run(tr, imu, gn, spec, gs, Config(zupt=True))
+    assert log.extra['motion']['zupt_accepted'] == 0
+    assert log.extra['motion']['unconfirmed_stop_vetoes'] > 0
+    # Three accurate stationary fixes confirm rest; a moving fix revokes it.
+    gn.valid[:] = True; gn.pos[:] = 0; gn.sigma[:] = .01
+    gs.lever_arm = np.zeros(3)
+    log = run(tr, imu, gn, spec, gs, Config(zupt=True))
+    assert log.extra['motion']['zupt_accepted'] > 0
+    assert min(log.extra['motion']['zupt_times']) > 3
+    gn.pos[gn.t >= 4] = [50, 0, 0]
+    log = run(tr, imu, gn, spec, gs, Config(zupt=True))
+    assert max(log.extra['motion']['zupt_times']) <= 4

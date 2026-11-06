@@ -70,6 +70,7 @@ class Config:
     earth_rate_enu: tuple | None = None
     local_gravity: float | None = None
     zupt: bool = False
+    zupt_require_gnss_stop: bool = True  # opt out only with independent external stop assurance
     zupt_accel_var: float | None = None  # frozen held-out calibration; None = noise-only floor
     zupt_gyro_var: float | None = None
     zupt_sigma: float = 0.05
@@ -154,6 +155,10 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
             dt=dt, gravity=9.81 if cfg.local_gravity is None else cfg.local_gravity)
     motion = {"zupt_attempted": 0, "zupt_accepted": 0, "odometry_attempted": 0,
               "odometry_accepted": 0, "zupt_times": []}
+    stop_verified = False
+    stop_confirmations = 0
+    previous_fix = None
+    motion["unconfirmed_stop_vetoes"] = 0
     odo_at = {}
     if odometry is not None:
         for j, ot in enumerate(odometry.t):
@@ -203,7 +208,16 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
         # Only samples already propagated are visible to the causal detector.
         stationary = False if detector is None else detector.step(
             imu.gyro[k], imu.accel[k], np.linalg.norm(A.v))
-        if stationary and kk % cfg.motion_every == 0:
+        # A quiet IMU and a small FILTER speed cannot independently prove rest.
+        # Once GNSS has confirmed rest, retain it through an outage only while
+        # the IMU dwell remains uninterrupted. New outage stops stay unconfirmed.
+        if detector is not None and detector.quiet == 0:
+            stop_verified = False
+            stop_confirmations = 0
+        stop_allowed = stop_verified or not cfg.zupt_require_gnss_stop
+        if stationary and not stop_allowed and kk % cfg.motion_every == 0:
+            motion['unconfirmed_stop_vetoes'] += 1
+        if stationary and stop_allowed and kk % cfg.motion_every == 0:
             motion['zupt_attempted'] += 1
             info = zupt_update(A, cfg.zupt_sigma, gate=float(chi2.ppf(.999, 3)))
             motion['zupt_accepted'] += int(info.accepted)
@@ -292,6 +306,20 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                 zg = gnss.pos[m]
                 if cfg.use_epoch_sigma and gnss.sigma_ep is not None:
                     Rm = np.diag(np.maximum(gnss.sigma_ep[m], cfg.gnss_sigma_floor) ** 2)
+                slow_fix = False
+                if detector is not None and cfg.zupt_require_gnss_stop:
+                    if previous_fix is not None:
+                        tp, zp, Rp = previous_fix
+                        gap = t - tp
+                        uncertainty = 2*np.sqrt(np.linalg.eigvalsh(Rp + Rm).max())
+                        slow_fix = (0 < gap <= 2.0 and
+                                    (np.linalg.norm(zg-zp) + uncertainty)/gap < .25)
+                    # Even a filter-rejected moving fix must revoke a stop latch:
+                    # otherwise a false ZUPT could gate out evidence of motion.
+                    if not slow_fix:
+                        stop_confirmations = 0
+                        stop_verified = False
+                    previous_fix = (t, zg.copy(), Rm.copy())
                 # integrity statistic
                 if cfg.monitor == "dual":
                     q = dr_statistic(B, zg, lever, Rm)
@@ -324,6 +352,9 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                         if coupler.monitor.alarm and range_alarm_time is None:
                             range_alarm_time = float(t)
                     if info.accepted:
+                        if detector is not None and cfg.zupt_require_gnss_stop:
+                            stop_confirmations = stop_confirmations + 1 if slow_fix else 0
+                            stop_verified = stop_confirmations >= 2
                         rejects = 0
                         t_last_gnss = t
                     else:

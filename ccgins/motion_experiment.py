@@ -32,6 +32,7 @@ def job(args):
         cfg = Config(filter=kind, pseudo='nhc', init_seed=0, **I.REAL_CFG,
                      **I.earth_config(seq), mount_py=tuple(mount['mount_py']),
                      nhc_sigma=mount['nhc_sigma_eff'], zupt=enabled,
+                     zupt_require_gnss_stop=profile=='guarded',
                      zupt_accel_var=detector.accel_var, zupt_gyro_var=detector.gyro_var)
         log = run(sc.truth, sc.imu, sc.gnss, sc.imu_spec, sc.gnss_spec, cfg)
         metrics = summarize(log, outages, t_start=30.)
@@ -73,7 +74,8 @@ def write_report(rows, out):
     (out/'metrics.json').write_text(json.dumps(result, indent=2, allow_nan=False)+'\n')
     lines = ['# Adaptive ZUPT on real i2Nav IMU + RTK', '',
         f"{len(rows)} paired cases / {2*len(rows)} trajectory runs. All cases retained. Profile: {rows[0]['profile']}.",
-        'Vehicle caps: accel std 3 m/s², gyro std 0.05 rad/s. Conservative profile: 0.25 m/s² and 0.01 rad/s.',
+        'Vehicle/guarded caps: accel std 3 m/s², gyro std 0.05 rad/s. Conservative profile: 0.25 m/s² and 0.01 rad/s.',
+        'Guarded profile (default): two consecutive accepted RTK displacement upper-speed bounds <0.25 m/s (distance + 2 sigma, epochs <=2 s apart) confirm rest. Any IMU dwell reset or moving RTK fix (even filter-rejected) revokes confirmation. New stops during outages cannot be confirmed. Other profiles omit this independent stop guard.',
         'Baseline: ESKF/InEKF + mounting-calibrated NHC with correlation-inflated sigma; Earth compensation and real receiver epoch sigma (0.05 m floor).',
         'Same seed 0, IMU, RTK, geometry, initialization, and outages within each pair. First 30 s excluded from global metrics.',
         'Calibration: lower-decile one-second IMU variance on the opposite time half, 4x margin, sensor noise density floor and physical caps. Existing training-half RTK/INS mounting calibration reused.',
@@ -103,7 +105,7 @@ def write_report(rows, out):
         '## Limits', '',
         'This is one shared drive, four co-mounted IMUs, two correlated time folds and one initial seed. Event counts are descriptive; no independence or statistical significance claim.',
         'The filter-speed veto can suppress real stops after large outage drift, and can admit smooth motion if the filter is already wrong. Zero observed false-motion accepts is not a safety guarantee; stops below 0.5 m/s include creep. Raw gyro mean conservatively rejects sensors with large turn-on bias.',
-        'The vehicle caps were revised after the conservative pilot rejected the calibration-half vibration floor (0.40–0.72 m/s² accel std). This is exploratory development, not a blind confirmatory evaluation. The pilot is retained in results/adaptive_motion_conservative. Calibration is frozen after the training half; caps can reject highly vibrating stationary vehicles. No online bias/threshold learning from accepted ZUPTs, avoiding self-reinforcing detection.',
+        'The vehicle caps were revised after the conservative pilot rejected the calibration-half vibration floor (0.40–0.72 m/s² accel std). This is exploratory development, not a blind confirmatory evaluation. The pilot is retained in results/adaptive_motion_conservative. The unguarded vehicle profile is retained in results/adaptive_motion_vehicle; its large regressions motivated the guarded default, so this evaluation must not be treated as held-out validation. Calibration is frozen after the training half; caps can reject highly vibrating stationary vehicles. No online bias/threshold learning from accepted ZUPTs, avoiding self-reinforcing detection.',
         'Odometry is integrated in the same pipeline with explicit mounting rotation and IMU-to-wheel lever arm, Earth-rate correction, timestamp validation, validity mask and NIS gating. i2Nav has no wheel-speed stream: no odometry accuracy claim or synthetic wheel experiment is reported. Slip, scale, timing offsets and geometry uncertainty remain unmodelled; caller must calibrate geometry and exclude slipping epochs.',
         'Reference is used for initial-state construction (existing protocol) and scoring only; this is not unaided cold-start navigation.', '',
         f"Reproduce: `OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.motion_experiment --workers 4 --profile {rows[0]['profile']} --out {out}`", '']
@@ -113,7 +115,7 @@ def write_report(rows, out):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--workers', type=int, default=4)
     ap.add_argument('--out', default='results/adaptive_motion')
-    ap.add_argument('--profile', choices=('vehicle', 'conservative'), default='vehicle')
+    ap.add_argument('--profile', choices=('guarded', 'vehicle', 'conservative'), default='guarded')
     a = ap.parse_args()
     jobs = [(n, f, k, c, a.profile) for n in I.IMUS for f in 'AB' for k in ('eskf', 'inekf') for c in ('clean', 'outage')]
     with Pool(a.workers) as pool:
