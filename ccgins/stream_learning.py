@@ -18,14 +18,14 @@ class LearnedStreamingNavigator(StreamingNavigator):
     """Select explicitly via this class and supply a loaded MotionNet checkpoint.
 
     Supports learned_vel/learned_nhc, ACI, GNSS ACI and single/dual CUSUM.
-    Hybrid/bias fallback, wheel/ZUPT, adaptive-R and range coupling are rejected.
+    Hybrid/bias fallback and wheels are supported. ZUPT, adaptive-R and range coupling are rejected.
     delay is in seconds of IMU event time; get_state() reports processed time.
     """
 
-    def __init__(self, *args, model, delay=0., motion_cfg=None, **kwargs):
+    def __init__(self, *args, model, delay=0., motion_cfg=None, max_buffer=4096, callback=None, **kwargs):
         cfg = motion_cfg
-        if cfg is None or cfg.pseudo not in ('learned_vel', 'learned_nhc'):
-            raise ValueError('learned streaming requires learned_vel or learned_nhc')
+        if cfg is None or cfg.pseudo not in ('learned_vel', 'learned_nhc', 'hybrid'):
+            raise ValueError('learned streaming requires learned_vel, learned_nhc or hybrid')
         if (cfg.zupt or cfg.adaptive_r or cfg.baseline_range_anchor is not None or
                 cfg.monitor not in ('none', 'single', 'dual')):
             raise ValueError('unsupported learned streaming motion/adaptive/range/monitor option')
@@ -42,13 +42,16 @@ class LearnedStreamingNavigator(StreamingNavigator):
         self.cfg = replace(cfg)
         self.model = model
         self.delay = delay
+        if not isinstance(max_buffer, int) or max_buffer < np.ceil(delay/self.dt)+1:
+            raise ValueError("max_buffer must cover delay budget")
+        self.max_buffer, self.callback = max_buffer, callback
         self._pending = deque()
         self._arrival_t = None
         self._raw = deque(maxlen=WINDOW)
         self._att = deque(maxlen=WINDOW)
         self._att_b = deque(maxlen=WINDOW)
         self.guard = self.filter.copy() if cfg.monitor == 'dual' else None
-        self.cal = ACICalibrator(2 if cfg.pseudo == 'learned_nhc' else 3,
+        self.cal = ACICalibrator(1 if cfg.pseudo == 'hybrid' else (2 if cfg.pseudo == 'learned_nhc' else 3),
             alpha=cfg.aci_alpha, gamma=cfg.aci_gamma, window=cfg.aci_window,
             beta=cfg.aci_beta, t_ref=cfg.aci_t_ref, enabled=cfg.aci)
         self.gnss_cal = GNSSACICalibrator(alpha=cfg.aci_alpha, gamma=cfg.aci_gamma,
@@ -58,12 +61,17 @@ class LearnedStreamingNavigator(StreamingNavigator):
         self.last_reset = None
         self.start_time = None
         self.alarm_time = None
+        self.bias_r = deque(maxlen=cfg.hybrid_bias_window)
+        self.bias_v = deque(maxlen=cfg.hybrid_bias_window)
+        self.bias_bad = cfg.hybrid_bias_z > 0
+        self.bias_latched = False
         self.decisions = []
         self.gnss_decisions = []
-        self._seen_gnss = set()
+        self._gnss_arrivals = {}
+        self._active_arrival = None
 
     @classmethod
-    def from_truth(cls, truth, imu_spec, gnss_spec, cfg=None, *, model, delay=0.):
+    def from_truth(cls, truth, imu_spec, gnss_spec, cfg=None, *, model, delay=0., **options):
         # Reuse the baseline initialization (including Earth/mount/noise options).
         from .pipeline import initial_state
         from .filters import NoiseParams
@@ -75,7 +83,7 @@ class LearnedStreamingNavigator(StreamingNavigator):
             earth = dict(w_ie=None if cfg.earth_rate_enu is None else np.asarray(cfg.earth_rate_enu),
                          g=np.array([0., 0., -(9.81 if cfg.local_gravity is None else cfg.local_gravity)]))
         return cls(R, v, p, P, NoiseParams.from_spec(imu_spec), kind=cfg.filter,
-            model=model, delay=delay, motion_cfg=cfg, imu_spec=imu_spec, dt=truth.dt,
+            model=model, delay=delay, **options, motion_cfg=cfg, imu_spec=imu_spec, dt=truth.dt,
             lever_arm=gnss_spec.lever_arm, gate=cfg.gnss_gate,
             max_consecutive_rejects=cfg.max_consecutive_rejects,
             robust_gnss_delta=cfg.robust_gnss_delta, earth=earth)
@@ -88,11 +96,10 @@ class LearnedStreamingNavigator(StreamingNavigator):
         if self._arrival_t is not None and (t <= self._arrival_t or
                 not np.isclose(t-self._arrival_t, self.dt, atol=1e-9, rtol=0)):
             raise ValueError('learned streaming requires increasing fixed-rate IMU')
-        if self._arrival_t is None:
-            for epoch, *_ in self._gnss:
-                if epoch < t-_EPS or not np.isclose((epoch-t)/self.dt,
-                        round((epoch-t)/self.dt), atol=1e-6):
-                    raise ValueError("learned streaming GNSS must align to IMU grid")
+        if self.t is None and self._gnss and self._gnss[0][0] < (self._pending[0][0] if self._pending else t)-_EPS:
+            raise ValueError("GNSS precedes first IMU epoch")
+        if len(self._pending) >= self.max_buffer:
+            raise BufferError("IMU buffer full")
         self._arrival_t = t
         self._pending.append((t, acc.copy(), gyro.copy()))
         while self._pending and self._pending[0][0] <= t-self.delay+_EPS:
@@ -104,26 +111,33 @@ class LearnedStreamingNavigator(StreamingNavigator):
             self._process(*self._pending.popleft())
 
     def push_odometry(self, *args, **kwargs):
-        raise ValueError('wheel updates use the supported baseline StreamingNavigator')
+        if len(self._odometry) >= self.max_buffer:
+            raise BufferError('wheel buffer full')
+        t = float(args[0] if args else kwargs['t'])
+        origin = self.start_time if self.start_time is not None else (self._pending[0][0] if self._pending else None)
+        if not np.isfinite(t) or (origin is not None and not np.isclose((t-origin)/self.dt, round((t-origin)/self.dt), atol=1e-6)):
+            raise ValueError('wheel must align to nominal IMU grid')
+        return super().push_odometry(*args, **kwargs)
 
-    def push_gnss(self, t, pos, cov):
-        # Require on-grid fixes: splitting would change stored feature semantics.
+    def push_gnss(self, t, pos, cov, *, arrival_time=None):
+        """Queue before processing; optional arrival_time is caller clock metadata."""
+        if arrival_time is not None and (not np.isfinite(arrival_time) or arrival_time < t):
+            raise ValueError("arrival_time must be finite and no earlier than epoch")
         c = self._as_cov(cov)
         if not np.isfinite(np.r_[t, np.asarray(pos).ravel(), c.ravel()]).all():
             raise ValueError('finite GNSS required')
         if not np.allclose(c, c.T):
             raise ValueError('symmetric GNSS covariance required')
         np.linalg.cholesky(c)
-        origin = self.t if self.t is not None else (self._pending[0][0] if self._pending else None)
-        if origin is not None and not np.isclose((t-origin)/self.dt, round((t-origin)/self.dt), atol=1e-6):
-            raise ValueError('learned streaming GNSS must align to IMU grid')
         # Current-epoch insertion is too late: its pseudo decision was emitted.
         if self.t is not None and t <= self.t+_EPS:
             raise ValueError('GNSS must arrive before its epoch is processed; increase delay')
-        if float(t) in self._seen_gnss:
+        if any(abs(float(t)-g[0]) <= _EPS for g in self._gnss):
             raise ValueError("duplicate GNSS epoch")
+        if len(self._gnss) >= self.max_buffer:
+            raise BufferError("GNSS buffer full")
         super().push_gnss(t, pos, c)
-        self._seen_gnss.add(float(t))
+        self._gnss_arrivals[float(t)] = self._arrival_t if arrival_time is None else float(arrival_time)
 
     def _process(self, t, acc, gyro):
         if self.t is None:
@@ -134,12 +148,22 @@ class LearnedStreamingNavigator(StreamingNavigator):
             self._att.append(roll_pitch(self.filter.R))
             if self.guard is not None:
                 self._att_b.append(roll_pitch(self.guard.R))
-                self.guard.propagate(self._last_imu[2], self._last_imu[1], self.dt)
-        if self._gnss and self._gnss[0][0] < t-_EPS:
-            raise ValueError("learned streaming GNSS must align to IMU grid")
         super().push_imu(t, acc, gyro)
+        if self.callback is not None:
+            self.callback(dict(event='imu', epoch=float(t), arrival_time=self._arrival_t,
+                               status='processed', state=self.get_state()))
+
+    def _propagate(self, gyro, acc, dt):
+        super()._propagate(gyro, acc, dt)
+        if self.guard is not None:
+            self.guard.propagate(gyro, acc, dt)
 
     def _apply_motion(self, t, gyro, acc):
+        wheel = self._odometry.get(self._odo_epochs[0]) if self._odo_epochs and abs(self._odo_epochs[0]-t) <= _EPS else None
+        super()._apply_motion(t, gyro, acc)
+        if wheel is not None and wheel.valid[0] and self.guard is not None:
+            from .zupt import mounted_odometry_update
+            mounted_odometry_update(self.guard, wheel.speed[0], wheel.sigma[0], gyro, wheel.C_vb, wheel.lever_b)
         if len(self._raw) < WINDOW or self._index % self.cfg.pseudo_every:
             return
         raw = np.asarray(self._raw)
@@ -149,6 +173,9 @@ class LearnedStreamingNavigator(StreamingNavigator):
         mu, var = mu[0], var[0]
         if not np.isfinite(mu).all() or not np.isfinite(var).all() or np.any(var <= 0):
             raise ValueError('nonfinite or nonpositive MotionNet prediction')
+        if self.cfg.pseudo == 'hybrid':
+            self._hybrid(t, raw, mu, var)
+            return
         nhc = self.cfg.pseudo == 'learned_nhc'
         ch = [1, 2] if nhc else [0, 1, 2]
         z = np.zeros(2) if nhc else mu
@@ -179,7 +206,7 @@ class LearnedStreamingNavigator(StreamingNavigator):
                 ev *= np.asarray(self.cfg.corr_scale)
             hb, Hb = self._body(self.guard, ch)
             self.guard.update(zb-hb, Hb, np.diag(ev))
-        self.decisions.append(dict(t=float(t), window_start=float(t-WINDOW*self.dt),
+        self._record(self.decisions, dict(t=float(t), window_start=float(t-WINDOW*self.dt),
             feature_mean=raw.mean(0).tolist(), attitude_mean=np.asarray(self._att).mean(0).tolist(),
             estimated_bias=inference_bias.tolist(),
             mu=mu.tolist(), variance=var.tolist(),
@@ -187,16 +214,68 @@ class LearnedStreamingNavigator(StreamingNavigator):
             observations=self.cal._n, kappa_before=before.tolist(), kappa=self.cal.kappa.tolist(),
             accepted=bool(info.accepted), alarm=bool(self.cusum.alarm)))
 
+    def _hybrid(self, t, raw, mu, var):
+        h, H = self._body(self.filter, [0, 1, 2])
+        tau = t-self.last_gnss
+        healthy = tau < 1.5 and t > 30. and not self.cusum.alarm
+        if healthy:
+            self.cal.observe(mu[:1]-h[:1], var[:1],
+                np.einsum('ij,jk,ik->i', H[:1], self.filter.P, H[:1]))
+            if self.cfg.hybrid_bias_z > 0:
+                self.bias_r.append(float(mu[0]-h[0]))
+                self.bias_v.append(float(var[0]))
+                if len(self.bias_r) >= self.cfg.hybrid_bias_min:
+                    # Same overlap correction as the batch hybrid bias monitor.
+                    n_eff = 1. if self.cfg.corr_scale is None else self.cfg.corr_scale[0]
+                    score = abs(np.mean(self.bias_r))/np.sqrt(np.mean(self.bias_v)*n_eff/len(self.bias_r))
+                    if score > self.cfg.hybrid_bias_z:
+                        self.bias_bad = True
+                        self.bias_latched = self.cfg.hybrid_bias_latch
+                    elif score < self.cfg.hybrid_bias_z/2 and not self.bias_latched:
+                        self.bias_bad = False
+        outage = 0. if tau < 1.5 else (tau if np.isfinite(tau) else t-self.start_time)
+        if not np.isfinite(tau) and outage < 1.5:
+            outage = 0.
+        def variance(v):
+            forward = self.cal.effective_var(v[:1], outage)[0]
+            if self.cfg.corr_scale is not None:
+                forward *= self.cfg.corr_scale[0]
+            return np.array([forward, self.cfg.nhc_sigma**2, self.cfg.nhc_sigma**2])
+        ev = variance(var)
+        fallback = self.bias_bad or np.sqrt(ev[0]) > self.cfg.hybrid_max_std or self.cal.kappa[0] > self.cfg.hybrid_max_kappa
+        sel = [1, 2] if fallback else [0, 1, 2]
+        z = np.array([mu[0], 0., 0.])
+        info = self.filter.update((z-h)[sel], H[sel], np.diag(ev[sel]))
+        if self.guard is not None:
+            mb, vb = predict(self.model, raw, np.array([WINDOW]), attitude=np.asarray(self._att_b),
+                             bias=np.r_[self.guard.bg, self.guard.ba])
+            hb, Hb = self._body(self.guard, [0, 1, 2])
+            zb = np.array([mb[0, 0], 0., 0.])
+            self.guard.update((zb-hb)[sel], Hb[sel], np.diag(variance(vb[0])[sel]))
+        self._record(self.decisions, dict(t=float(t), fallback=bool(fallback), accepted=bool(info.accepted),
+            eligible=bool(healthy and self.cfg.aci), effective_variance=ev.tolist()))
+
+    def _record(self, history, event):
+        history.append(event)
+        if len(history) > self.max_buffer:
+            del history[0]
+
     def _body(self, f, ch):
         h, H = f.body_vel_model((0, 1, 2))
-        if self.C_vb is not None and self.cfg.pseudo == 'learned_nhc':
+        if self.C_vb is not None and self.cfg.pseudo in ('learned_nhc', 'hybrid'):
             h, H = self.C_vb@h, self.C_vb@H
         return h[ch], H[ch]
+
+    def _pop_and_apply_gnss(self):
+        # Use the queued key, even when the base treats a near-grid epoch as equal.
+        self._active_arrival = self._gnss_arrivals.pop(self._gnss[0][0], None)
+        super()._pop_and_apply_gnss()
 
     def _apply_gnss(self, pos, cov):
         Rg = cov if self.gnss_cal is None else self.gnss_cal.effective_cov(cov)
         h, H = self.filter.gnss_model(self.lever_arm)
         residual, C = pos-h, H@self.filter.P@H.T
+        nis = float(residual@np.linalg.solve(C+Rg, residual))
         q = None
         if self.cfg.monitor != 'none':
             q = (dr_statistic(self.guard, pos, self.lever_arm, Rg) if self.guard is not None
@@ -217,9 +296,11 @@ class LearnedStreamingNavigator(StreamingNavigator):
             eligible = accepted and not forced and not self.cusum.alarm and self.t > 30.
             if self.gnss_cal is not None and eligible:
                 self.gnss_cal.observe(residual, cov, C)
-        self.gnss_decisions.append(dict(t=float(self.t), q=q, g=float(self.cusum.g),
+        self._record(self.gnss_decisions, dict(t=float(self.t), arrival_time=self._active_arrival, processed_arrival_time=self._arrival_t, alarm=bool(self.cusum.alarm), status='accepted' if accepted else ('excluded' if not use else 'rejected'), nis=nis, q=q, g=float(self.cusum.g),
             excluded=not use, accepted=accepted, eligible=bool(eligible), kappa_used=scale,
             kappa_next=1. if self.gnss_cal is None else self.gnss_cal.kappa))
+        if self.callback is not None:
+            self.callback(dict(event='gnss', **self.gnss_decisions[-1]))
         if (self.guard is not None and self.t-self.last_reset >= self.cfg.dr_reset_period
                 and not self.cusum.alarm and self.cusum.g < .25*self.cfg.cusum_h
                 and self.t-self.last_gnss < 1.5):

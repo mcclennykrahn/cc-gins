@@ -121,15 +121,14 @@ def test_dual_cusum_excludes_precise_malicious_epoch():
     assert all(not r['eligible'] for r in bad.decisions if r['t'] > 3.)
 
 
-def test_rejects_late_offgrid_and_unsupported():
+def test_rejects_late_and_unsupported():
     sc = make_scenario(714, duration=2.)
     cfg = Config(pseudo='learned_vel')
     nav = drive(sc, cfg, model())
     with pytest.raises(ValueError, match='before its epoch'):
         nav.push_gnss(1., [0, 0, 0], 1.)
-    with pytest.raises(ValueError, match='align'):
-        nav.push_gnss(2.003, [0, 0, 0], 1.)
-    for option in [dict(pseudo='hybrid'), dict(zupt=True), dict(adaptive_r=True)]:
+    nav.push_gnss(2.003, [0, 0, 0], 1.)
+    for option in [dict(zupt=True), dict(adaptive_r=True)]:
         with pytest.raises(ValueError):
             LearnedStreamingNavigator.from_truth(sc.truth, sc.imu_spec, sc.gnss_spec,
                 replace(cfg, **option), model=model())
@@ -155,11 +154,138 @@ def test_pending_delay_budget_and_duplicate_fix():
     assert nav.get_state().t == .06
 
 
-def test_prequeued_offgrid_rejected_before_first_state():
+def test_prequeued_offgrid_is_split():
     sc = make_scenario(717, duration=1.)
     nav = LearnedStreamingNavigator.from_truth(sc.truth, sc.imu_spec, sc.gnss_spec,
             Config(pseudo='learned_vel'), model=model())
     nav.push_gnss(.003, [0, 0, 0], 1.)
-    with pytest.raises(ValueError, match='align'):
-        nav.push_imu(0., sc.imu.accel[0], sc.imu.gyro[0])
-    assert nav.t is None
+    nav.push_imu(0., sc.imu.accel[0], sc.imu.gyro[0])
+    nav.push_imu(.01, sc.imu.accel[1], sc.imu.gyro[1])
+    assert nav.gnss_decisions[0]['t'] == .003
+    assert nav.t == .01
+
+
+@pytest.mark.parametrize('pseudo', ['hybrid', 'learned_vel'])
+def test_wheel_layer_batch_parity(pseudo):
+    from ccgins.zupt import OdometryData
+    sc = make_scenario(718, duration=5.)
+    sc.gnss.valid[sc.gnss.idx == 0] = False
+    cfg = Config(pseudo=pseudo, aci=True, monitor='dual', cusum_h=1e12,
+                 corr_scale=(40.,40.,40.), hybrid_max_std=.01)
+    ii = np.arange(10, len(sc.truth.t), 10)
+    vb = np.einsum('nji,nj->ni', sc.truth.R[ii], sc.truth.v[ii])
+    odo = OdometryData(sc.truth.t[ii], vb[:,0], .1, np.eye(3), np.zeros(3))
+    net = model()
+    batch = run(sc.truth, sc.imu, sc.gnss, sc.imu_spec, sc.gnss_spec, cfg,
+                model=net, odometry=odo, log_covariance=True)
+    nav = LearnedStreamingNavigator.from_truth(sc.truth, sc.imu_spec, sc.gnss_spec,
+                                               cfg, model=net, delay=.05)
+    for j,t in enumerate(odo.t):
+        nav.push_odometry(t,odo.speed[j],odo.sigma[j],odo.C_vb,odo.lever_b)
+    drive(sc,cfg,net,nav=nav)
+    np.testing.assert_allclose(nav.filter.p,batch.p_est[-1],atol=1e-10,rtol=0)
+    np.testing.assert_allclose(nav.filter.P,batch.extra['covariance'][-1],atol=1e-10,rtol=0)
+    assert nav.motion == batch.extra['motion']
+
+
+def test_offgrid_out_of_order_delayed_and_guard_split():
+    sc = make_scenario(719,duration=3.)
+    cfg = Config(pseudo='learned_nhc', monitor='dual', cusum_h=1e12)
+    net = model(True)
+    a = LearnedStreamingNavigator.from_truth(sc.truth,sc.imu_spec,sc.gnss_spec,cfg,model=net,delay=.05)
+    b = LearnedStreamingNavigator.from_truth(sc.truth,sc.imu_spec,sc.gnss_spec,cfg,model=net,delay=.05)
+    fixes=[(.503,sc.truth.p[50]),(.507,sc.truth.p[50]),(1.405,sc.truth.p[140])]
+    for t,p in fixes[::-1]: a.push_gnss(t,p,4.)
+    for k,t in enumerate(sc.truth.t):
+        for epoch,p in fixes[::-1]:
+            if abs(t-(np.ceil(epoch*100)/100+.02))<1e-9: b.push_gnss(epoch,p,4.)
+        a.push_imu(t,sc.imu.accel[k],sc.imu.gyro[k])
+        b.push_imu(t,sc.imu.accel[k],sc.imu.gyro[k])
+    a.flush(); b.flush()
+    np.testing.assert_array_equal(a.filter.P,b.filter.P)
+    np.testing.assert_array_equal(a.guard.P,b.guard.P)
+    assert a.decisions == b.decisions
+    assert [g['t'] for g in a.gnss_decisions] == [f[0] for f in fixes]
+
+
+def test_buffer_explicit_error_and_replay(tmp_path):
+    from ccgins.stream_replay import save_artifact,replay
+    sc=make_scenario(720,duration=2.)
+    cfg=Config(pseudo='learned_vel')
+    net=model()
+    with pytest.raises(ValueError,match='budget'):
+        LearnedStreamingNavigator.from_truth(sc.truth,sc.imu_spec,sc.gnss_spec,cfg,model=net,delay=1.,max_buffer=2)
+    nav=LearnedStreamingNavigator.from_truth(sc.truth,sc.imu_spec,sc.gnss_spec,cfg,model=net,max_buffer=2)
+    nav.push_gnss(1.,[0,0,0],1.);nav.push_gnss(2.,[0,0,0],1.)
+    with pytest.raises(BufferError): nav.push_gnss(3.,[0,0,0],1.)
+    with pytest.raises(ValueError): nav.push_gnss(4.,[np.nan,0,0],1.)
+    path=tmp_path/'full.npz'
+    save_artifact(path,sc,cfg,lag=.03,delay=.05)
+    events=[]
+    replayed,timing=replay(path,net,events.append)
+    expected=drive(sc,cfg,net)
+    np.testing.assert_array_equal(replayed.filter.P,expected.filter.P)
+    assert all(e['arrival_time']>=e.get('epoch',e.get('t')) for e in events)
+    assert all(e['status'] in ('processed','accepted','rejected','excluded') for e in events)
+    assert timing['hz']>0
+
+
+def test_realistic_ramp_with_100_sample_latency():
+    import runpy
+    probe=runpy.run_path('results/proposal_alignment_stream_fifth/spoof_probe.py')['probe']
+    clean,bad=probe(False),probe(True)
+    assert clean['alarm_time'] is None
+    assert bad['alarm_time']==8.  # 3 s after ramp onset at 5 s
+    assert all(g['accepted'] for g in clean['gnss'])
+    assert all(g['accepted'] for g in bad['gnss'] if g['t']<=5 or g['t']>13)
+    assert all(g['arrival_time']>=g['t']+1. for g in bad['gnss'])
+    assert all(g['g']<=7. for g in bad['gnss'] if g['t']<8.)
+    excluded=probe(True,exclude=True)
+    assert excluded['alarm_time']==8.
+    assert all(g['excluded'] and not g['accepted'] for g in excluded['gnss'] if g['t']>=8.)
+
+
+@pytest.mark.parametrize('bias_guard', [False, True])
+def test_hybrid_warmup_calibration_and_bias_fallback(bias_guard):
+    sc=make_scenario(721,duration=34.)
+    sc.gnss.valid[sc.gnss.idx==0]=False
+    cfg=Config(pseudo='hybrid',aci=True,monitor='dual',cusum_h=1e12,
+               corr_scale=(40.,40.,40.),mount_py=(.05,.1),
+               hybrid_bias_z=.1 if bias_guard else 0.,hybrid_bias_min=3,
+               hybrid_bias_latch=bias_guard)
+    net=model()
+    batch=run(sc.truth,sc.imu,sc.gnss,sc.imu_spec,sc.gnss_spec,cfg,model=net,log_covariance=True)
+    nav=drive(sc,cfg,net)
+    np.testing.assert_allclose(nav.filter.p,batch.p_est[-1],atol=1e-10,rtol=0)
+    np.testing.assert_allclose(nav.filter.P,batch.extra['covariance'][-1],atol=1e-10,rtol=0)
+    assert nav.cal._n>0
+    if bias_guard: assert nav.bias_bad and nav.bias_latched
+
+
+def test_offgrid_split_matches_explicit_main_and_guard_propagation():
+    sc=make_scenario(722,duration=1.)
+    cfg=Config(pseudo='learned_vel',monitor='dual',cusum_h=1e12)
+    nav=LearnedStreamingNavigator.from_truth(sc.truth,sc.imu_spec,sc.gnss_spec,cfg,model=model())
+    main,guard=nav.filter.copy(),nav.guard.copy()
+    gyro=np.array([.1,.2,.3]);acc=np.array([.4,.5,9.7]);z=np.array([0.,0.,0.])
+    nav.push_gnss(.003,z,4.)
+    nav.push_imu(0.,acc,gyro);nav.push_imu(.01,acc,gyro)
+    main.propagate(gyro,acc,.003);guard.propagate(gyro,acc,.003)
+    main.update_gnss(z,nav.lever_arm,np.eye(3)*4.,gate=nav.gate)
+    main.propagate(gyro,acc,.007);guard.propagate(gyro,acc,.007)
+    np.testing.assert_array_equal(nav.filter.P,main.P)
+    np.testing.assert_array_equal(nav.guard.P,guard.P)
+    np.testing.assert_array_equal(nav.guard.p,guard.p)
+
+
+def test_near_grid_metadata_and_history_are_bounded():
+    sc=make_scenario(723,duration=.1)
+    nav=LearnedStreamingNavigator.from_truth(sc.truth,sc.imu_spec,sc.gnss_spec,
+        Config(pseudo='learned_vel'),model=model(),max_buffer=2)
+    nav.push_imu(0.,[0,0,9.81],[0,0,0])
+    for k in range(1,11):
+        nav.push_gnss(k*.01+1e-10,[0,0,0],4.,arrival_time=k*.01+.001)
+        nav.push_imu(k*.01,[0,0,9.81],[0,0,0])
+    assert len(nav.gnss_decisions)==2
+    assert not nav._gnss_arrivals
+    assert nav.gnss_decisions[-1]['arrival_time']==.101

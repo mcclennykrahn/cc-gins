@@ -160,7 +160,7 @@ class StreamingNavigator:
         while self._gnss and self._gnss[0][0] < t - _EPS:
             g_t = self._gnss[0][0]
             if g_t > prev_t + _EPS:
-                self.filter.propagate(prev_gyro, prev_acc, g_t - prev_t)
+                self._propagate(prev_gyro, prev_acc, g_t - prev_t)
                 prev_t = g_t
                 self.t = g_t
             self._pop_and_apply_gnss()
@@ -171,7 +171,7 @@ class StreamingNavigator:
             if (prev_t == self._last_imu[0] and self.dt is not None and
                     np.isclose(interval, self.dt, atol=1e-9, rtol=0)):
                 interval = self.dt
-            self.filter.propagate(prev_gyro, prev_acc, interval)
+            self._propagate(prev_gyro, prev_acc, interval)
         self.t = t
         self._last_imu = (t, acc, gyro)
         self._index += 1
@@ -265,6 +265,9 @@ class StreamingNavigator:
         )
 
     # ------------------------------------------------------------------ internals
+    def _propagate(self, gyro, acc, dt):
+        self.filter.propagate(gyro, acc, dt)
+
     def _insert_gnss(self, t: float, pos: np.ndarray, cov: np.ndarray) -> None:
         # seq keeps the arrival order stable for identical timestamps
         bisect.insort(self._gnss, (t, self._seq, pos, cov), key=lambda item: (item[0], item[1]))
