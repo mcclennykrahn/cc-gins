@@ -1,0 +1,14 @@
+{
+  "base_commit": "7574225febaca86b830cf6cc373d5b02187d70ec",
+  "sha256": {
+    "metrics.json": "54289189dc65cf7cd5f1abcd41eae432a507d3d554519ed191183d8b1a90ebbe",
+    "evaluate.py": "3ad6ae52af7e2bf03878c045b1ced0b0fef1b7ac1fbf4dec7fcb8562ae8f7468",
+    "selfcheck.py": "19a7db067034ed98656705c3baccbb200ed518a553c9a8f4aeed4e3448aca554",
+    "revalidate.py": "a6b3e175ab864893fea1e6992edfb43714df270aec361178a01b3e5d6afb6f35",
+    "stage4_independent_review.json": "3b3831493603e7a1859addf3e94a2851c385b9256a5f7275e28551296807edac",
+    "../v08_stage3/metrics.json": "bf9affcad3f50282b7a33f462f408da84aafad759a753ecdef75c1fe0585bea3",
+    "../v08_stage3/report.md": "9366e951e5d9688084a4b8a8407069a7e8caa6be374b4f14962ec77338eb9cde"
+  },
+  "prior_hashes_unchanged": true,
+  "fresh_held_out": false
+}

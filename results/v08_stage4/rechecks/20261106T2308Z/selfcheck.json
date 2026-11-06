@@ -1,0 +1,19 @@
+{
+  "verdict": "PASS",
+  "checks": [
+    "validation: complete unique matrix; counters/partitions valid; historical differences recorded",
+    "held_out_diagnostic: complete unique matrix; counters/partitions valid; historical differences recorded",
+    "batch/stream final state and covariance parity"
+  ],
+  "historical_differences": {
+    "validation:final_horizontal_error_m": 14,
+    "validation:fallback_epochs": 14,
+    "validation:reason_codes": 14,
+    "held_out_diagnostic:final_horizontal_error_m": 37,
+    "held_out_diagnostic:fallback_epochs": 37,
+    "held_out_diagnostic:reason_codes": 37
+  },
+  "historical_note": "Stage3 campaign predates S3-01; differences are not attributed to Stage4 counters",
+  "detection": "FAIL",
+  "confirmed_v08": false
+}
