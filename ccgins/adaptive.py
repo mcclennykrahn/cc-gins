@@ -96,7 +96,7 @@ class AdaptiveR:
 
 
 def gnss_update(nav, z, lever, R, estimator: AdaptiveR | None = None,
-                gate: float | None = None, force: bool = False):
+                gate: float | None = None, force: bool = False, robust_delta=None):
     """GNSS position update with optional adaptive R.
 
     Drop-in replacement for ``h, H = nav.gnss_model(lever); nav.update(z - h, H, R, ...)``.
@@ -108,4 +108,4 @@ def gnss_update(nav, z, lever, R, estimator: AdaptiveR | None = None,
     r = np.asarray(z, float) - h
     if estimator is not None:
         R = estimator.update(r, H, nav.P)
-    return nav.update(r, H, R, gate=gate, force=force)
+    return nav.update_gnss(z, lever, R, gate=gate, force=force, robust_delta=robust_delta)

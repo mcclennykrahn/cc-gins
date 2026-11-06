@@ -114,6 +114,28 @@ class NavFilter:
         h = self.p + self.R @ lever
         return h, self._H_gnss(lever)
 
+    def update_gnss(self, z, lever, Rm, gate=None, force=False, robust_delta=None):
+        """Optional Huber weights on whitened innovations, with covariance inflation.
+
+        Squared inverse weights bound influence; NIS and gates use original R.
+        """
+        if robust_delta is not None and (not np.isfinite(robust_delta) or robust_delta <= 0):
+            raise ValueError("robust_delta must be finite and positive")
+        h, H = self.gnss_model(lever)
+        r = np.asarray(z, float) - h
+        S = H @ self.P @ H.T + Rm
+        nis = float(r @ np.linalg.solve(S, r))
+        if gate is not None and nis > gate and not force:
+            return UpdateInfo(nis, False, 3)
+        if robust_delta is not None:
+            L = np.linalg.cholesky(S)
+            u = np.linalg.solve(L, r)
+            weights = np.minimum(1.0, robust_delta / np.maximum(np.abs(u), 1e-15))
+            D = L @ np.diag(1.0 / weights) @ np.linalg.inv(L)
+            Rm = D @ Rm @ D.T
+        info = self.update(r, H, Rm)
+        return UpdateInfo(nis, info.accepted, 3)
+
     def body_vel_model(self, channels=(0, 1, 2)):
         vb = self.R.T @ self.v
         H = self._H_body_vel()

@@ -56,6 +56,7 @@ class Config:
     use_epoch_sigma: bool = False
     gnss_sigma_floor: float = 0.0
     # opt-in innovation-based R estimation (ccgins/adaptive.py); off = existing behaviour
+    robust_gnss_delta: float | None = None  # Huber innovation threshold
     adaptive_r: bool = False
     # IMU-to-vehicle mounting (real data): (pitch, yaw) [rad] of the vehicle forward axis seen in the
     # IMU body frame. NHC / hybrid lateral-vertical constraints are applied in the VEHICLE frame
@@ -255,7 +256,8 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
                     h, H = A.gnss_model(lever)
                     force = rejects >= cfg.max_consecutive_rejects
                     Rm_eff = Rm if adaptive is None else adaptive.update(zg - h, H, A.P)
-                    info = A.update(zg - h, H, Rm_eff, gate=cfg.gnss_gate, force=force)
+                    info = A.update_gnss(zg, lever, Rm_eff, gate=cfg.gnss_gate, force=force,
+                                         robust_delta=cfg.robust_gnss_delta)
                     if info.accepted:
                         rejects = 0
                         t_last_gnss = t

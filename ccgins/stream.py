@@ -53,9 +53,10 @@ class StreamingNavigator:
 
     def __init__(self, R, v, p, P0, noise: NoiseParams, kind: str = "inekf",
                  bg=None, ba=None, lever_arm=None, gate: float | None = None,
-                 max_consecutive_rejects: int = 5):
+                 max_consecutive_rejects: int = 5, robust_gnss_delta=None):
         self.filter = make_filter(kind, R, v, p, P0, noise, bg=bg, ba=ba)
         self.lever_arm = np.zeros(3) if lever_arm is None else np.asarray(lever_arm, float)
+        self.robust_gnss_delta = robust_gnss_delta
         self.gate = float(chi2.ppf(0.999, 3)) if gate is None else gate
         self.max_consecutive_rejects = int(max_consecutive_rejects)
 
@@ -82,7 +83,8 @@ class StreamingNavigator:
         return cls(R0, v0, p0, P0, noise, kind=cfg.filter,
                    lever_arm=getattr(gnss_spec, "lever_arm", None),
                    gate=cfg.gnss_gate,
-                   max_consecutive_rejects=cfg.max_consecutive_rejects)
+                   max_consecutive_rejects=cfg.max_consecutive_rejects,
+                   robust_gnss_delta=cfg.robust_gnss_delta)
 
     # ------------------------------------------------------------------ streaming API
     def push_imu(self, t: float, acc, gyro) -> None:
@@ -176,7 +178,8 @@ class StreamingNavigator:
     def _apply_gnss(self, pos: np.ndarray, cov: np.ndarray) -> None:
         h, H = self.filter.gnss_model(self.lever_arm)
         force = self._rejects >= self.max_consecutive_rejects
-        info = self.filter.update(pos - h, H, cov, gate=self.gate, force=force)
+        info = self.filter.update_gnss(pos, self.lever_arm, cov, gate=self.gate, force=force,
+                                       robust_delta=self.robust_gnss_delta)
         if info.accepted:
             self._rejects = 0
         else:
