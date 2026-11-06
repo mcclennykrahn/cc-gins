@@ -17,7 +17,7 @@
 | ESKF 基线 | `ccgins/filters.py::ESKF` | 15 维误差状态，使用 Joseph 形式更新，支持 χ² 门限 |
 | **基线伪距耦合原型** | `ccgins/range_coupling.py` | `Config.baseline_range_anchor`：每历元将 RTK 基线及其协方差投影为单个距离，与 IMU 预测天线位置耦合；预更新标量 CUSUM 捕获径向杆臂误差。仅径向可观，替代原 RTK 更新，不重复融合；非原始卫星伪距 |
 | InEKF 松组合 | `ccgins/filters.py::InEKF` | 右不变 SE₂(3) 误差加可加性零偏，GNSS 观测带杆臂 |
-| **零速检测 / ZUPT / 里程计** | `ccgins/zupt.py` | 陀螺/加速度滑窗方差阈值检测静止段（可设最短持续时间）；提供导航系零速 ZUPT 与机体系里程计速度更新，复用 `NavFilter.update` 的 Joseph 形式更新和 χ² 门限 |
+| **零速检测 / ZUPT / 里程计** | `ccgins/zupt.py` | 按传感器噪声密度与留出 IMU 振动标定的因果检测，含速度/转动/重力/持续时间防护；主 `pipeline.run` 可选 ZUPT 与带安装角/轮速点杆臂的里程计更新；ESKF/InEKF 共用 Joseph 更新和 χ² 门限 |
 | **实时流式封装** | `ccgins/stream.py` | `StreamingNavigator`：`push_imu` / `push_gnss` 增量处理，乱序 GNSS 缓存后按时间戳插入，`get_state` 返回位置、速度、姿态与协方差；复用现有 ESKF/InEKF |
 | **自适应 GNSS 量测噪声 R** | `ccgins/adaptive.py` | 基于新息的 Sage-Husa 滑窗估计（遗忘因子加权），按 `[min_scale, max_scale] × R_nominal` 逐轴夹紧；`Config.adaptive_r=False`（默认）时不启用 |
 | **配置驱动 CLI** | `ccgins/cli.py` | `ccgins run --config … --out …`（或 `python -m ccgins.cli`）跑仿真/中断场景，写出 `report.md` 与 `metrics.json`；示例配置 `configs/example_sim.yaml` |
@@ -348,7 +348,7 @@ ccgins run --config configs/example_sim.yaml --out results/cli_demo
 - OXTS 真值本身有质量问题（drive 0028 有 30 m 级跳变），已用跳变检测剔除，但可能仍有残余误差。
 - 仿真器假设振动幅度随车速增大，使前向速度在仿真中更可观；KITTI 结果证实真实情况要差得多。
 - v3 的偏差监测在 GNSS 健康期才能工作；若一开始就没有 GNSS，则一直使用 NHC。锁存后不会恢复。
-- **ZUPT/里程计目前是独立模块**：静止检测使用固定滑窗方差阈值，未按 IMU 噪声或车辆振动自适应，也未接入 `pipeline.py` 的主实验；里程计速度更新假设无杆臂/安装角误差，且未建模轮速滑移。
+- **ZUPT/里程计已接入批量主流程，默认关闭**：ZUPT 振动标定在留出半段冻结，速度门限依赖滤波速度，默认还需真实 GNSS 位移确认停车；因此中断中新发生的停车无法确认，漂移较大时也可能漏掉真停车。车辆起步到下一次 GNSS 之间仍有因果延迟风险；未验证独立道路泛化。里程计支持显式安装旋转/杆臂与地球自转修正，但 i2Nav 没有轮速流，尚无实测轮速精度结论；滑移、比例因子、时间偏差和几何不确定性未估计。流式接口尚不支持这两种更新。
 - **i2Nav 只有一次约 1617 s 的开阔路段行驶**，最高车速约 13.6 m/s。留出方式是同一次行驶内的时间切分，4 个 IMU 共享同一条轨迹，并非独立场景，因此跨场景泛化（城市峡谷、高速、不同车辆）未验证。
 - **i2Nav-Robot 数据集未使用**：数据托管在 OneDrive，访问未获批准。KF-GINS 示例数据是 Leador-A15（战术级，非 MEMS），因此也未使用。
 - i2Nav 上 MotionNet 的前向速度 RMSE 仍有约 1.2–1.4 m/s；在 ADIS16465（安装航向角方向与训练 IMU 相反）上侧向 RMSE 为 0.38 m/s。仿真零样本网络的前向 RMSE 约 44 m/s，完全不可用。
@@ -377,3 +377,53 @@ docs/        调研与方案文档
 结果位于 `results/range_coupling/`。注入项是沿机体前向缓慢增长的天线杆臂误差；
 对照使用相同 IMU 与初值。标量残差只能检测不一致，不能唯一归因于杆臂，也不能独立约束切向位置。
 这一步没有原始卫星观测、接收机钟差或多星几何，不代表完整 GNSS 紧组合。
+
+### 自适应 ZUPT 与显式几何里程计（主批量流程）
+
+`Config(zupt=True)` 在 `pipeline.run` 中启用零速更新；默认仅用噪声密度地板，
+实车应先用独立标定 IMU 的 `AdaptiveZeroVelocity.calibrate(gyro, accel, spec, dt)`，
+将其 `accel_var` / `gyro_var` 写入 `Config.zupt_accel_var` / `zupt_gyro_var`。
+标定取 1 s 窗方差下十分位与噪声地板的较大者，乘 4，分别封顶于
+3² (m/s²)² 与 0.05² (rad/s)²（车辆振动配置；更低阈值的保守试验也保留）。检测采用过去 0.5 s 的数据，连续满足 1 s 后
+才允许 10 Hz、σ=0.05 m/s 的零速观测。原始陀螺均值 <0.02 rad/s、
+重力模长误差 <0.25 m/s²、滤波速度 <0.5 m/s；χ²(3,0.999) 门控不强制重捕获。
+默认 `zupt_require_gnss_stop=True`：连续两次被接受的真实 GNSS 位置对满足
+`(位移模长 + 2√λmax(R₁+R₂))/Δt < 0.25 m/s`（历元间隔 ≤2 s）才确认停车。
+任何 IMU 持续条件中断，或任何表明运动的有效 GNSS 对（即使被滤波器拒绝）都会撤销确认。
+确认停车可在 IMU 持续静止时延续到中断内，但中断中新停车无法确认。
+仅在有独立外部停车保证时才能关闭此保护。未保护的车辆振动配置实测曾因误检导致严重发散，
+完整失败结果保留于 `results/adaptive_motion_vehicle/`，低阈值无更新结果保留于
+`results/adaptive_motion_conservative/`。这些开发试验不是盲测或泛化验证。
+这不是仅靠 IMU 就能识别匀速运动的保证，尤其不能把滤波速度当独立传感器。
+
+外部轮速使用 `run(..., odometry=OdometryData(t, speed, sigma, C_vb, lever_b, valid))`：
+有符号前向 m/s，显式 IMU FLU → 车辆 FLU 旋转 `C_vb`，IMU 到轮速测点的 FLU 米制杆臂
+`lever_b`（零杆臂也须显式给出）。观测为 `C_vb (Rᵀv + (gyro−bg−Rᵀω_ie)×lever_b)`
+的前向分量，含零偏与姿态雅可比、标量 NIS 门控。时间戳须严格递增并落在已推进的 IMU 网格，
+不插值、不保持旧值；`valid=False` 用于排除已知滑移。日志 `extra["motion"]` 记录尝试/接受计数与零速更新时间。
+
+实测配对协议、逐次结果、所有改善和退化见
+[results/adaptive_motion/report.md](results/adaptive_motion/report.md)，机器指标为同目录 `metrics.json`。
+复现：`OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.motion_experiment --workers 4`。
+
+
+本批实际运行 **192 条轨迹 / 96 组配对**：4 IMU × 2 时间折 × ESKF/InEKF ×
+无中断/六段中断 × 有/无更新 × 3 个保留配置；每配置有 96 个配对中断事件。
+使用初值种子 0，基线为安装角标定 + 相关性膨胀 NHC，启用地球补偿和真实 RTK 历元 σ。
+全部原 73 测试与新增 10 测试通过：**83 passed in 32.45s**。
+
+| 配置 | 无中断全程水平 RMSE，基线→更新 [m] | 中断场景全程水平 RMSE，基线→更新 [m] | 中断场景改善/相同/退化组数 |
+|---|---:|---:|---:|
+| 低阈值保守试验（未接受任何零速更新） | 0.0282→0.0282 | 5.9700→5.9700 | 0/16/0 |
+| 未加 GNSS 停车确认的振动配置（失败消融） | 0.0282→2.4824 | 5.9700→41.8525 | 10/0/6 |
+| **默认：振动标定 + GNSS 停车确认** | **0.0282→0.0275** | **5.9700→5.9694** | **8/7/1** |
+
+默认配置共接受 4592 次零速更新，参考速度 >0.5 m/s 时接受 0 次；这不保证更慢蠕行或其他道路上的安全性。
+默认配置的中断场景平均 RMSE：ICM20602 14.0610→14.0610 m，ADIS16460 4.0023→3.9998 m，
+ADIS16465 3.2207→3.2207 m，i300 2.5962→2.5962 m。
+60 s 中断平均最大水平误差 18.2851→18.2798 m（32 事件，2 改善/28 相同/2 退化）；
+30/120 s 对应 4.5080/23.1857 m，基本不变。
+**保守默认没有带来实质中断性能突破**；它避免了本次未保护配置的误零速发散，但无法确认中断中新出现的停车。
+所有配置为同一条行驶的开发试验，GNSS 保护是在观察到失败后加入，不应视为独立盲测。
+完整配置、逐 IMU 一致性、全部中断最大/末端误差、失败和复现命令见
+[批次报告](results/adaptive_motion/batch_summary.md)；里程计仅完成集成与控制测试，未声称实测轮速性能。
