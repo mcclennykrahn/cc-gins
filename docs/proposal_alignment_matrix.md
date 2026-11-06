@@ -1,6 +1,6 @@
 # Proposal alignment audit
 
-Proposal evidence: `docs/project_proposal.md` §§3–9; improvement/literature documents describe intent, never implementation. Baseline audit written before code changes. Counts are bookkeeping, not a completion percentage.
+Proposal evidence: `docs/project_proposal.md` §§3–9; improvement/literature documents describe intent, never implementation. Baseline audit committed as ecb70c8 before code changes; this version updates network evidence after the pullback. Counts are bookkeeping, not a completion percentage.
 
 | Proposal item | Expected modules / behavior | Current reality | Status | Evidence |
 |---|---|---|---|---|
@@ -10,7 +10,7 @@ Proposal evidence: `docs/project_proposal.md` §§3–9; improvement/literature 
 | noise §3.2/4 | GM biases, second-order discretization, IMU YAML profiles | Random-walk biases, first-order Phi; dataclass noise and optional Earth correction. | partial | `ccgins/filters.py`, `ccgins/sim.py`, `tests/test_earth.py`, `configs/example_sim.yaml` |
 | gnss §3.3 | LC position/optional velocity and lever arm | Position LC with lever arm supported/tested; optional GNSS velocity absent. | partial | `ccgins/filters.py`, `tests/test_filters.py`, `tests/test_robust.py` |
 | robust §3.3 | Gate and robust Huber/Student-t GNSS | Huber plus chi-square gate wired via Config/CLI; forced reacquisition after repeated rejects; default robust off. | complete | `ccgins/pipeline.py`, `ccgins/filters.py`, `ccgins/cli.py`, `tests/test_robust.py`, `tests/test_cli.py` |
-| network §3.4 M3 | 3-layer dilated TCN, roll/pitch, bias-compensated IMU, β-NLL heads | BASELINE: MotionNet plain stride Conv1d, dilation=1, six raw IMU channels, no attitude; dual mean/logvar and beta-NLL exist. Pullback recorded below; historical checkpoints remain legacy. | partial | `ccgins/learning.py`, `scripts/train_motionnet.py`, `tests/test_learning_pipeline.py`, `results/motionnet_val.json`, `results/kitti/motionnet_val.json`, `results/i2nav/motionnet_val.json` |
+| network §3.4 M3 | 3-layer dilated TCN, roll/pitch, bias-compensated IMU, β-NLL heads | Baseline: plain six-channel stride CNN, no attitude/dilation. Pullback: MotionNetTCN 1/2/4 dilations, eight normalized IMU+roll/pitch channels, beta-NLL, live filter attitude/current-bias correction in batch; default new sim training and CLI architecture selection. Legacy weights still load. Mini paired metrics measured; full held-out architecture validation remains missing. | partial | `ccgins/learning.py`, `scripts/train_motionnet.py`, `tests/test_learning_pipeline.py`, `results/motionnet_val.json`, `results/kitti/motionnet_val.json`, `results/i2nav/motionnet_val.json`, `tests/test_proposal_tcn.py`, `ccgins/alignment_experiment.py`, `configs/proposal_alignment_smoke.yaml`, `results/proposal_alignment/report.md` |
 | datasets §3.4/5 | Sliding windows and real body-velocity supervision | Simulation/KITTI/i2Nav windows and labels; KITTI body velocity corrected using R-transformed ENU rather than horizontal vf/vl. | complete | `ccgins/learning.py`, `ccgins/data/kitti.py`, `ccgins/data/i2nav.py`, `scripts/train_motionnet_kitti.py`, `scripts/train_motionnet_i2nav.py`, `tests/test_learning_pipeline.py`, `tests/test_i2nav.py` |
 | nhc §3.4/6 B1-B4 | Fixed NHC, learned NHC and learned full velocity | All batch modes selectable; hybrid/v2/v3 add forward rejection and fixed lateral/vertical NHC. | complete | `ccgins/pipeline.py`, `ccgins/cli.py`, `tests/test_hybrid_kitti.py`, `tests/test_learning_pipeline.py`, `results/outage_table.md` |
 | aci §3.5 M4 | Per-learning-channel online κ and outage inflation | learned_vel calibrates three channels; hybrid/v2/v3 only forward; pre-pseudo reference is GNSS-constrained prior, t>30 and recent accepted GNSS. Clipped alpha/sliding window/bounded κ; correlated closed-loop reference. | partial | `ccgins/aci.py`, `ccgins/pipeline.py`, `tests/test_aci.py`, `tests/test_learning_pipeline.py`, `results/outage_table.md`, `results/outage_shift_table.md` |
@@ -43,6 +43,12 @@ Exploratory = `baseline_range_anchor`, Sage-Husa `adaptive_r`, stream-only extra
 
 All table numbers above are pre-existing, not re-run. Simulation GNSS is synthetic; KITTI uses real OXTS IMU/reference with synthetic GNSS; i2Nav uses real RTK with artificial masking/attacks. Historical tables use legacy CNN. Simulation spoof dual detection improves 0.2 m/s delay 85.9→53.4 s, but real-RTK results in `results/i2nav/spoof_table.md` do not establish general dual superiority. No empirical table implies closed-loop statistical or safety guarantees.
 
-Legacy `results/motionnet.pt`, `results/kitti/motionnet_kitti.pt`, and `results/i2nav/motionnet_fold{A,B}.pt` are six-channel MotionNet state dictionaries; loader compatibility will be regression-tested during pullback.
+Legacy `results/motionnet.pt`, `results/kitti/motionnet_kitti.pt`, and `results/i2nav/motionnet_fold{A,B}.pt` are six-channel MotionNet state dictionaries; all four loaders were regression-tested successfully in tests/test_proposal_tcn.py. The TCN checkpoint uses architecture metadata; historical plain state dictionaries remain supported.
 
 Counts: {'complete': 5, 'partial': 16, 'experiment_substitute': 2, 'unimplemented': 5}
+
+## Pullback outcome
+
+The architecture row remains partial: the requested network and batch filter-input wiring now exist with focused tests and a measured locked paired smoke, but full drive/fold retraining and ≥20-run validation are outstanding. New network training uses reference attitude/true simulated biases; deployed inference uses filter estimates. This conditioning gap is explicitly reported.
+
+See `results/proposal_alignment/report.md` and `metrics.json` for measured results and `configs/proposal_alignment_smoke.yaml` for frozen parameters. TCN did not outperform legacy CNN in this small undertrained test; no historical table was replaced. `configs/proposal_primary.yaml` runs the complete currently supported primary batch spine through CLI; GNSS κ_g/HPL/online mounting/recovery remain absent.

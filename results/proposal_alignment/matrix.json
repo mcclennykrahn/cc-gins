@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "audit_stage": "baseline before implementation; post-pullback addendum in Markdown",
+  "audit_stage": "post-pullback; baseline preserved in commit ecb70c8",
   "counts": {
     "complete": 5,
     "partial": 16,
@@ -90,7 +90,7 @@
       "id": "network",
       "proposal": "§3.4 M3",
       "expected": "3-layer dilated TCN, roll/pitch, bias-compensated IMU, β-NLL heads",
-      "reality": "BASELINE: MotionNet plain stride Conv1d, dilation=1, six raw IMU channels, no attitude; dual mean/logvar and beta-NLL exist. Pullback recorded below; historical checkpoints remain legacy.",
+      "reality": "Baseline: plain six-channel stride CNN, no attitude/dilation. Pullback: MotionNetTCN 1/2/4 dilations, eight normalized IMU+roll/pitch channels, beta-NLL, live filter attitude/current-bias correction in batch; default new sim training and CLI architecture selection. Legacy weights still load. Mini paired metrics measured; full held-out architecture validation remains missing.",
       "status": "partial",
       "evidence": [
         "ccgins/learning.py",
@@ -98,7 +98,11 @@
         "tests/test_learning_pipeline.py",
         "results/motionnet_val.json",
         "results/kitti/motionnet_val.json",
-        "results/i2nav/motionnet_val.json"
+        "results/i2nav/motionnet_val.json",
+        "tests/test_proposal_tcn.py",
+        "ccgins/alignment_experiment.py",
+        "configs/proposal_alignment_smoke.yaml",
+        "results/proposal_alignment/report.md"
       ]
     },
     {

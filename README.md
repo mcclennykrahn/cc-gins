@@ -1,10 +1,34 @@
 # cc-gins：一致性校准的学习辅助 GNSS/INS 组合导航
 
-**cc-gins**（Consistency-Calibrated GNSS/INS）是一个可运行、可测试的松组合导航原型。它解决的问题是：在 GNSS 中断时，用学习得到的车辆运动伪观测来约束惯导漂移，同时保证滤波器给出的协方差仍然“可信”；在 GNSS 被慢漂移欺骗时，能够检测出来并把它剔除。
+**cc-gins**（Consistency-Calibrated GNSS/INS）是一个可运行、可测试的松组合导航原型。它解决的问题是：在 GNSS 中断时，用学习得到的车辆运动伪观测来约束惯导漂移，同时评估学习观测方差与滤波协方差的经验一致性；在 GNSS 被慢漂移欺骗时，能够检测出来并把它剔除。
 
 > ⚠️ 本仓库的数值结果全部由下文脚本实际运行得到，分三部分：(a) **仿真数据**（`ccgins/sim.py`）；(b) **KITTI raw 真实 OXTS 数据**（真实 IMU 与真值轨迹，但 GNSS 为合成：1 Hz、带中断/欺骗；并在 OXTS IMU 上注入了 MEMS 级误差）；(c) **i2Nav awesome-gins 真实数据**（真实 MEMS IMU×4 + 真实 RTK + 真值，第 6 节）。
 
 调研文档位于 `docs/`：`literature_review.md`（文献综述）、`improvement_opportunities.md`（可改进点）、`project_proposal.md`（方案）。
+
+## 方案对齐与主路径
+
+逐项审计见 [proposal_alignment_matrix.md](docs/proposal_alignment_matrix.md) / [matrix.json](results/proposal_alignment/matrix.json)。方案/综述是设计证据，不代表实现。ACI 不构成数学上的闭环完好性保证。
+
+**Primary（M0–M6）**：批量 InEKF-LC + 学习车体速度/hybrid + ACI/中断膨胀 + Huber GNSS + 双通道 DR-CUSUM。`configs/proposal_primary.yaml` 可完整运行该研究主线。学习/ACI/监测仍为 batch-only，StreamingNavigator 对这些配置报错。
+**Exploratory**：`baseline_range_anchor` 单 RTK 基线距离、`adaptive_r` Sage-Husa、流式扩展、ZUPT/轮速研究。保留这些能力，不替代主线验证。
+
+本次拉回 §3.4：新增 `MotionNetTCN`，三层膨胀卷积 1/2/4 + roll/pitch + 均值/log 方差头 + β-NLL。尾窗内采用对称 padding，不宣称内部特征逐点因果；端点推理只读取过去 IMU/滤波姿态，用当前滤波零偏扣除 IMU 窗口。历史 `MotionNet` 和检查点保留兼容。**下方历史表格全部使用 legacy CNN，未重跑或替换。** 仿真新训练脚本默认 TCN；旧 Python 六通道训练调用、KITTI/i2Nav 历史复现脚本仍为 legacy。
+
+```bash
+# 固定迷你配对：两条训练、一个验证、两个测试种子，全部合成 IMU/GNSS
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.alignment_experiment
+# 完整主线 assembly，使用上一步小模型，仅作 smoke
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.cli run --config configs/proposal_primary.yaml --out results/proposal_alignment/cli_primary
+# 新训练默认 TCN，使用仿真真值姿态/零偏作监督输入，部署使用滤波估计
+.venv/bin/python scripts/train_motionnet.py --architecture proposal_tcn --out results/proposal_alignment/motionnet_tcn.pt
+# 历史架构复现另存，避免覆盖发布模型
+.venv/bin/python scripts/train_motionnet.py --architecture legacy_cnn --out results/proposal_alignment/legacy_retrained.pt
+```
+
+固定参数与实测配对结果见 [smoke report](results/proposal_alignment/report.md) / [metrics](results/proposal_alignment/metrics.json)。本次两种子平均水平 RMSE：legacy CNN **3.001 m**、TCN **3.849 m**、NHC **3.963 m**；TCN 的 NLL **11.596** 对比 legacy **1.938**，全程位置覆盖率 **0.682** 对比 **0.795**，因此本次 TCN 表现更差，没有调参掩盖退化。小样本不证明 TCN 精度提升；网络 NLL/覆盖率用参考姿态/仿真真零偏，导航推理用滤波姿态/估计零偏，分开报告。
+
+剩余偏差：GNSS κ_g、在线安装角/18维状态、HPL/超界率、报警恢复、流式 learning/ACI/integrity、B5 VB/Student-t、≥20 次 MC/全消融/独立道路泛化，以及 M7 UrbanNav 原始伪距/平滑/在线微调。KITTI GNSS 为合成；i2Nav 为真实 RTK，但仅一次行驶的时间折。
 
 ## 已实现内容
 
@@ -15,14 +39,14 @@
 | 惯导机械编排 | `ccgins/filters.py::mechanize` | 采用 ENU 导航系与 FLU 机体系，支持每滤波器地球自转、Coriolis 与当地重力；对应 ESKF/InEKF 协方差动力学；`i2nav_scenarios.earth_config(seq)` 从实测元数据配置，默认仿真关闭 |
 | **稳健 GNSS 更新** | `NavFilter.update_gnss` | ESKF/InEKF 共用白化新息 Huber 权重与协方差膨胀；`Config.robust_gnss_delta=1.5` 启用，默认关闭 |
 | ESKF 基线 | `ccgins/filters.py::ESKF` | 15 维误差状态，使用 Joseph 形式更新，支持 χ² 门限 |
-| **基线伪距耦合原型** | `ccgins/range_coupling.py` | `Config.baseline_range_anchor`：每历元将 RTK 基线及其协方差投影为单个距离，与 IMU 预测天线位置耦合；预更新标量 CUSUM 捕获径向杆臂误差。仅径向可观，替代原 RTK 更新，不重复融合；非原始卫星伪距 |
+| **探索：基线距离耦合原型** | `ccgins/range_coupling.py` | `Config.baseline_range_anchor`：每历元将 RTK 基线及其协方差投影为单个距离，与 IMU 预测天线位置耦合；预更新标量 CUSUM 捕获径向杆臂误差。仅径向可观，替代原 RTK 更新，不重复融合；非原始卫星伪距 |
 | InEKF 松组合 | `ccgins/filters.py::InEKF` | 右不变 SE₂(3) 误差加可加性零偏，GNSS 观测带杆臂 |
 | **零速检测 / ZUPT / 里程计** | `ccgins/zupt.py` | 按传感器噪声密度与留出 IMU 振动标定的因果检测，含速度/转动/重力/持续时间防护；主 `pipeline.run` 可选 ZUPT 与带安装角/轮速点杆臂的里程计更新；ESKF/InEKF 共用 Joseph 更新和 χ² 门限 |
 | **实时流式封装** | `ccgins/stream.py` | `StreamingNavigator`：`push_imu` / `push_gnss` / `push_odometry` 增量处理，乱序 GNSS 缓存后按时间戳插入，`get_state` 返回位置、速度、姿态与协方差；复用现有 ESKF/InEKF |
-| **自适应 GNSS 量测噪声 R** | `ccgins/adaptive.py` | 基于新息的 Sage-Husa 滑窗估计（遗忘因子加权），按 `[min_scale, max_scale] × R_nominal` 逐轴夹紧；`Config.adaptive_r=False`（默认）时不启用 |
+| **探索：自适应 GNSS 量测噪声 R** | `ccgins/adaptive.py` | 基于新息的 Sage-Husa 滑窗估计（遗忘因子加权），按 `[min_scale, max_scale] × R_nominal` 逐轴夹紧；`Config.adaptive_r=False`（默认）时不启用 |
 | **配置驱动 CLI** | `ccgins/cli.py` | `ccgins run --config … --out …`（或 `python -m ccgins.cli`）跑仿真/中断场景，写出 `report.md` 与 `metrics.json`；示例配置 `configs/example_sim.yaml` |
 | NHC 基线 | `pipeline.py`（`pseudo="nhc"`） | 侧向和垂向速度为 0，σ 固定为 0.1 m/s |
-| 学习速度伪观测 | `ccgins/learning.py` | 1D-CNN（MotionNet）：输入 1 s 原始 IMU（100 个采样），输出机体系速度（前、左、上）的均值和方差，用 β-NLL 训练 |
+| 学习速度伪观测 | `ccgins/learning.py` | MotionNetTCN：三层膨胀 1/2/4、IMU + roll/pitch；legacy MotionNet 保留，历史模型输入 1 s 原始 IMU（100 个采样），输出机体系速度（前、左、上）的均值和方差，用 β-NLL 训练 |
 | **相关性膨胀** | `learning.correlation_factor` | 网络误差存在强时间相关性，用验证集估计 n_eff = 1+2Σρ_k，再按 n_eff 放大伪观测方差 |
 | **ACI 在线校准** | `ccgins/aci.py` | 自适应共形推断（Gibbs & Candès 2021）：GNSS 健康时，以先验速度为参考，在线求解各通道方差尺度 κ；GNSS 中断时冻结 κ，并按中断时长做膨胀：κ(1+β·τ/T_ref) |
 | **双通道 DR-CUSUM 欺骗检测** | `ccgins/integrity.py` | 独立航位推算通道 B（只用 IMU 和伪观测，不用 GNSS）每 30 s 由主滤波器重置一次；用 GNSS 与 B 的预测之差做 χ² 统计量，送入 CUSUM；报警后剔除 GNSS |
@@ -45,7 +69,7 @@ pip install numpy scipy pandas matplotlib pyyaml tqdm pytest
 pip install -e .
 
 python -m pytest -q                                   # 单元测试
-python scripts/train_motionnet.py                     # 训练 MotionNet（约 1 分钟），生成 results/motionnet.pt 和 motionnet_val.json（含 n_eff）
+python scripts/train_motionnet.py --architecture proposal_tcn  # 另存 results/proposal_alignment/，保留历史模型
 python scripts/run_outage_experiment.py               # GNSS 中断实验（10 个测试种子，约 4 分钟）
 python scripts/run_outage_experiment.py --shift       # 分布偏移下的中断实验
 python scripts/run_spoof_experiment.py                # 慢漂移欺骗实验（约 3.5 分钟）
@@ -113,7 +137,7 @@ python -m ccgins.cli run --config configs/example_sim.yaml --out results/cli_dem
 ccgins run --config configs/example_sim.yaml --out results/cli_demo
 ```
 
-配置段包括 `scenario`、`imu`、`gnss`（含 `outages`）、`filter`（任意 `Config` 字段）、可选 `learning.model`，以及 `metrics.t_start`。`--seed` / `--duration` 可覆盖配置。输出：
+配置段包括 `scenario`、`imu`、`gnss`（含 `outages`）、`filter`（任意 `Config` 字段）、可选 `learning.model` / `learning.architecture`（`legacy_cnn` 或 `proposal_tcn`，须匹配检查点），以及 `metrics.t_start`。`--seed` / `--duration` 可覆盖配置。输出：
 - `report.md`：RMSE、最大水平误差、NEES 一致性（ANEES、95% 覆盖率）、耗时、中断表
 - `metrics.json`：指标与解析后的配置
 

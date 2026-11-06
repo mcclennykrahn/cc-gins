@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "config_path": "configs/proposal_primary.yaml",
+  "scenario": {
+    "seed": 900,
+    "duration": 80.0,
+    "dt": 0.01,
+    "n_imu": 8001,
+    "n_gnss": 80,
+    "outages": [
+      [
+        45.0,
+        20.0
+      ]
+    ]
+  },
+  "filter": {
+    "filter": "inekf",
+    "pseudo": "hybrid",
+    "hybrid_max_std": 1000000000.0,
+    "hybrid_max_kappa": 1000000000.0,
+    "hybrid_bias_z": 0.0,
+    "hybrid_bias_window": 100,
+    "hybrid_bias_min": 30,
+    "hybrid_bias_latch": false,
+    "nhc_sigma": 0.1,
+    "pseudo_every": 10,
+    "corr_scale": [
+      40.0,
+      40.0,
+      40.0
+    ],
+    "aci": true,
+    "aci_alpha": 0.05,
+    "aci_gamma": 0.01,
+    "aci_window": 300,
+    "aci_beta": 2.0,
+    "aci_t_ref": 60.0,
+    "gnss_gate": 16.26623619623813,
+    "max_consecutive_rejects": 5,
+    "monitor": "dual",
+    "cusum_k": 3.0,
+    "cusum_h": 50.0,
+    "dr_reset_period": 30.0,
+    "exclude_on_alarm": true,
+    "init_seed": 0,
+    "use_epoch_sigma": false,
+    "gnss_sigma_floor": 0.0,
+    "robust_gnss_delta": 1.5,
+    "adaptive_r": false,
+    "mount_py": null,
+    "p0_bias": null,
+    "baseline_range_start_s": 0.0,
+    "baseline_range_anchor": null,
+    "earth_rate_enu": null,
+    "local_gravity": null,
+    "zupt": false,
+    "zupt_require_gnss_stop": true,
+    "zupt_accel_var": null,
+    "zupt_gyro_var": null,
+    "zupt_odometry_stop": false,
+    "zupt_sigma": 0.05,
+    "motion_every": 10,
+    "label": ""
+  },
+  "metrics": {
+    "rmse_h": 3.8290411114757736,
+    "rmse_3d": 3.873244171211559,
+    "runtime_us": 270.9516693739715,
+    "anees_pos": 1.6714612115056025,
+    "coverage95_h": 0.5249500998003992,
+    "max_err_outage_20s": 11.942900975238038,
+    "end_err_outage_20s": 11.942900975238038,
+    "coverage95_h_outage": 0.0,
+    "anees_pos_outage": 2.4822063425248135,
+    "max_err_h": 11.942900975238038,
+    "max_err_3d": 12.078868245540974,
+    "nees_2d_mean": 4.544451057629869,
+    "nees_3d_mean": 5.014383634516808,
+    "nees_2d_p95": 7.633816965319019,
+    "nees_3d_p95": 7.834068165341243,
+    "nees_95_threshold_2d": 5.991464547107979,
+    "n_metrics_epochs": 501,
+    "outage_metrics": [
+      {
+        "start_s": 45.0,
+        "duration_s": 20.0,
+        "max_err_h": 11.942900975238038,
+        "end_err_h": 11.942900975238038,
+        "anees_pos": 2.4822063425248135,
+        "coverage95_h": 0.0
+      }
+    ],
+    "runtime_total_s": 2.1693875069904607,
+    "n_steps": 8000
+  },
+  "wall_time_s": 2.1693875069904607,
+  "data_source": "synthetic simulation IMU + synthetic GNSS (truth + noise/outage)"
+}
