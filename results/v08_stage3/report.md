@@ -117,3 +117,22 @@ The mechanism checks and preserved regression suite support review of the opt-in
 implementation. They do not override the failed default-noise detection campaign.
 Independent Stage 3 review is pending; packaging selfcheck is not independent
 approval. See [handoff/README.md](handoff/README.md).
+
+## S3-01 independent-review fix addendum
+
+Independent review found that interval renewal could clear an active alarm and
+resume learned forward aiding at 30.1–31.0 s. Fixed in `d8167d8`: batch and learned
+stream now record all boundary-epoch evidence in the new assessment interval,
+including alarm, recovery, rejection, forced and nonfinite disqualifiers. DR
+reseeding remains alarm-gated; `guard_ref_health=False` remains the default.
+Loaded-checkpoint regression checks fixed-NHC fallback across the alarmed boundary,
+zero alarm-time reseeds and batch/stream position/full-covariance parity. Additional
+boundary tests cover rejection, forced fixes and completing recovery in both paths.
+The original defect-asserting repro now exits with `Defect no longer reproduced`.
+
+This is a mechanism fix awaiting independent re-review. Historical campaign tables
+above describe the pre-fix implementation and have not been rerun or rewritten.
+**DETECTION remains FAIL; confirmed_v08=false.**
+
+Post-fix full suite: `.venv/bin/python -m pytest -q` — **177 passed in 106.79s
+(0:01:46)**; preserved in [s301_pytest.log](s301_pytest.log).
