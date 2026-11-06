@@ -1,0 +1,780 @@
+{
+  "rows": [
+    {
+      "seed": 500,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 66.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 58.068969450476644
+    },
+    {
+      "seed": 500,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": null,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 1.009928120493339
+    },
+    {
+      "seed": 500,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": null,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 1.009928120493339
+    },
+    {
+      "seed": 500,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 66.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 58.068969450476644
+    },
+    {
+      "seed": 500,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 350.0,
+      "delay_s": 50.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 17.921332023662718
+    },
+    {
+      "seed": 500,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 358.0,
+      "delay_s": 58.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 49.25706589325238
+    },
+    {
+      "seed": 500,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 66.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 58.068969450476644
+    },
+    {
+      "seed": 500,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 327.0,
+      "delay_s": 27.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 68.79885942898983
+    },
+    {
+      "seed": 500,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 330.0,
+      "delay_s": 30.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 48.68351867252558
+    },
+    {
+      "seed": 500,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 66.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 58.068969450476644
+    },
+    {
+      "seed": 500,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 307.0,
+      "delay_s": 7.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 46.506591256600395
+    },
+    {
+      "seed": 500,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 310.0,
+      "delay_s": 10.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 50.64893095115035
+    },
+    {
+      "seed": 501,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 69.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 81.11318487643716
+    },
+    {
+      "seed": 501,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 118.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 14.812185985498632
+    },
+    {
+      "seed": 501,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 136.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 19.89455519094185
+    },
+    {
+      "seed": 501,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 69.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 81.11318487643716
+    },
+    {
+      "seed": 501,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 118.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 14.812185985498632
+    },
+    {
+      "seed": 501,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 136.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 19.89455519094185
+    },
+    {
+      "seed": 501,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 69.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 81.11318487643716
+    },
+    {
+      "seed": 501,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 118.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 14.812185985498632
+    },
+    {
+      "seed": 501,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 136.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 19.89455519094185
+    },
+    {
+      "seed": 501,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 69.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 81.11318487643716
+    },
+    {
+      "seed": 501,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 118.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 14.812185985498632
+    },
+    {
+      "seed": 501,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 136.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 19.89455519094185
+    },
+    {
+      "seed": 502,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 269.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 11.309614489046801
+    },
+    {
+      "seed": 502,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": null,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 1.2701791087390348
+    },
+    {
+      "seed": 502,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": null,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 1.2701791087390348
+    },
+    {
+      "seed": 502,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 269.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 11.309614489046801
+    },
+    {
+      "seed": 502,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 324.0,
+      "delay_s": 24.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 3.1510124309251695
+    },
+    {
+      "seed": 502,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 329.0,
+      "delay_s": 29.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 2.69672869398029
+    },
+    {
+      "seed": 502,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 269.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 11.309614489046801
+    },
+    {
+      "seed": 502,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 312.0,
+      "delay_s": 12.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 5.577413236968779
+    },
+    {
+      "seed": 502,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 316.0,
+      "delay_s": 16.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 3.4795785638178827
+    },
+    {
+      "seed": 502,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 269.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 11.309614489046801
+    },
+    {
+      "seed": 502,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 305.0,
+      "delay_s": 5.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 7.745685443276067
+    },
+    {
+      "seed": 502,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 307.0,
+      "delay_s": 7.0,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 7.745685443276067
+    },
+    {
+      "seed": 503,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 77.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 32.486981063636456
+    },
+    {
+      "seed": 503,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 114.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 9.147053362356578
+    },
+    {
+      "seed": 503,
+      "rate": 0.0,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 122.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 3.2812751592265106
+    },
+    {
+      "seed": 503,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 77.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 32.486981063636456
+    },
+    {
+      "seed": 503,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 114.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 9.147053362356578
+    },
+    {
+      "seed": 503,
+      "rate": 0.2,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 122.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 3.2812751592265106
+    },
+    {
+      "seed": 503,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 77.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 32.486981063636456
+    },
+    {
+      "seed": 503,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 114.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 9.147053362356578
+    },
+    {
+      "seed": 503,
+      "rate": 0.5,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 122.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 3.2812751592265106
+    },
+    {
+      "seed": 503,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "alarm_time": 77.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 32.486981063636456
+    },
+    {
+      "seed": 503,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "alarm_time": 114.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 9.147053362356578
+    },
+    {
+      "seed": 503,
+      "rate": 1.0,
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "alarm_time": 122.0,
+      "delay_s": null,
+      "gnss_epochs": 600,
+      "recoveries": 0,
+      "end_horizontal_error_m": 3.2812751592265106
+    }
+  ],
+  "candidates": [
+    {
+      "candidate": {
+        "cusum_k": 0.0,
+        "cusum_h": 20.0
+      },
+      "summary": {
+        "clean_alarms": 4,
+        "clean_runs": 4,
+        "clean_exposure_s": 2400,
+        "clean_gnss_epochs": 2400,
+        "attacks": {
+          "0.2": {
+            "runs": 4,
+            "detected": 0,
+            "misses": 4,
+            "preattack_alarms": 4,
+            "delays_s": [
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "0.5": {
+            "runs": 4,
+            "detected": 0,
+            "misses": 4,
+            "preattack_alarms": 4,
+            "delays_s": [
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "1.0": {
+            "runs": 4,
+            "detected": 0,
+            "misses": 4,
+            "preattack_alarms": 4,
+            "delays_s": [
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        }
+      }
+    },
+    {
+      "candidate": {
+        "cusum_k": 3.0,
+        "cusum_h": 50.0
+      },
+      "summary": {
+        "clean_alarms": 2,
+        "clean_runs": 4,
+        "clean_exposure_s": 2400,
+        "clean_gnss_epochs": 2400,
+        "attacks": {
+          "0.2": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "preattack_alarms": 2,
+            "delays_s": [
+              50.0,
+              null,
+              24.0,
+              null
+            ]
+          },
+          "0.5": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "preattack_alarms": 2,
+            "delays_s": [
+              27.0,
+              null,
+              12.0,
+              null
+            ]
+          },
+          "1.0": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "preattack_alarms": 2,
+            "delays_s": [
+              7.0,
+              null,
+              5.0,
+              null
+            ]
+          }
+        }
+      }
+    },
+    {
+      "candidate": {
+        "cusum_k": 6.0,
+        "cusum_h": 100.0
+      },
+      "summary": {
+        "clean_alarms": 2,
+        "clean_runs": 4,
+        "clean_exposure_s": 2400,
+        "clean_gnss_epochs": 2400,
+        "attacks": {
+          "0.2": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "preattack_alarms": 2,
+            "delays_s": [
+              58.0,
+              null,
+              29.0,
+              null
+            ]
+          },
+          "0.5": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "preattack_alarms": 2,
+            "delays_s": [
+              30.0,
+              null,
+              16.0,
+              null
+            ]
+          },
+          "1.0": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "preattack_alarms": 2,
+            "delays_s": [
+              10.0,
+              null,
+              7.0,
+              null
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

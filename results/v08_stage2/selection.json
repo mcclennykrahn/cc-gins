@@ -1,0 +1,122 @@
+{
+  "validation_seeds": [
+    500,
+    501,
+    502,
+    503
+  ],
+  "test_seeds": [
+    900,
+    901,
+    902,
+    903,
+    904,
+    905,
+    906,
+    907,
+    908,
+    909
+  ],
+  "candidates": [
+    {
+      "cusum_k": 0.0,
+      "cusum_h": 20.0
+    },
+    {
+      "cusum_k": 3.0,
+      "cusum_h": 50.0
+    },
+    {
+      "cusum_k": 6.0,
+      "cusum_h": 100.0
+    }
+  ],
+  "base": {
+    "filter": "inekf",
+    "pseudo": "hybrid",
+    "corr_scale": [
+      38.02,
+      61.09,
+      39.1
+    ],
+    "aci": true,
+    "aci_gamma": 0.05,
+    "aci_window": 100,
+    "hybrid_max_kappa": 10.0,
+    "hybrid_bias_z": 4.0,
+    "hybrid_bias_latch": true,
+    "monitor": "dual",
+    "dr_reset_period": 30.0,
+    "recovery_epochs": 0
+  },
+  "duration_s": 600,
+  "onset_s": 300,
+  "rates": [
+    0.0,
+    0.2,
+    0.5,
+    1.0
+  ],
+  "acceptance": "zero clean alarms and all attacks detected after onset, each split separately",
+  "ranking": "passing first; then total clean+pre-attack alarms, misses, total detected delay; stable grid order ties",
+  "validation_pass": false,
+  "frozen_candidate": {
+    "cusum_k": 3.0,
+    "cusum_h": 50.0
+  },
+  "frozen_config": {
+    "filter": "inekf",
+    "pseudo": "hybrid",
+    "hybrid_max_std": 1000000000.0,
+    "hybrid_max_kappa": 10.0,
+    "hybrid_bias_z": 4.0,
+    "hybrid_bias_window": 100,
+    "hybrid_bias_min": 30,
+    "hybrid_bias_latch": true,
+    "nhc_sigma": 0.1,
+    "pseudo_every": 10,
+    "corr_scale": [
+      38.02,
+      61.09,
+      39.1
+    ],
+    "aci": true,
+    "aci_alpha": 0.05,
+    "aci_gamma": 0.05,
+    "aci_window": 100,
+    "aci_beta": 2.0,
+    "aci_t_ref": 60.0,
+    "gnss_aci": false,
+    "gnss_gate": 16.26623619623813,
+    "max_consecutive_rejects": 5,
+    "monitor": "dual",
+    "cusum_k": 3.0,
+    "cusum_h": 50.0,
+    "recovery_epochs": 0,
+    "recovery_q": 3.0,
+    "dr_reset_period": 30.0,
+    "exclude_on_alarm": true,
+    "init_seed": 0,
+    "use_epoch_sigma": false,
+    "gnss_sigma_floor": 0.0,
+    "robust_gnss_delta": null,
+    "adaptive_r": false,
+    "mount_py": null,
+    "p0_bias": null,
+    "baseline_range_start_s": 0.0,
+    "baseline_range_anchor": null,
+    "earth_rate_enu": null,
+    "local_gravity": null,
+    "zupt": false,
+    "zupt_require_gnss_stop": true,
+    "zupt_accel_var": null,
+    "zupt_gyro_var": null,
+    "zupt_odometry_stop": false,
+    "zupt_sigma": 0.05,
+    "motion_every": 10,
+    "label": ""
+  },
+  "checkpoint_sha256": "e2495238df1cf3093155f26cec929d2341f03abb489f04b8acb9dd6a9f515445",
+  "evaluator_sha256": "9d27085fba400b12b8d7ef5bf40bace319b42a4cbe583ae5ce4e7f73f9bbefe1",
+  "held_out_used_for_selection": false
+}
