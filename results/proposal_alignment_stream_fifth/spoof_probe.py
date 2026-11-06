@@ -23,10 +23,10 @@ def probe(attacked, h=7., exclude=False):
    nav.push_gnss(epoch,[shift,0,0],.25,arrival_time=t)
   nav.push_imu(t,[0,0,9.81],[0,0,0])
  nav.flush()
- return dict(attacked=attacked,alarm_time=nav.alarm_time,gnss=nav.gnss_decisions)
+ return dict(attacked=attacked,exclude_on_alarm=exclude,alarm_time=nav.alarm_time,gnss=nav.gnss_decisions)
 
 if __name__=='__main__':
  torch.set_num_threads(1)
- rows=[probe(False),probe(True)]
+ rows=[probe(False),probe(True),probe(True,exclude=True)]
  Path(__file__).with_name('spoof.json').write_text(json.dumps(rows,indent=2)+'\n')
  for r in rows: print(r['attacked'],r['alarm_time'],[(g['t'],round(g['q'],2),round(g['g'],2),g['accepted']) for g in r['gnss']])

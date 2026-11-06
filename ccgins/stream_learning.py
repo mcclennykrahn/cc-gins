@@ -256,6 +256,9 @@ class LearnedStreamingNavigator(StreamingNavigator):
             eligible=bool(healthy and self.cfg.aci), effective_variance=ev.tolist()))
 
     def _record(self, history, event):
+        # Calibration adaptation uses cal.buf, not this diagnostic history.
+        if len(self.cal.history) > self.max_buffer:
+            del self.cal.history[:-self.max_buffer]
         history.append(event)
         if len(history) > self.max_buffer:
             del history[0]

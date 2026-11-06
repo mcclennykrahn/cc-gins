@@ -289,3 +289,6 @@ def test_near_grid_metadata_and_history_are_bounded():
     assert len(nav.gnss_decisions)==2
     assert not nav._gnss_arrivals
     assert nav.gnss_decisions[-1]['arrival_time']==.101
+    nav.cal.history = [np.ones(3) for _ in range(3)]
+    nav._record(nav.decisions, dict(t=.1))
+    assert len(nav.cal.history)==2

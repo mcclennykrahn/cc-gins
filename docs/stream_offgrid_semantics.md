@@ -8,7 +8,8 @@ truth. The default primary checkpoint is legacy CNN. No TCN promotion.
 Push fixed-rate IMU in increasing event time. Acceleration/gyro at t are held over
 [t,next_t). `delay` holds incoming IMU by event-time seconds; `get_state()` returns
 the processed epoch, not arrival time. GNSS must arrive strictly before its epoch
-has been processed. Delayed and out-of-order arrivals are sorted by measurement
+has been processed. The base epoch-comparison tolerance is 1e-9 s; a fix
+within that tolerance of a grid epoch is treated as coincident. Delayed and out-of-order arrivals are sorted by measurement
 epoch; duplicate pending epochs, current/past processed fixes, nonfinite data,
 nonpositive covariance and exhausted buffers raise explicit errors. There is no
 rewind of already emitted states. Increase delay to accommodate known arrival lag.
