@@ -101,3 +101,14 @@ A finite variance bound and β-weighting do not guarantee calibrated tails.
 Full-chain streaming learning+ACI+integrity remains incomplete; so do GNSS κ_g,
 online mounting/18-state, HPL/exceedance/recovery, full 20×600 s training,
 real-drive TCN validation and UrbanNav raw-pseudorange tightly coupled processing.
+
+## Fourth-batch frozen-checkpoint follow-up (2026-11-06)
+
+[New diagnosis](../results/proposal_tcn_diagnosis/report.md) confirms the intended
+three dilated stages and comparable parameter capacity, scans all original training
+and validation data seeds, and records opening/detrend, transform, channel/label,
+adjacency and prior test-channel evidence. Outputs are finite in those new scans;
+no demonstrated label/order error or validation-only fix explains the full test
+navigation failure. TCN remains available and unpromoted. Streaming assembly is now
+implemented for the supported opt-in learned modes; see the new stream report.
+Earlier measurements and hypotheses above remain historical evidence.

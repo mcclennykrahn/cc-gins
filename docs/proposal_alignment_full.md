@@ -87,3 +87,11 @@ mounting/18-state estimation, healthy-window guard resets, alarm recovery, HPL a
 exceedance reporting, B5 Student-t/VB, ≥20-test-run acceptance, and UrbanNav raw
 pseudorange tightly coupled processing. M3/M4/M5 acceptance is not inferred from
 restoring the simulation training budget.
+
+## Fourth-batch streaming follow-up (2026-11-06)
+
+The prior batch-only scope is superseded for the explicitly supported learned
+streaming modes by [the fourth-batch report](../results/proposal_alignment_stream/report.md).
+The opt-in engine runs causal MotionNet, learned/GNSS ACI and DR-CUSUM with bounded
+arrival delay. Historical measurements and the non-promotion decision remain intact.
+This does not close the original M3/M4/M5 acceptance gaps.

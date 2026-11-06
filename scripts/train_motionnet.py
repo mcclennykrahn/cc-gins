@@ -11,11 +11,11 @@ from ccgins import learning
 from ccgins.scenarios import TRAIN_SEEDS, VAL_SEEDS, make_scenario
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--architecture", choices=["legacy_cnn", "proposal_tcn"], default="proposal_tcn")
+ap.add_argument("--architecture", choices=["legacy_cnn", "proposal_tcn"], default="legacy_cnn")
 ap.add_argument("--variance-activation", choices=["hard", "smooth"], default="smooth")
 ap.add_argument("--epochs", type=int, default=8)
 ap.add_argument("--n-train", type=int, default=len(TRAIN_SEEDS))
-ap.add_argument("--out", default="results/proposal_alignment_next/exploratory_motionnet_tcn.pt")
+ap.add_argument("--out", default="results/exploratory_motionnet.pt")
 args = ap.parse_args()
 Path(args.out).parent.mkdir(parents=True, exist_ok=True)
 

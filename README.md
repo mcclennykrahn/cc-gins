@@ -10,17 +10,17 @@
 
 逐项审计见 [proposal_alignment_matrix.md](docs/proposal_alignment_matrix.md) / [matrix.json](results/proposal_alignment/matrix.json)。方案/综述是设计证据，不代表实现。ACI 不构成数学上的闭环完好性保证。
 
-**Primary（M0–M6）**：批量 InEKF-LC + 学习车体速度/hybrid + ACI/中断膨胀 + Huber GNSS + 双通道 DR-CUSUM。`configs/proposal_primary.yaml` 使用历史已验证 legacy 检查点运行该研究主线；TCN 不作默认工作方法。学习/ACI/监测仍为 batch-only，StreamingNavigator 对这些配置报错。
+**Primary（M0–M6）**：批量 InEKF-LC + 学习车体速度/hybrid + ACI/中断膨胀 + Huber GNSS + 双通道 DR-CUSUM。`configs/proposal_primary.yaml` 使用历史已验证 legacy 检查点运行该研究主线；TCN 不作默认工作方法。新增 opt-in `LearnedStreamingNavigator` 运行 learned_vel/learned_nhc + ACI + GNSS κ_g + DR-CUSUM；基线 `StreamingNavigator` 保留原 parity/拒绝行为。
 **Exploratory**：`baseline_range_anchor` 单 RTK 基线距离、`adaptive_r` Sage-Husa、流式扩展、ZUPT/轮速研究。保留这些能力，不替代主线验证。
 
-此前拉回 §3.4：新增 `MotionNetTCN`，三层膨胀卷积 1/2/4 + roll/pitch + 均值/log 方差头 + β-NLL。尾窗内采用对称 padding，不宣称内部特征逐点因果；端点推理只读取过去 IMU/滤波姿态，用当前滤波零偏扣除 IMU 窗口。历史 `MotionNet` 和检查点保留兼容。**下方历史表格全部使用 legacy CNN，未重跑或替换。** 仿真新训练脚本默认 TCN；旧 Python 六通道训练调用、KITTI/i2Nav 历史复现脚本仍为 legacy。
+此前拉回 §3.4：新增 `MotionNetTCN`，三层膨胀卷积 1/2/4 + roll/pitch + 均值/log 方差头 + β-NLL。尾窗内采用对称 padding，不宣称内部特征逐点因果；端点推理只读取过去 IMU/滤波姿态，用当前滤波零偏扣除 IMU 窗口。历史 `MotionNet` 和检查点保留兼容。**下方历史表格全部使用 legacy CNN，未重跑或替换。** 仿真训练脚本默认 legacy_cnn，TCN 需显式选择；旧 Python 六通道训练调用、KITTI/i2Nav 历史复现脚本仍为 legacy。
 
 ```bash
 # 重现此前迷你配对，另存 debug 目录；全部合成 IMU/GNSS
 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.alignment_experiment --out results/proposal_alignment_debug/smoke
 # 主线 assembly，默认历史 legacy 模型；短场景仅作 smoke
 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.cli run --config configs/proposal_primary.yaml --out results/proposal_alignment_debug/legacy_primary_cli
-# 新训练默认 TCN，使用仿真真值姿态/零偏作监督输入，部署使用滤波估计
+# 显式选择 TCN，使用仿真真值姿态/零偏作监督输入，部署使用滤波估计
 .venv/bin/python scripts/train_motionnet.py --architecture proposal_tcn --variance-activation smooth --out results/proposal_alignment_next/exploratory_motionnet_tcn.pt
 # 历史架构复现另存，避免覆盖发布模型
 .venv/bin/python scripts/train_motionnet.py --architecture legacy_cnn --out results/proposal_alignment_next/exploratory_legacy.pt
@@ -42,6 +42,12 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.alignment_ne
 [完整协议报告](results/proposal_alignment_full/report.md) / [实现与边界](docs/proposal_alignment_full.md)：两种架构均完成 **100–119 共 20 条 × 600 s、相同 12 epoch** 的原始训练预算；验证 500–503、测试 900–909，smooth 方差预先固定。完整测试 RMSE：legacy **5.154 m**、TCN **31.537 m**、NHC 控制 **3.269 m**。TCN 验证略优（4.043 vs 4.061 m）但测试失败，**不提升为 primary；legacy 保留工作主方法**。NHC 控制未启用学习 ACI/双监测，配置差异见报告；历史发布表格/检查点未改写，旧 reduced-train 证据保留。
 
 新增 `Config(gnss_aci=True)`：从三维向量 NIS 在线求 GNSS κ_g，前一尺度进入当前 GNSS/监测更新，新尺度仅用于下一历元；合成校准种子 pilot 与主测试分开。分组相关性估计逐条轨迹计算再平均，不混同此前双监测误报警/锁存问题。完整 streaming learning/ACI/DR-CUSUM、在线安装角/18 状态、HPL/恢复、独立道路泛化与 UrbanNav TC 仍未完成，无完整导航完好性保证。详见报告的实测范围。
+
+## 第四批：因果流式主链
+
+[流式报告](results/proposal_alignment_stream/report.md) 保留代码 API、延迟 GNSS、因果性、中断冻结、恶意注入剔除测试及本机运行速度。显式使用 `ccgins.stream_learning.LearnedStreamingNavigator`，默认示例加载 legacy；TCN 保留可选，**未提升为 primary/default**。传入到达缓冲延迟可处理尚未执行历元的 GNSS；不回写已发布决策。固定 NHC/ZUPT/轮速基线路径与历史发布结果未改写。
+
+剩余范围包括 learned 流式 hybrid/轮速组合、任意迟到重放、非网格 GNSS、完整健康窗重置/恢复、HPL、独立实车 TCN 验证和 M3/M4/M5 验收。当前实现不提供闭环完好性保证。第四批 [TCN 诊断](results/proposal_tcn_diagnosis/report.md) 使用冻结权重，不按测试集挑模型。
 
 ## 已实现内容
 
