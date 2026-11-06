@@ -16,7 +16,8 @@ interval at the measurement time when necessary.  This reproduces the batch orde
 
 Adaptive causal ZUPT and mounted wheel updates share the batch detector/models/guards.
 Fixed mounted NHC is supported; learned pseudo-measurements, ACI, monitoring and
-adaptive-R remain batch-only (unsupported configurations raise ValueError).
+adaptive-R are rejected by this baseline class. The separate opt-in
+`ccgins.stream_learning.LearnedStreamingNavigator` supports learned motion/ACI/integrity.
 """
 from __future__ import annotations
 

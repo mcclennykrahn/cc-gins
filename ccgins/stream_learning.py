@@ -36,10 +36,8 @@ class LearnedStreamingNavigator(StreamingNavigator):
             raise ValueError('corr_scale requires three finite inflations >= 1')
         baseline = replace(cfg, pseudo='none', aci=False, gnss_aci=False, monitor='none')
         super().__init__(*args, motion_cfg=baseline, **kwargs)
-        if dt := kwargs.get("dt"):
-            if not np.isfinite(dt) or dt <= 0:
-                raise ValueError("positive fixed dt required")
-        else:
+        dt = kwargs.get("dt")
+        if dt is None or not np.isfinite(dt) or dt <= 0:
             raise ValueError("positive fixed dt required")
         self.cfg = replace(cfg)
         self.model = model
@@ -69,6 +67,8 @@ class LearnedStreamingNavigator(StreamingNavigator):
         # Reuse the baseline initialization (including Earth/mount/noise options).
         from .pipeline import initial_state
         from .filters import NoiseParams
+        if cfg is None:
+            raise ValueError("explicit learned streaming Config required")
         R, v, p, P = initial_state(truth, cfg.init_seed, cfg.p0_bias)
         earth = None
         if cfg.earth_rate_enu is not None or cfg.local_gravity is not None:
@@ -88,6 +88,11 @@ class LearnedStreamingNavigator(StreamingNavigator):
         if self._arrival_t is not None and (t <= self._arrival_t or
                 not np.isclose(t-self._arrival_t, self.dt, atol=1e-9, rtol=0)):
             raise ValueError('learned streaming requires increasing fixed-rate IMU')
+        if self._arrival_t is None:
+            for epoch, *_ in self._gnss:
+                if epoch < t-_EPS or not np.isclose((epoch-t)/self.dt,
+                        round((epoch-t)/self.dt), atol=1e-6):
+                    raise ValueError("learned streaming GNSS must align to IMU grid")
         self._arrival_t = t
         self._pending.append((t, acc.copy(), gyro.copy()))
         while self._pending and self._pending[0][0] <= t-self.delay+_EPS:

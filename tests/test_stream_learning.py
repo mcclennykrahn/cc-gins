@@ -52,9 +52,9 @@ def test_delayed_stream_matches_batch_semantics(tcn, pseudo):
                 log_covariance=True)
     nav = drive(sc, cfg, net)
     # Same window epochs and cached historical attitude; delay only changes availability.
-    np.testing.assert_allclose(nav.get_state().position, batch.p_est[-1], atol=1e-10)
-    np.testing.assert_allclose(nav.get_state().covariance, batch.extra['covariance'][-1], atol=1e-10)
-    np.testing.assert_allclose([r['q'] for r in nav.gnss_decisions], batch.stat_q, atol=1e-10)
+    np.testing.assert_allclose(nav.get_state().position, batch.p_est[-1], atol=1e-10, rtol=0)
+    np.testing.assert_allclose(nav.get_state().covariance, batch.extra['covariance'][-1], atol=1e-10, rtol=0)
+    np.testing.assert_allclose([r['q'] for r in nav.gnss_decisions], batch.stat_q, atol=1e-10, rtol=0)
     assert nav.decisions[0]['t'] == 1.
     assert len(nav.decisions) == 31
     assert all(r['accepted'] for r in nav.decisions)
@@ -133,3 +133,33 @@ def test_rejects_late_offgrid_and_unsupported():
         with pytest.raises(ValueError):
             LearnedStreamingNavigator.from_truth(sc.truth, sc.imu_spec, sc.gnss_spec,
                 replace(cfg, **option), model=model())
+
+
+def test_pending_delay_budget_and_duplicate_fix():
+    sc = make_scenario(716, duration=1.)
+    cfg = Config(pseudo='learned_vel')
+    nav = LearnedStreamingNavigator.from_truth(sc.truth, sc.imu_spec, sc.gnss_spec,
+                                               cfg, model=model(), delay=.05)
+    nav.push_imu(0., sc.imu.accel[0], sc.imu.gyro[0])
+    with pytest.raises(RuntimeError, match='no IMU'):
+        nav.get_state()
+    nav.push_gnss(0., [0, 0, 0], 1.)
+    with pytest.raises(ValueError, match='duplicate'):
+        nav.push_gnss(0., [0, 0, 0], 1.)
+    for k in range(1, 7):
+        nav.push_imu(sc.truth.t[k], sc.imu.accel[k], sc.imu.gyro[k])
+    assert nav.get_state().t == .01
+    with pytest.raises(ValueError, match='before its epoch'):
+        nav.push_gnss(.01, [0, 0, 0], 1.)
+    nav.flush()
+    assert nav.get_state().t == .06
+
+
+def test_prequeued_offgrid_rejected_before_first_state():
+    sc = make_scenario(717, duration=1.)
+    nav = LearnedStreamingNavigator.from_truth(sc.truth, sc.imu_spec, sc.gnss_spec,
+            Config(pseudo='learned_vel'), model=model())
+    nav.push_gnss(.003, [0, 0, 0], 1.)
+    with pytest.raises(ValueError, match='align'):
+        nav.push_imu(0., sc.imu.accel[0], sc.imu.gyro[0])
+    assert nav.t is None

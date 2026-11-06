@@ -59,8 +59,8 @@
     {
       "architecture": "legacy_cnn",
       "imu_samples": 4001,
-      "wall_seconds": 1.209361364992219,
-      "processed_hz": 3308.3577132677315,
+      "wall_seconds": 1.1815189750050195,
+      "processed_hz": 3386.3188697269993,
       "duration_seconds": 40.0,
       "pseudo_decisions": 391,
       "gnss_decisions": 35,
@@ -75,8 +75,8 @@
     {
       "architecture": "proposal_tcn",
       "imu_samples": 4001,
-      "wall_seconds": 1.2811469029984437,
-      "processed_hz": 3122.983001118694,
+      "wall_seconds": 1.3143924950127257,
+      "processed_hz": 3043.9918176505284,
       "duration_seconds": 40.0,
       "pseudo_decisions": 391,
       "gnss_decisions": 35,

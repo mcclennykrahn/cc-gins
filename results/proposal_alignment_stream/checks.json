@@ -1,0 +1,46 @@
+{
+  "data": "synthetic IMU and synthetic GNSS",
+  "tests": {
+    "delayed_batch_stream": "pass; four architecture/mode cases",
+    "future_cannot_influence_past": "pass; changed future inputs and continued old snapshots",
+    "aci_freeze": "pass; both alpha/kappa/count states after inherited freshness grace",
+    "malicious_cusum": "pass; attack/exclusion at exactly 3.0 s; clean control no alarm",
+    "arrival_contract": "pass; late, off-grid, duplicate and buffered-start checks"
+  },
+  "runtime": [
+    {
+      "architecture": "legacy_cnn",
+      "imu_samples": 4001,
+      "wall_seconds": 1.1815189750050195,
+      "processed_hz": 3386.3188697269993,
+      "duration_seconds": 40.0,
+      "pseudo_decisions": 391,
+      "gnss_decisions": 35,
+      "aci_observations": 54,
+      "gnss_aci_observations": 5,
+      "frozen_decisions": 34,
+      "position_max_abs_difference": 0.0,
+      "covariance_max_abs_difference": 0.0,
+      "statistic_max_abs_difference": 0.0,
+      "alarm_time": null
+    },
+    {
+      "architecture": "proposal_tcn",
+      "imu_samples": 4001,
+      "wall_seconds": 1.3143924950127257,
+      "processed_hz": 3043.9918176505284,
+      "duration_seconds": 40.0,
+      "pseudo_decisions": 391,
+      "gnss_decisions": 35,
+      "aci_observations": 54,
+      "gnss_aci_observations": 5,
+      "frozen_decisions": 34,
+      "position_max_abs_difference": 0.0,
+      "covariance_max_abs_difference": 0.0,
+      "statistic_max_abs_difference": 0.0,
+      "alarm_time": null
+    }
+  ],
+  "semantic_scope": "matched grid/windows only; no general covariance or HPL guarantee",
+  "pytest": "140 passed in 47.10s"
+}

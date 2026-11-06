@@ -66,10 +66,12 @@ scope gaps, not complete proposal M3/M4/M5 acceptance.
 
 ## Tests and matched semantics
 
-`tests/test_stream_learning.py` adds eight cases: four architecture/mode delayed
+`tests/test_stream_learning.py` adds ten cases: four architecture/mode delayed
 batch comparisons, one future-invariance case, one joint outage-freeze case, one
-precise dual-CUSUM malicious-exclusion case and one rejection-contract case.
-All eight passed in the focused run. Original tests remain unchanged.
+precise dual-CUSUM malicious-exclusion case, one rejection-contract case, and
+two arrival-buffer/duplicate/prequeued-grid cases. Original tests remain unchanged.
+The initial focused baseline+learned run passed 37 cases; the final full-suite
+result including the additional arrival-contract cases is in `pytest.log`.
 
 The short comparisons use seed 710, 4 s, GNSS arrival lag 30 ms, processing delay
 50 ms, full trailing window 100 samples, 31 pseudo epochs. Both architectures
@@ -118,7 +120,16 @@ length and should be drained/managed by a production host.
 Secondary TCN diagnosis follows only after this primary chain and tests landed.
 Prior full-protocol metrics are retained, and TCN is **not promoted**.
 
-Measured local runtime (initial demo; see rerun metrics for latest):
+Measured local runtime (final checkpoint demo, includes diagnostic logging):
 
-- legacy_cnn: 4001 samples, 1.209361 s wall, 3308.4 IMU samples/s.
-- proposal_tcn: 4001 samples, 1.281147 s wall, 3123.0 IMU samples/s.
+- legacy_cnn: 4001 samples, 1.181519 s wall, 3386.3 IMU samples/s.
+- proposal_tcn: 4001 samples, 1.314392 s wall, 3044.0 IMU samples/s.
+
+Secondary bounded diagnosis completed: [TCN report](../proposal_tcn_diagnosis/report.md).
+Architecture, seed finiteness, opening/detrending, validation transforms/adjacency,
+training curves and prior test-channel errors are recorded. Causal attribution of
+the full navigation failure remains partial; no fix or promotion is claimed.
+
+Final full suite: **140 passed in 47.10s** (`pytest.log`). All ten new chain/arrival
+cases and the unchanged baseline parity/motion suites passed. Historical published
+legacy tables, checkpoints and earlier full/smoke/next metrics were not rewritten.
