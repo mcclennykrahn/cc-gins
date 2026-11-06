@@ -27,7 +27,10 @@ class GuardReferenceHealth:
     ``begin(t)`` opens a new assessment interval at a scheduled DR boundary;
     callers evaluate ``healthy`` at that boundary, reseed only if healthy, then
     call ``begin`` again even when they did not reseed.  That rules out a
-    permanent deadlock after an outage.  ``check_fresh(t)`` marks the interval
+    permanent deadlock after an outage. Callers must record the boundary GNSS
+    epoch again after ``begin``, including all disqualifiers, so an active alarm
+    or recovery cannot become healthy merely through renewal.
+    ``check_fresh(t)`` marks the interval
     stale/missing when no accepted fix is recent enough; it is deliberately
     causal (no look-ahead).
 

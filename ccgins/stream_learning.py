@@ -371,7 +371,9 @@ class LearnedStreamingNavigator(StreamingNavigator):
                 # Every scheduled boundary opens a fresh assessment interval,
                 # reseeded or not, avoiding a permanent outage deadlock.
                 self.guard_ref.begin(self.t)
-                if accepted and not forced and not self.cusum.alarm and not recovered:
-                    self.guard_ref.observe(self.t, accepted=True, q=q, forced=False,
-                                           alarm=False, recovery=False)
+                # Boundary evidence belongs to the new interval, including
+                # active disqualifiers that must keep learned aiding disabled.
+                self.guard_ref.observe(self.t, accepted=accepted, q=q, forced=forced,
+                                       alarm=bool(was or self.cusum.alarm),
+                                       recovery=recovered)
                 self.last_reset = self.t

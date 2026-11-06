@@ -138,3 +138,85 @@ def test_loaded_checkpoint_outage_batch_stream_parity():
     assert np.max(np.abs(nav.get_state().position - batch.p_est[-1])) < 1e-9
     assert np.max(np.abs(nav.get_state().covariance -
                          batch.extra['covariance'][-1])) < 1e-9
+
+
+def test_loaded_checkpoint_alarmed_boundary_keeps_fixed_nhc():
+    # Sensitive thresholds exercise latch semantics, not detection performance.
+    torch.set_num_threads(1)
+    net = load('results/motionnet.pt')
+    sc = make_scenario(500, duration=33.)
+    cfg = Config(guard_ref_health=True, cusum_h=.001, cusum_k=0.,
+                 pseudo='learned_vel', monitor='dual')
+    nav = _feed_stream(sc, cfg, net)
+    window = [d for d in nav.decisions if 30. < d['t'] <= 31.]
+    assert window and nav.alarm_time < 30.
+    assert all(d['alarm'] and not d['guard_ref_healthy'] and
+               d['guard_ref_fallback'] and len(d['effective_variance']) == 2
+               for d in window)
+    assert nav.guard_ref.resets == 0
+    batch = run(sc.truth, sc.imu, sc.gnss, sc.imu_spec, sc.gnss_spec,
+                cfg, model=net, log_covariance=True)
+    assert batch.extra['guard_ref_health']['resets'] == 0
+    assert batch.extra['guard_ref_fallback_epochs'] == nav.guard_ref_fallbacks
+    np.testing.assert_allclose(nav.get_state().position, batch.p_est[-1],
+                               rtol=0, atol=1e-9)
+    np.testing.assert_allclose(nav.get_state().covariance,
+                               batch.extra['covariance'][-1], rtol=0, atol=1e-9)
+
+
+@pytest.mark.parametrize('engine', ['batch', 'stream'])
+@pytest.mark.parametrize('forced', [False, True])
+def test_rejected_boundary_stays_unhealthy(monkeypatch, engine, forced):
+    original = GuardReferenceHealth.observe
+    boundary = []
+
+    def observe(self, t, **evidence):
+        result = original(self, t, **evidence)
+        if t == 30.:
+            boundary.append((self.start_t, self.healthy, list(self.reasons)))
+        return result
+
+    monkeypatch.setattr(GuardReferenceHealth, 'observe', observe)
+    torch.set_num_threads(1)
+    sc = make_scenario(500, duration=30.2)
+    cfg = Config(guard_ref_health=True, pseudo='learned_vel', monitor='dual',
+                 cusum_h=1e10, gnss_gate=0.,
+                 max_consecutive_rejects=0 if forced else 1000)
+    net = load('results/motionnet.pt')
+    if engine == 'batch':
+        run(sc.truth, sc.imu, sc.gnss, sc.imu_spec, sc.gnss_spec, cfg, model=net)
+    else:
+        _feed_stream(sc, cfg, net)
+    assert len(boundary) == 2
+    assert boundary[-1][0] == 30.
+    assert boundary[-1][1] is False
+    assert ('forced' if forced else 'rejected') in boundary[-1][2]
+
+
+@pytest.mark.parametrize('engine', ['batch', 'stream'])
+def test_completing_recovery_at_boundary_stays_unhealthy(monkeypatch, engine):
+    from ccgins.integrity import Cusum
+
+    def step(self, q):
+        self._test_epoch = getattr(self, '_test_epoch', 0) + 1
+        # GNSS begins at 1 s. Complete recovery exactly on the 30 s boundary.
+        self.alarm = self._test_epoch == 29
+        self.g = 0.
+        return self.alarm
+
+    monkeypatch.setattr(Cusum, 'step', step)
+    torch.set_num_threads(1)
+    sc = make_scenario(500, duration=30.2)
+    cfg = Config(guard_ref_health=True, pseudo='learned_vel', monitor='dual')
+    net = load('results/motionnet.pt')
+    if engine == 'batch':
+        result = run(sc.truth, sc.imu, sc.gnss, sc.imu_spec, sc.gnss_spec,
+                     cfg, model=net)
+        summary = result.extra['guard_ref_health']
+    else:
+        nav = _feed_stream(sc, cfg, net)
+        summary = nav.guard_ref.summary()
+    assert summary['start_t'] == 30.
+    assert not summary['healthy']
+    assert 'recovery' in summary['reasons']
+    assert summary['resets'] == 0

@@ -500,9 +500,10 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                     # the previous was unhealthy, so an outage cannot deadlock
                     # reseeding forever.
                     grh.begin(t)
-                    if fix_accepted and not forced and not cus.alarm and not recovered:
-                        grh.observe(t, accepted=True, q=q_obs, forced=False,
-                                    alarm=False, recovery=False)
+                    # All boundary evidence belongs to the new interval,
+                    # including active alarm, recovery and rejection reasons.
+                    grh.observe(t, accepted=fix_accepted, q=q_obs, forced=forced,
+                                alarm=bool(was or cus.alarm), recovery=recovered)
                     t_last_reset = t
 
         if kk % 10 == 0:
