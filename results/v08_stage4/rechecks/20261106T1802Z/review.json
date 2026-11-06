@@ -1,0 +1,14 @@
+{
+  "stage_id": "cc_diagnostics_s4",
+  "verdict": "PASS",
+  "pytest": "180 passed in 87.87s (0:01:27)",
+  "rows_audited": 112,
+  "scope": "Stored-evidence arithmetic audit and selfcheck plus full regression. Prior independent source review retained; this is not a new external review.",
+  "blocking_issues": [],
+  "fresh_held_out": false,
+  "detection": "FAIL",
+  "confirmed_v08": false,
+  "tcn_promoted": false,
+  "cusum_promoted": false,
+  "written_at": "2026-11-06T18:03:52.802869+00:00"
+}

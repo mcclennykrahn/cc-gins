@@ -1,0 +1,7 @@
+{
+  "verdict": "PASS",
+  "rows_audited": 112,
+  "scope": "Independent arithmetic audit of stored rows; no fresh simulation or held-out evidence",
+  "detection": "FAIL",
+  "confirmed_v08": false
+}
