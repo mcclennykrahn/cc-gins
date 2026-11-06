@@ -181,3 +181,30 @@ opt-in and unpromoted. UrbanNav raw multi-satellite TC remains incomplete
 (`experiment_substitute`). Matrix counts are unchanged at `{'complete': 5,
 'partial': 17, 'experiment_substitute': 2, 'unimplemented': 4}`; no row changed
 acceptance class and no prior evidence was rewritten.
+
+## 2026-11-06 v0.8-stage3 guard-reference health
+
+[Stage 3 report](../results/v08_stage3/report.md) records the opt-in shared
+batch/learned-stream whole-reset-interval health implementation in `e45900a`.
+Sticky unhealthy intervals hold ACI/bias references, drop learned forward aiding
+to fixed NHC, and block reseeding; scheduled boundaries renew assessment even
+when a reseed is skipped. Defaults remain unchanged. Loaded-checkpoint clean and
+outage final position/full covariance batch/stream deltas are zero; the outage
+records 195 fallback epochs in each engine, one skipped boundary and historical
+`stale`. Preserved full-suite evidence: 170 passed in 67.90s.
+
+The full evaluator completed (exit 0), with validation 500–503 and reused held-out
+900–909. Validation clean alarms remain 2/4 and detections 2/4 per rate with either
+flag. Held-out flag-off/on clean alarms are 6/10 versus 7/10; detections are 5/10
+versus 4/10 at each of 0.2/0.5/1.0 m/s, with 5 versus 6 pre-onset misses per rate.
+Pooled mean final horizontal error worsens from 17.231177 to 20.870568 m (validation
+15.488622 to 25.292962 m). This does not establish a navigation improvement.
+Reason summaries describe final-interval presence, not cumulative reason events;
+coverage/kappa/reseed-age/DR covariance growth were not measured. Fresh independent
+seeds and independent review remain required for later acceptance claims.
+
+**DETECTION still FAILS; Stage 3 does not close DETECTION; confirmed_v08=false.**
+CUSUM and TCN remain unpromoted, legacy remains primary, coverage_h=0.691387
+remains below nominal, HPL stays unimplemented, and raw UrbanNav TC stays
+`experiment_substitute`. Counts remain `{'complete': 5, 'partial': 17,
+'experiment_substitute': 2, 'unimplemented': 4}`; no acceptance class changed.

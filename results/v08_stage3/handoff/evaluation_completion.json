@@ -1,0 +1,33 @@
+{
+  "evaluator_exit_code": 0,
+  "phases": [
+    "parity",
+    "validation",
+    "held_out_diagnostic"
+  ],
+  "validation_rows": 32,
+  "held_out_rows": 80,
+  "validation_seeds": [
+    500,
+    501,
+    502,
+    503
+  ],
+  "held_out_seeds": [
+    900,
+    901,
+    902,
+    903,
+    904,
+    905,
+    906,
+    907,
+    908,
+    909
+  ],
+  "pytest": "170 passed in 67.90s (0:01:07)",
+  "pytest_provenance": "preserved pre-interruption log; source unchanged",
+  "independent_review": "pending",
+  "confirmed_v08": false,
+  "detection_pass": false
+}
