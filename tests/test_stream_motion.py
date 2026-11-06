@@ -80,16 +80,19 @@ def test_stationary_outage_confirmation(kind, wheel):
                  zupt_odometry_stop=wheel)
     ii = np.arange(10, n, 10)
     odo = OdometryData(t[ii], np.zeros(len(ii)), .01, np.eye(3), np.zeros(3))
-    log = run(truth, imu, gnss, spec, gs, cfg, odometry=odo)
+    log = run(truth, imu, gnss, spec, gs, cfg, odometry=odo, log_covariance=True)
     nav = StreamingNavigator.from_truth(truth, spec, gs, cfg)
-    pp=[]
+    pp=[]; vv=[]; cov=[]
     for k, epoch in enumerate(t):
         if k in ii:
             nav.push_odometry(epoch, 0, .01, np.eye(3), np.zeros(3))
         nav.push_imu(epoch, acc[k], zero[k])
         if k > 0 and k % 10 == 0:
-            pp.append(nav.get_state().position)
-    np.testing.assert_allclose(pp, log.p_est, atol=1e-9, rtol=0)
+            state = nav.get_state()
+            pp.append(state.position); vv.append(state.velocity); cov.append(state.covariance)
+    np.testing.assert_allclose(pp, log.p_est, atol=1e-12, rtol=0)
+    np.testing.assert_allclose(vv, log.v_est, atol=1e-12, rtol=0)
+    np.testing.assert_allclose(cov, log.extra["covariance"], atol=1e-12, rtol=0)
     assert nav.motion == log.extra['motion']
     assert (nav.motion['zupt_accepted'] > 0) == wheel
     if not wheel:

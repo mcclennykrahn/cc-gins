@@ -15,7 +15,8 @@ interval at the measurement time when necessary.  This reproduces the batch orde
 (propagate, then update at the GNSS epoch) for measurements on or between IMU epochs.
 
 Adaptive causal ZUPT and mounted wheel updates share the batch detector/models/guards.
-Learned/NHC pseudo-measurements, ACI, monitoring and adaptive-R remain batch-only.
+Fixed mounted NHC is supported; learned pseudo-measurements, ACI, monitoring and
+adaptive-R remain batch-only (unsupported configurations raise ValueError).
 """
 from __future__ import annotations
 
@@ -70,6 +71,14 @@ class StreamingNavigator:
         from .pipeline import Config
         from .zupt import AdaptiveZeroVelocity, OdometryStopGuard
         self.cfg = Config() if motion_cfg is None else motion_cfg
+        if (self.cfg.pseudo not in ('none', 'nhc') or self.cfg.aci or
+                self.cfg.monitor != 'none' or self.cfg.adaptive_r or
+                self.cfg.baseline_range_anchor is not None):
+            raise ValueError("streaming supports none/fixed NHC, without ACI, monitoring, adaptive R or range coupling")
+        if self.cfg.pseudo_every < 1:
+            raise ValueError("positive pseudo cadence required")
+        from .pipeline import mount_matrix
+        self.C_vb = None if self.cfg.mount_py is None else mount_matrix(*self.cfg.mount_py)
         self.detector = None
         if self.cfg.motion_every < 1 or not np.isfinite(self.cfg.zupt_sigma) or self.cfg.zupt_sigma <= 0:
             raise ValueError("invalid motion cadence/sigma")
@@ -99,7 +108,8 @@ class StreamingNavigator:
 
         `cfg` is a `ccgins.pipeline.Config`; `init_seed`, `p0_bias`, `filter`,
         `gnss_gate`, `max_consecutive_rejects` and motion options are honoured.
-        Pseudo-measurements, ACI, monitoring and adaptive R remain batch-only.
+        Fixed mounted NHC is supported; learned pseudo-measurements, ACI,
+        monitoring and adaptive R remain batch-only and are rejected.
         Supply frozen held-out detector variances through cfg, as for batch.
         """
         from .pipeline import Config, initial_state
@@ -154,11 +164,24 @@ class StreamingNavigator:
                 self.t = g_t
             self._pop_and_apply_gnss()
         if t > prev_t + _EPS:
-            self.filter.propagate(prev_gyro, prev_acc, t - prev_t)
+            interval = t - prev_t
+            # Batch uses nominal truth.dt. Do not round a remainder after an
+            # off-grid GNSS split: that intentionally uses actual subintervals.
+            if (prev_t == self._last_imu[0] and self.dt is not None and
+                    np.isclose(interval, self.dt, atol=1e-9, rtol=0)):
+                interval = self.dt
+            self.filter.propagate(prev_gyro, prev_acc, interval)
         self.t = t
         self._last_imu = (t, acc, gyro)
         self._index += 1
         self._apply_motion(t, prev_gyro, prev_acc)
+        from .learning import WINDOW
+        if (self.cfg.pseudo == 'nhc' and self._index >= WINDOW and
+                self._index % self.cfg.pseudo_every == 0):
+            h, H = self.filter.body_vel_model((0, 1, 2))
+            if self.C_vb is not None:
+                h, H = self.C_vb @ h, self.C_vb @ H
+            self.filter.update(-h[1:], H[1:], np.eye(2)*self.cfg.nhc_sigma**2)
         self._apply_due_gnss(t)
 
     def push_odometry(self, t, speed, sigma, C_vb, lever_b, valid=True):

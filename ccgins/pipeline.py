@@ -119,8 +119,13 @@ def mount_matrix(pitch, yaw):
     return C_bv.T
 
 
-def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=None) -> RunLog:
-    """pred: (idx, mu, var) learned predictions at pseudo epochs (idx = IMU end index)."""
+def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=None,
+        log_covariance=False) -> RunLog:
+    """pred: (idx, mu, var) learned predictions at pseudo epochs (IMU end index).
+
+    log_covariance adds full internal 15x15 covariance at the existing every-tenth-sample
+    log epochs to extra['covariance']; otherwise that entry is None.
+    """
     if cfg.motion_every < 1 or not np.isfinite(cfg.zupt_sigma) or cfg.zupt_sigma <= 0:
         raise ValueError("positive motion cadence and ZUPT sigma required")
     noise = NoiseParams.from_spec(imu_spec)
@@ -197,6 +202,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
 
     logs = {k: [] for k in ("t", "pe", "pt", "P", "ve", "vt", "vb", "tg")}
     gq = {"t": [], "q": [], "g": []}
+    full_cov = []  # opt-in parity diagnostics
     t0 = time.perf_counter()
 
     for k in range(n - 1):
@@ -371,6 +377,8 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                 t_last_reset = t
 
         if kk % 10 == 0:
+            if log_covariance:
+                full_cov.append(A.P.copy())
             logs["t"].append(t)
             logs["pe"].append(A.p.copy())
             logs["pt"].append(truth.p[kk].copy())
@@ -386,7 +394,8 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
         P_pos=np.array(logs["P"]), v_est=np.array(logs["ve"]), v_true=np.array(logs["vt"]),
         gnss_t=np.array(gq["t"]), stat_q=np.array(gq["q"]), stat_g=np.array(gq["g"]),
         alarm_time=alarm_time, kappa_hist=np.array(cal.history), runtime_per_step_us=rt,
-        extra={"motion": motion, "range_alarm_time": range_alarm_time, "range_trace": range_trace,
+        extra={"covariance": np.array(full_cov) if log_covariance else None,
+               "motion": motion, "range_alarm_time": range_alarm_time, "range_trace": range_trace,
                "fallback_frac": n_fallback / max(n_pseudo, 1), "vb_est": np.array(logs["vb"]),
                "since_gnss": np.array(logs["tg"])},
     )

@@ -10,7 +10,7 @@ from . import i2nav_scenarios as I
 from .pipeline import Config, run, mount_matrix
 from .zupt import AdaptiveZeroVelocity, OdometryData
 from .metrics import summarize
-from .stream import StreamingNavigator
+from .parity import replay
 
 
 def job(args):
@@ -37,12 +37,12 @@ def job(args):
                  **I.REAL_CFG, **I.earth_config(seq),
                  zupt_accel_var=det.accel_var, zupt_gyro_var=det.gyro_var)
     rows = {}
-    logs = {}
+    parities = {}
     for method in ('guarded', 'synthetic_wheel', 'synthetic_wheel_stop'):
         c = replace(cfg, zupt_odometry_stop=method=='synthetic_wheel_stop')
         log = run(sc.truth, sc.imu, sc.gnss, sc.imu_spec, sc.gnss_spec, c,
-                  odometry=None if method=='guarded' else odo)
-        logs[method] = log
+                  odometry=None if method=='guarded' else odo, log_covariance=True)
+        parities[method] = replay(sc, c, log, None if method=='guarded' else odo)
         m = summarize(log, outs, t_start=30.)
         m.pop('runtime_us')
         eh = np.linalg.norm(log.p_est[:, :2]-log.p_true[:, :2], axis=1)
@@ -54,30 +54,11 @@ def job(args):
         m['zupt_reference_speed_gt_0_5'] = int((np.linalg.norm(seq.truth.v[zidx], axis=1)>.5).sum())
         m['outage_zupts'] = int(sum(((zt>=s)&(zt<s+d)).sum() for s,d in outs))
         rows[method] = m
-    # Replay every epoch with the same sigma floors and ordering as batch.
-    nav = StreamingNavigator.from_truth(sc.truth, sc.imu_spec, sc.gnss_spec, replace(cfg, zupt_odometry_stop=True))
-    for j,t in enumerate(sc.gnss.t):
-        if sc.gnss.valid[j] and sc.gnss.idx[j] > 0:
-            nav.push_gnss(t, sc.gnss.pos[j], np.maximum(sc.gnss.sigma_ep[j], cfg.gnss_sigma_floor)**2)
-    for j,t in enumerate(odo.t):
-        nav.push_odometry(t, odo.speed[j], odo.sigma[j], C, odo.lever_b, odo.valid[j])
-    positions=[]; velocities=[]; covs=[]
-    # Batch logs only propagated epochs at multiples of ten.
-    wanted = set(np.rint(logs['synthetic_wheel_stop'].t/seq.truth.dt).astype(int))
-    for k,t in enumerate(seq.truth.t):
-        nav.push_imu(t, sc.imu.accel[k], sc.imu.gyro[k])
-        if k in wanted:
-            state = nav.get_state()
-            positions.append(state.position); velocities.append(state.velocity); covs.append(state.position_covariance)
-    log = logs['synthetic_wheel_stop']
-    parity = dict(position_max_abs=float(np.max(np.abs(positions-log.p_est))),
-                  velocity_max_abs=float(np.max(np.abs(velocities-log.v_est))),
-                  position_cov_max_abs=float(np.max(np.abs(covs-log.P_pos))),
-                  motion_equal=nav.motion==log.extra['motion'])
+    parity = parities['synthetic_wheel_stop']
     print(name, fold, {k:round(v['rmse_h'],3) for k,v in rows.items()}, parity, flush=True)
     return dict(imu=name, fold=fold, train_range=train, test_range=test,
                 calibration=dict(accel_var=det.accel_var, gyro_var=det.gyro_var),
-                methods=rows, stream_batch=parity)
+                methods=rows, stream_batch=parity, stream_batch_methods=parities)
 
 
 def main():
@@ -98,6 +79,8 @@ def write_report(rows, out):
         parity = r['stream_batch']
         assert parity['motion_equal'] and all(parity[k] < 1e-5 for k in
             ('position_max_abs', 'velocity_max_abs', 'position_cov_max_abs')), parity
+        for p in r.get('stream_batch_methods', {}).values():
+            assert p['motion_equal'] and all(v <= 1e-12 for k,v in p.items() if k.endswith('_max_abs')), p
         seq = I.segment(r['imu'], *r['test_range'])
         stopped = np.linalg.norm(seq.truth.v, axis=1) < .1
         edges = np.diff(np.r_[False, stopped, False].astype(int))
@@ -114,14 +97,15 @@ def write_report(rows, out):
                                       for m,v in r['methods'].items()}))
         r['reference_new_outage_stops'] = events
     agg={m:{k:float(np.mean([r['methods'][m][k] for r in rows])) for k in ('rmse_h','coverage95_h','anees_pos','outage_zupts')} for m in rows[0]['methods']}
-    data=dict(protocol='SYNTHETIC wheel: 4 co-mounted IMUs x 2 time folds; InEKF seed 0; 3 batch methods + 1 stream replay per case',
+    replay_count = sum(len(r.get('stream_batch_methods', {'synthetic_wheel_stop': r['stream_batch']})) for r in rows)
+    data=dict(protocol=f'SYNTHETIC wheel: 4 co-mounted IMUs x 2 time folds; InEKF seed 0; 3 batch methods; {replay_count} stream replays total',
               mount_calibration_sha256=hashlib.sha256(Path('results/i2nav/mount_calibration.json').read_bytes()).hexdigest(),
               data_sha256={n:hashlib.sha256((I.DATA/f'{n}.npz').read_bytes()).hexdigest() for n in I.IMUS}, aggregate=agg, runs=rows)
     (out/'metrics.json').write_text(json.dumps(data, indent=2, allow_nan=False)+'\n')
     lines=['# SYNTHETIC wheel speed: exploratory outage-stop experiment','',
         'i2Nav has NO real wheel-speed log. Reference/body velocity is intentionally used as a synthetic measurement here; this is an oracle-assisted mechanism study, not measured odometry accuracy or held-out validation.',
-        '8 paired cases, 24 batch trajectories + 8 full stream replays. Four co-mounted IMUs, folds A/B, InEKF, initial seed 0. All cases retained. Same drive/folds as prior development; no significance claim.',
-        'No NHC/learned pseudo-measurements: streaming supports IMU/GNSS/motion only. Guarded baseline is therefore a new matched baseline, not the earlier NHC baseline.',
+        f'8 paired cases, 24 batch trajectories + {replay_count} full stream replays. Four co-mounted IMUs, folds A/B, InEKF, initial seed 0. All cases retained. Same drive/folds as prior development; no significance claim.',
+        'No NHC/learned pseudo-measurements in this experiment. Guarded baseline is a separate matched NO-NHC baseline, not the earlier NHC baseline; streaming now also supports fixed mounted NHC.',
         'Frozen opposite-half IMU variance calibration; existing opposite-half mounting calibration. Synthetic wheel point is the IMU centre (explicit zero lever), vehicle forward axis from calibrated mounting. 10 Hz signed reference/body forward speed, 1% scale error, independent Gaussian sigma=0.01+0.02|v_forward| m/s; +10% slip for seconds 40–45 of each 90 s period, explicitly marked invalid and excluded. Synthetic RNG seed 2026. Assumed known slip is optimistic; no slip estimator.',
         'Methods: guarded ZUPT; guarded ZUPT + synthetic wheel; guarded ZUPT + synthetic wheel + opt-in wheel-zero stop confirmation. The latter two isolate the incremental benefit of stop confirmation from continuous speed aiding.',
         'Wheel stop guard requires two accepted |speed|+3sigma<0.1 m/s observations <=0.2 s apart; expires after 0.2 s. ZUPT still requires causal IMU quiet/dwell, gravity/rotation and filter-speed veto, and is never forced. Invalid observations are not updates; previous evidence expires naturally. Forward zero does not exclude lateral slip.',
