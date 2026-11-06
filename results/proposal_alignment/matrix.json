@@ -1,0 +1,378 @@
+{
+  "schema_version": 1,
+  "audit_stage": "baseline before implementation; post-pullback addendum in Markdown",
+  "counts": {
+    "complete": 5,
+    "partial": 16,
+    "experiment_substitute": 2,
+    "unimplemented": 5
+  },
+  "items": [
+    {
+      "id": "geometry",
+      "proposal": "§3.1/4 M0",
+      "expected": "SE₂(3), Lie tools, numerical Jacobians",
+      "reality": "SO(3) Exp/Log/Jacobians and SE₂(3) injection; no standalone full SE₂(3) API.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/geometry.py",
+        "ccgins/filters.py",
+        "tests/test_geometry.py",
+        "tests/test_filters.py"
+      ]
+    },
+    {
+      "id": "filters",
+      "proposal": "§3.2 M1/M2",
+      "expected": "InEKF and ESKF shared mechanization",
+      "reality": "Both 15-state filters runnable; Joseph updates and navigation covariance conversion tested. Large 90-degree convergence acceptance and KF-GINS cross-validation absent.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/filters.py",
+        "ccgins/comparison.py",
+        "tests/test_filters.py",
+        "results/inekf_vs_eskf/report.md"
+      ]
+    },
+    {
+      "id": "mount",
+      "proposal": "§3.1/3.4",
+      "expected": "18-state online δm mounting estimation",
+      "reality": "15-state only; i2Nav opposite-half offline mounting fixed during evaluation.",
+      "status": "experiment_substitute",
+      "evidence": [
+        "ccgins/filters.py",
+        "ccgins/i2nav_scenarios.py",
+        "results/i2nav/mount_calibration.json",
+        "tests/test_i2nav.py"
+      ]
+    },
+    {
+      "id": "noise",
+      "proposal": "§3.2/4",
+      "expected": "GM biases, second-order discretization, IMU YAML profiles",
+      "reality": "Random-walk biases, first-order Phi; dataclass noise and optional Earth correction.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/filters.py",
+        "ccgins/sim.py",
+        "tests/test_earth.py",
+        "configs/example_sim.yaml"
+      ]
+    },
+    {
+      "id": "gnss",
+      "proposal": "§3.3",
+      "expected": "LC position/optional velocity and lever arm",
+      "reality": "Position LC with lever arm supported/tested; optional GNSS velocity absent.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/filters.py",
+        "tests/test_filters.py",
+        "tests/test_robust.py"
+      ]
+    },
+    {
+      "id": "robust",
+      "proposal": "§3.3",
+      "expected": "Gate and robust Huber/Student-t GNSS",
+      "reality": "Huber plus chi-square gate wired via Config/CLI; forced reacquisition after repeated rejects; default robust off.",
+      "status": "complete",
+      "evidence": [
+        "ccgins/pipeline.py",
+        "ccgins/filters.py",
+        "ccgins/cli.py",
+        "tests/test_robust.py",
+        "tests/test_cli.py"
+      ]
+    },
+    {
+      "id": "network",
+      "proposal": "§3.4 M3",
+      "expected": "3-layer dilated TCN, roll/pitch, bias-compensated IMU, β-NLL heads",
+      "reality": "BASELINE: MotionNet plain stride Conv1d, dilation=1, six raw IMU channels, no attitude; dual mean/logvar and beta-NLL exist. Pullback recorded below; historical checkpoints remain legacy.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/learning.py",
+        "scripts/train_motionnet.py",
+        "tests/test_learning_pipeline.py",
+        "results/motionnet_val.json",
+        "results/kitti/motionnet_val.json",
+        "results/i2nav/motionnet_val.json"
+      ]
+    },
+    {
+      "id": "datasets",
+      "proposal": "§3.4/5",
+      "expected": "Sliding windows and real body-velocity supervision",
+      "reality": "Simulation/KITTI/i2Nav windows and labels; KITTI body velocity corrected using R-transformed ENU rather than horizontal vf/vl.",
+      "status": "complete",
+      "evidence": [
+        "ccgins/learning.py",
+        "ccgins/data/kitti.py",
+        "ccgins/data/i2nav.py",
+        "scripts/train_motionnet_kitti.py",
+        "scripts/train_motionnet_i2nav.py",
+        "tests/test_learning_pipeline.py",
+        "tests/test_i2nav.py"
+      ]
+    },
+    {
+      "id": "nhc",
+      "proposal": "§3.4/6 B1-B4",
+      "expected": "Fixed NHC, learned NHC and learned full velocity",
+      "reality": "All batch modes selectable; hybrid/v2/v3 add forward rejection and fixed lateral/vertical NHC.",
+      "status": "complete",
+      "evidence": [
+        "ccgins/pipeline.py",
+        "ccgins/cli.py",
+        "tests/test_hybrid_kitti.py",
+        "tests/test_learning_pipeline.py",
+        "results/outage_table.md"
+      ]
+    },
+    {
+      "id": "aci",
+      "proposal": "§3.5 M4",
+      "expected": "Per-learning-channel online κ and outage inflation",
+      "reality": "learned_vel calibrates three channels; hybrid/v2/v3 only forward; pre-pseudo reference is GNSS-constrained prior, t>30 and recent accepted GNSS. Clipped alpha/sliding window/bounded κ; correlated closed-loop reference.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/aci.py",
+        "ccgins/pipeline.py",
+        "tests/test_aci.py",
+        "tests/test_learning_pipeline.py",
+        "results/outage_table.md",
+        "results/outage_shift_table.md"
+      ]
+    },
+    {
+      "id": "gnss_aci",
+      "proposal": "§3.5",
+      "expected": "Online GNSS κ_g from vector NIS",
+      "reality": "No GNSS conformal calibrator in pipeline; AdaptiveR is Sage-Husa, not κ_g.",
+      "status": "unimplemented",
+      "evidence": [
+        "ccgins/aci.py",
+        "ccgins/pipeline.py",
+        "ccgins/adaptive.py"
+      ]
+    },
+    {
+      "id": "coverage",
+      "proposal": "§3.5/7 M4",
+      "expected": "Nominal long-run coverage and consistent closed loop",
+      "reality": "Published v3 full/outage simulation 0.699/0.833; shift 0.730/0.876; KITTI FT outage 0.681; i2Nav mounted v3 0.574, correlation-NHC 0.887. ACI is NOT a mathematical closed-loop integrity guarantee.",
+      "status": "partial",
+      "evidence": [
+        "results/outage_table.md",
+        "results/outage_shift_table.md",
+        "results/kitti/outage_table.md",
+        "results/i2nav/outage_table.md"
+      ]
+    },
+    {
+      "id": "dual",
+      "proposal": "§3.6 M5",
+      "expected": "GNSS-free DR guard, CUSUM, healthy-window reset",
+      "reality": "Batch dual guard and single-channel comparison present; reset uses current health rather than proving entire-window health; alarms latch without recovery M epochs.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/integrity.py",
+        "ccgins/pipeline.py",
+        "tests/test_learning_pipeline.py",
+        "results/spoof_table.md",
+        "results/i2nav/spoof_table.md"
+      ]
+    },
+    {
+      "id": "hpl",
+      "proposal": "§3.6/7",
+      "expected": "HPL and HPE>HPL reporting",
+      "reality": "No HPL output or exceedance metric; NEES coverage is different.",
+      "status": "unimplemented",
+      "evidence": [
+        "ccgins/metrics.py",
+        "ccgins/pipeline.py",
+        "ccgins/integrity.py"
+      ]
+    },
+    {
+      "id": "stream",
+      "proposal": "§4",
+      "expected": "Sensor→learning→ACI→integrity online assembly",
+      "reality": "Streaming supports fixed mounted NHC/ZUPT/wheel; learned/ACI/monitor explicitly rejected. Primary learning spine remains batch-only.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/stream.py",
+        "tests/test_stream_parity.py",
+        "results/stream_batch_parity/report.md"
+      ]
+    },
+    {
+      "id": "cli",
+      "proposal": "§4 M6",
+      "expected": "Configuration end-to-end assembly and reports",
+      "reality": "Simulation CLI supports learned checkpoint, ACI, dual monitor and robust GNSS via Config; scripts handle real datasets.",
+      "status": "complete",
+      "evidence": [
+        "ccgins/cli.py",
+        "configs/example_sim.yaml",
+        "tests/test_cli.py"
+      ]
+    },
+    {
+      "id": "simulation",
+      "proposal": "§5.1 M0",
+      "expected": "Two MEMS grades; outages, jumps, colored noise, ramp attacks",
+      "reality": "Simulation noise/bias/vibration, colored GNSS and configurable outages/ramp; no comprehensive two-grade jump/NLOS benchmark.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/sim.py",
+        "ccgins/scenarios.py",
+        "tests/test_filters.py",
+        "results/outage_table.md",
+        "results/spoof_table.md"
+      ]
+    },
+    {
+      "id": "kitti",
+      "proposal": "§5.2",
+      "expected": "Disjoint drives; real IMU plus synthetic GNSS",
+      "reality": "Drive splits and test segments implemented; GNSS truth+noise/outage/spoof, NOT real received GNSS.",
+      "status": "complete",
+      "evidence": [
+        "ccgins/kitti_scenarios.py",
+        "ccgins/data/kitti.py",
+        "scripts/run_kitti_experiment.py",
+        "tests/test_hybrid_kitti.py",
+        "results/kitti/outage_table.md"
+      ]
+    },
+    {
+      "id": "i2nav",
+      "proposal": "§5.3",
+      "expected": "Real MEMS/RTK cross-device, KF-GINS validation",
+      "reality": "Real RTK, four co-mounted IMUs, opposite time halves of ONE drive; no independent roads or KF-GINS comparison.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/i2nav_scenarios.py",
+        "scripts/run_i2nav_experiment.py",
+        "tests/test_i2nav.py",
+        "results/i2nav/outage_paired.md"
+      ]
+    },
+    {
+      "id": "baselines",
+      "proposal": "§6",
+      "expected": "B0–B5/Ours, A1–A4",
+      "reality": "B0–B4 variants and ACI/inflation/filter/single-monitor ablations recorded. B5 VB/Student-t not present; Sage-Husa/Huber are different. No unified full Ours benchmark with GNSS κ_g/HPL.",
+      "status": "partial",
+      "evidence": [
+        "scripts/run_outage_experiment.py",
+        "scripts/run_spoof_experiment.py",
+        "results/outage_table.md",
+        "results/spoof_table.md",
+        "ccgins/adaptive.py"
+      ]
+    },
+    {
+      "id": "protocol",
+      "proposal": "§5/7 M6",
+      "expected": "Locked splits, paired baselines, ≥20 MC, mean/std",
+      "reality": "Simulation 100–119 train,500–503 val,900–909 test,700–705 calibration. Only 10 test seeds; KITTI held-out drives; i2Nav same-drive temporal folds. This session adds frozen mini paired protocol, not full acceptance.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/scenarios.py",
+        "ccgins/kitti_scenarios.py",
+        "ccgins/i2nav_scenarios.py",
+        "scripts/run_outage_experiment.py",
+        "results/outage_metrics.json"
+      ]
+    },
+    {
+      "id": "metrics",
+      "proposal": "§7",
+      "expected": "RMSE, velocity/yaw, %DT, NEES/NIS fit, HPL, FAs/hour, efficiency",
+      "reality": "Position RMSE/outage endpoints/NEES/coverage/runtime; spoof delays and detection counts. Missing unified yaw/%DT/NIS-fit/HPL/memory/FA-per-hour suite.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/metrics.py",
+        "scripts/run_spoof_experiment.py",
+        "tests/test_comparison.py",
+        "results/inekf_vs_eskf/metrics.json"
+      ]
+    },
+    {
+      "id": "reports",
+      "proposal": "§4/9 M6",
+      "expected": "Automatic full report and plots",
+      "reality": "Separate experiment scripts and tables; no unified make_report.py full M6 acceptance.",
+      "status": "partial",
+      "evidence": [
+        "scripts/run_outage_experiment.py",
+        "scripts/plot_i2nav_summary.py",
+        "results/i2nav/outage_table.md"
+      ]
+    },
+    {
+      "id": "export",
+      "proposal": "§4",
+      "expected": "TorchScript/ONNX export",
+      "reality": "State-dict persistence only; no export utility.",
+      "status": "unimplemented",
+      "evidence": [
+        "ccgins/learning.py"
+      ]
+    },
+    {
+      "id": "urbannav",
+      "proposal": "§3.7/5.4 M7",
+      "expected": "UrbanNav raw mult satellite pseudorange TC + clock/NLOS",
+      "reality": "Single RTK baseline projected to rank-one scalar range replaces vector update; exploratory substitute, no satellites/clock/RINEX/UrbanNav.",
+      "status": "experiment_substitute",
+      "evidence": [
+        "ccgins/range_coupling.py",
+        "ccgins/range_experiment.py",
+        "tests/test_range_coupling.py",
+        "results/range_coupling/report.md"
+      ]
+    },
+    {
+      "id": "smoothing",
+      "proposal": "§3.7 M7",
+      "expected": "Fixed-lag RTS 1–5s",
+      "reality": "No smoother.",
+      "status": "unimplemented",
+      "evidence": [
+        "ccgins/pipeline.py"
+      ]
+    },
+    {
+      "id": "online_train",
+      "proposal": "§3.7 M7",
+      "expected": "Healthy GNSS last-layer SGD with rollback",
+      "reality": "Offline fine-tuning only.",
+      "status": "unimplemented",
+      "evidence": [
+        "ccgins/learning.py",
+        "scripts/train_motionnet_i2nav.py"
+      ]
+    },
+    {
+      "id": "motion_extras",
+      "proposal": "§3.1 optional odometer; post-proposal ZUPT",
+      "expected": "Optional wheel scale; later causal motion research",
+      "reality": "Mounted wheel/ZUPT integrated and parity tested; no wheel-scale state or real wheel data; synthetic wheel studies are exploratory.",
+      "status": "partial",
+      "evidence": [
+        "ccgins/zupt.py",
+        "ccgins/stream.py",
+        "tests/test_zupt.py",
+        "tests/test_stream_motion.py",
+        "results/adaptive_motion/report.md",
+        "results/stream_motion/report.md"
+      ]
+    }
+  ]
+}
