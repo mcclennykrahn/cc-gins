@@ -1,0 +1,11 @@
+completed seed 900
+completed seed 903
+completed seed 902
+completed seed 901
+completed seed 905
+completed seed 904
+completed seed 907
+completed seed 906
+completed seed 908
+completed seed 909
+{"clean_alarms": 6, "clean_runs": 10, "clean_exposure_s": 6000, "clean_gnss_epochs": 6000, "attacks": {"0.2": {"runs": 10, "detected": 5, "misses": 5, "preattack_alarms": 5, "delays_s": [null, 123.0, 16.0, null, null, null, 14.0, 15.0, null, 33.0]}, "0.5": {"runs": 10, "detected": 5, "misses": 5, "preattack_alarms": 5, "delays_s": [null, 16.0, 10.0, null, null, null, 8.0, 6.0, null, 13.0]}, "1.0": {"runs": 10, "detected": 5, "misses": 5, "preattack_alarms": 5, "delays_s": [null, 7.0, 6.0, null, null, null, 5.0, 5.0, null, 8.0]}}}

@@ -158,3 +158,26 @@ TCN unpromoted. Historical evidence above and published tables are preserved.
 
 Current bookkeeping counts: {'complete': 5, 'partial': 17,
 'experiment_substitute': 2, 'unimplemented': 4}. No acceptance class changes.
+
+## 2026-11-06 v0.8-stage2 detection campaign
+
+[Protocol](../results/v08_stage2/protocol.md) and
+[Stage 2 report](../results/v08_stage2/report.md) record a preregistered
+default-noise ramp campaign. Validation seeds 500–503 rejected all three
+candidates `(k,h)` = `(0,20)`, `(3,50)`, `(6,100)` for clean alarms and/or
+missed attacks, so `validation_pass` is false. The least-bad `(3,50)` was frozen
+only for held-out diagnosis and was **not promoted**; runtime defaults, attack
+and noise definitions, and historical tables are unchanged. Held-out seeds
+900–909 produced 6/10 clean alarms and 5/10 post-onset detections at each of
+0.2, 0.5 and 1.0 m/s, with the five non-detections per rate being pre-onset
+latched alarms. `detection_pass` is false and the mandatory DETECTION gate
+still FAILS. Full pytest: 159 passed in 89.44s.
+
+The next proposed step is the opt-in whole-reset-interval guard-reference
+health mechanism with fixed-NHC fallback described in
+[blocked_followup.md](../results/v08_stage2/blocked_followup.md); it is a
+proposal, not implemented here and not asserted to close DETECTION. TCN remains
+opt-in and unpromoted. UrbanNav raw multi-satellite TC remains incomplete
+(`experiment_substitute`). Matrix counts are unchanged at `{'complete': 5,
+'partial': 17, 'experiment_substitute': 2, 'unimplemented': 4}`; no row changed
+acceptance class and no prior evidence was rewritten.
