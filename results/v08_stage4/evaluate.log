@@ -1,0 +1,19 @@
+completed validation seed 501
+completed validation seed 503
+completed validation seed 502
+completed validation seed 500
+completed held_out_diagnostic seed 903
+completed held_out_diagnostic seed 900
+completed held_out_diagnostic seed 902
+completed held_out_diagnostic seed 901
+completed held_out_diagnostic seed 904
+completed held_out_diagnostic seed 905
+completed held_out_diagnostic seed 906
+completed held_out_diagnostic seed 907
+completed held_out_diagnostic seed 908
+completed held_out_diagnostic seed 909
+parity [('clean', True, None), ('outage', None, True)]
+validation False clean alarms 2 fallbacks 0
+validation True clean alarms 2 fallbacks 55840
+held_out_diagnostic False clean alarms 6 fallbacks 0
+held_out_diagnostic True clean alarms 7 fallbacks 146100

@@ -208,3 +208,12 @@ CUSUM and TCN remain unpromoted, legacy remains primary, coverage_h=0.691387
 remains below nominal, HPL stays unimplemented, and raw UrbanNav TC stays
 `experiment_substitute`. Counts remain `{'complete': 5, 'partial': 17,
 'experiment_substitute': 2, 'unimplemented': 4}`; no acceptance class changed.
+
+## Stage 4 cumulative DETECTION diagnostics
+
+Stage 4 adds lifetime invalidation-call and affected-interval counters without
+changing health decisions or promoting a detector. See
+[protocol](../results/v08_stage4/protocol.md) and
+[measured report](../results/v08_stage4/report.md). Current-interval reason codes
+remain intact. Reused seeds provide diagnostics only; DETECTION remains FAIL,
+confirmed_v08=false, CUSUM/TCN unpromoted. No proposal status/count upgrade.

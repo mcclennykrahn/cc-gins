@@ -1,0 +1,7 @@
+# Stage 4 independent review — PASS
+
+Source review and focused regression: **21 passed in 18.73s**. No blocking implementation findings. Reviewed integrity counters, Stage4 evaluator, and added independent tests in `tests/test_stage4_diagnostics.py`.
+
+Counters are additive and do not change detector or navigation decisions. `reason_events` counts invalidate calls, including repeated freshness checks and reset-boundary observations; these are not independent GNSS observations. `reason_intervals` counts each affected interval once per reason, including the current open interval. Copies in summary prevent later mutation from changing snapshots. Independent tests cover preservation through clean-ending intervals, repeated freshness checks, open intervals, copied dictionaries, onset equality, preattack/no-alarm miss partition, and pooled counts.
+
+Campaign output and report require final selfcheck after completion. The inherited phase-specific CLI overwrites metrics.json; run `all` or preserve separate outputs. Reused seeds are diagnostic evidence, not fresh held-out validation. DETECTION remains FAIL; confirmed_v08=false; neither CUSUM nor TCN is promoted.

@@ -55,6 +55,10 @@ class GuardReferenceHealth:
         self.reset_skips = 0
         self.unhealthy_intervals = 0
         self.history_reasons = []
+        # Lifetime bookkeeping occurrences, including repeated freshness checks.
+        # Interval counts include the current interval; neither measures duration.
+        self.reason_events = dict.fromkeys(self.REASONS, 0)
+        self.reason_intervals = dict.fromkeys(self.REASONS, 0)
         self.begin(0.0)
 
     def begin(self, t) -> None:
@@ -84,7 +88,9 @@ class GuardReferenceHealth:
     def invalidate(self, reason: str) -> None:
         if reason not in self.REASONS:
             raise ValueError(f"unknown guard-reference reason {reason!r}")
+        self.reason_events[reason] += 1
         if reason not in self.reasons:
+            self.reason_intervals[reason] += 1
             self.reasons.append(reason)
         self.bad = True
 
@@ -137,6 +143,8 @@ class GuardReferenceHealth:
                     accepted=self.accepted, epochs=self.epochs,
                     reasons=list(self.reasons), reason_codes=self.reason_codes(),
                     history_reasons=list(self.history_reasons),
+                    reason_events=dict(self.reason_events),
+                    reason_intervals=dict(self.reason_intervals),
                     last_fix_t=None if self.last_fix_t is None else float(self.last_fix_t),
                     start_t=None if self.start_t is None else float(self.start_t))
 

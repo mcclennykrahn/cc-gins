@@ -1,0 +1,26 @@
+{
+  "stage_id": "cc_diagnostics_s4",
+  "verdict": "PASS",
+  "scope": "Independent source review and focused regression; campaign artifacts require final selfcheck",
+  "blocking_issues": [],
+  "pytest": "21 passed in 18.73s",
+  "pytest_log": "/workspace/ccgins-v08/reviews/stage4_independent_pytest.log",
+  "reviewed_paths": [
+    "ccgins/integrity.py",
+    "results/v08_stage4/evaluate.py",
+    "tests/test_stage4_diagnostics.py"
+  ],
+  "findings": [
+    "Counters are additive; no detector/navigation state transitions changed.",
+    "reason_events counts every invalidate call, including repeated freshness checks and reset-boundary observations; not independent GNSS observations.",
+    "reason_intervals counts once per reason per affected interval including the open interval.",
+    "Summary snapshots copy dictionaries and cumulative values survive begin().",
+    "Independent synthetic tests verify onset equality, preattack/no-alarm miss partition and pooled count summation.",
+    "Phase-specific evaluator invocations overwrite metrics.json; final campaign must use all or preserve outputs separately."
+  ],
+  "confirmed_v08": false,
+  "detection": "FAIL",
+  "tcn_promoted": false,
+  "cusum_promoted": false,
+  "written_at": "2026-11-06T16:01:08.058516+00:00"
+}

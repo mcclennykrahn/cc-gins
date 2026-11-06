@@ -1,0 +1,4065 @@
+{
+  "parity": [
+    {
+      "case": "clean",
+      "duration_s": 40.0,
+      "outages": null,
+      "False": {
+        "batch_extra_guard": null,
+        "batch_fallback_epochs": 0,
+        "stream_fallback_epochs": 0,
+        "max_position_delta": 0.0,
+        "max_covariance_delta": 0.0
+      },
+      "True": {
+        "batch_extra_guard": {
+          "enabled": true,
+          "healthy": true,
+          "bad": false,
+          "intervals": 2,
+          "resets": 1,
+          "reset_skips": 0,
+          "unhealthy_intervals": 0,
+          "accepted": 11,
+          "epochs": 11,
+          "reasons": [],
+          "reason_codes": {
+            "missing": 0,
+            "stale": 0,
+            "rejected": 0,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 0,
+            "recovery": 0
+          },
+          "history_reasons": [],
+          "reason_events": {
+            "missing": 0,
+            "stale": 0,
+            "rejected": 0,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 0,
+            "recovery": 0
+          },
+          "reason_intervals": {
+            "missing": 0,
+            "stale": 0,
+            "rejected": 0,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 0,
+            "recovery": 0
+          },
+          "last_fix_t": 40.0,
+          "start_t": 30.0
+        },
+        "batch_fallback_epochs": 0,
+        "stream_fallback_epochs": 0,
+        "max_position_delta": 0.0,
+        "max_covariance_delta": 0.0
+      },
+      "flag_on_is_noop": true
+    },
+    {
+      "case": "outage",
+      "duration_s": 50.0,
+      "outages": [
+        [
+          10.0,
+          4.0
+        ]
+      ],
+      "False": {
+        "batch_extra_guard": null,
+        "batch_fallback_epochs": 0,
+        "stream_fallback_epochs": 0,
+        "max_position_delta": 0.0,
+        "max_covariance_delta": 0.0
+      },
+      "True": {
+        "batch_extra_guard": {
+          "enabled": true,
+          "healthy": true,
+          "bad": false,
+          "intervals": 2,
+          "resets": 0,
+          "reset_skips": 1,
+          "unhealthy_intervals": 1,
+          "accepted": 21,
+          "epochs": 21,
+          "reasons": [],
+          "reason_codes": {
+            "missing": 0,
+            "stale": 0,
+            "rejected": 0,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 0,
+            "recovery": 0
+          },
+          "history_reasons": [
+            "stale"
+          ],
+          "reason_events": {
+            "missing": 0,
+            "stale": 35,
+            "rejected": 0,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 0,
+            "recovery": 0
+          },
+          "reason_intervals": {
+            "missing": 0,
+            "stale": 1,
+            "rejected": 0,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 0,
+            "recovery": 0
+          },
+          "last_fix_t": 50.0,
+          "start_t": 30.0
+        },
+        "batch_fallback_epochs": 195,
+        "stream_fallback_epochs": 195,
+        "max_position_delta": 0.0,
+        "max_covariance_delta": 0.0
+      },
+      "flag_on_observable_health": true
+    }
+  ],
+  "validation": {
+    "rows": [
+      {
+        "split": "validation",
+        "seed": 500,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": null,
+        "delay_s": null,
+        "final_horizontal_error_m": 1.009928120493339,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 500,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": null,
+        "delay_s": null,
+        "final_horizontal_error_m": 1.0082920475879549,
+        "resets": 17,
+        "reset_skips": 3,
+        "fallback_epochs": 150,
+        "first_fallback": 435.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 0,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 0,
+          "stale": 5,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 0,
+          "stale": 1,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 500,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 350.0,
+        "delay_s": 50.0,
+        "final_horizontal_error_m": 17.921332023662718,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 500,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 350.0,
+        "delay_s": 50.0,
+        "final_horizontal_error_m": 80.21314165521763,
+        "resets": 11,
+        "reset_skips": 9,
+        "fallback_epochs": 2500,
+        "first_fallback": 350.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2288,
+          "stale": 96,
+          "rejected": 260,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 260,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 8,
+          "stale": 1,
+          "rejected": 10,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 10,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 500,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 327.0,
+        "delay_s": 27.0,
+        "final_horizontal_error_m": 68.79885942898983,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 500,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 327.0,
+        "delay_s": 27.0,
+        "final_horizontal_error_m": 86.80022772647492,
+        "resets": 10,
+        "reset_skips": 10,
+        "fallback_epochs": 2730,
+        "first_fallback": 327.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 26,
+          "rejected": 284,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 284,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 1,
+          "rejected": 11,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 500,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 307.0,
+        "delay_s": 7.0,
+        "final_horizontal_error_m": 46.506591256600395,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 500,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 307.0,
+        "delay_s": 7.0,
+        "final_horizontal_error_m": 94.08027104705995,
+        "resets": 10,
+        "reset_skips": 10,
+        "fallback_epochs": 2950,
+        "first_fallback": 305.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 231,
+          "rejected": 305,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 304,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 1,
+          "rejected": 11,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 501,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": 118.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 14.812185985498632,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 501,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": 115.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 24.521120477375895,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 4860,
+        "first_fallback": 89.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4576,
+          "stale": 51,
+          "rejected": 504,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 503,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 16,
+          "stale": 2,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 18,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 501,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 118.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 14.812185985498632,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 501,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 115.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 24.521120477375895,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 4860,
+        "first_fallback": 89.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4576,
+          "stale": 51,
+          "rejected": 504,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 503,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 16,
+          "stale": 2,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 18,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 501,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 118.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 14.812185985498632,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 501,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 115.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 24.521120477375895,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 4860,
+        "first_fallback": 89.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4576,
+          "stale": 51,
+          "rejected": 504,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 503,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 16,
+          "stale": 2,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 18,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 501,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 118.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 14.812185985498632,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 501,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 115.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 24.521120477375895,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 4860,
+        "first_fallback": 89.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4576,
+          "stale": 51,
+          "rejected": 504,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 503,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 16,
+          "stale": 2,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 18,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 502,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": null,
+        "delay_s": null,
+        "final_horizontal_error_m": 1.2701791087390348,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 502,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": null,
+        "delay_s": null,
+        "final_horizontal_error_m": 1.2701791087390348,
+        "resets": 18,
+        "reset_skips": 2,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 0,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 0,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 0,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 502,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 324.0,
+        "delay_s": 24.0,
+        "final_horizontal_error_m": 3.1510124309251695,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 502,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 327.0,
+        "delay_s": 27.0,
+        "final_horizontal_error_m": 3.069538435471896,
+        "resets": 9,
+        "reset_skips": 11,
+        "fallback_epochs": 2730,
+        "first_fallback": 327.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 26,
+          "rejected": 284,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 284,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 1,
+          "rejected": 11,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 502,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 312.0,
+        "delay_s": 12.0,
+        "final_horizontal_error_m": 5.577413236968779,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 502,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 312.0,
+        "delay_s": 12.0,
+        "final_horizontal_error_m": 0.6029990409321646,
+        "resets": 9,
+        "reset_skips": 11,
+        "fallback_epochs": 2950,
+        "first_fallback": 305.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 181,
+          "rejected": 300,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 299,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 1,
+          "rejected": 11,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 502,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 305.0,
+        "delay_s": 5.0,
+        "final_horizontal_error_m": 7.745685443276067,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 502,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 305.0,
+        "delay_s": 5.0,
+        "final_horizontal_error_m": 3.8597768636368452,
+        "resets": 9,
+        "reset_skips": 11,
+        "fallback_epochs": 2950,
+        "first_fallback": 305.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 246,
+          "rejected": 306,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 306,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 1,
+          "rejected": 11,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 503,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": 114.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.147053362356578,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 503,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": 114.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 10.974635234958427,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4860,
+        "first_fallback": 114.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4576,
+          "stale": 56,
+          "rejected": 504,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 504,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 16,
+          "stale": 1,
+          "rejected": 18,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 18,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 503,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 114.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.147053362356578,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 503,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 114.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 10.974635234958427,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4860,
+        "first_fallback": 114.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4576,
+          "stale": 56,
+          "rejected": 504,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 504,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 16,
+          "stale": 1,
+          "rejected": 18,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 18,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 503,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 114.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.147053362356578,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 503,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 114.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 10.974635234958427,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4860,
+        "first_fallback": 114.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4576,
+          "stale": 56,
+          "rejected": 504,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 504,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 16,
+          "stale": 1,
+          "rejected": 18,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 18,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "validation",
+        "seed": 503,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 114.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.147053362356578,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "validation",
+        "seed": 503,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 114.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 10.974635234958427,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4860,
+        "first_fallback": 114.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4576,
+          "stale": 56,
+          "rejected": 504,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 504,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 16,
+          "stale": 1,
+          "rejected": 18,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 18,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      }
+    ],
+    "summaries": [
+      {
+        "guard_ref_health": false,
+        "clean": {
+          "runs": 4,
+          "exposure_s": 2400,
+          "alarms": 2,
+          "alarm_times": [
+            118.0,
+            114.0
+          ]
+        },
+        "attacks": {
+          "0.2": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 2,
+            "delays_s": [
+              50.0,
+              24.0
+            ]
+          },
+          "0.5": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 2,
+            "delays_s": [
+              27.0,
+              12.0
+            ]
+          },
+          "1.0": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 2,
+            "delays_s": [
+              7.0,
+              5.0
+            ]
+          }
+        },
+        "navigation": {
+          "mean_final_horizontal_error_m": 15.48862240256726,
+          "max_final_horizontal_error_m": 68.79885942898983,
+          "resets": 0,
+          "reset_skips": 0,
+          "fallback_epochs": 0,
+          "reason_codes": {},
+          "reason_events": {},
+          "reason_intervals": {}
+        }
+      },
+      {
+        "guard_ref_health": true,
+        "clean": {
+          "runs": 4,
+          "exposure_s": 2400,
+          "alarms": 2,
+          "alarm_times": [
+            115.0,
+            114.0
+          ]
+        },
+        "attacks": {
+          "0.2": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 2,
+            "delays_s": [
+              50.0,
+              27.0
+            ]
+          },
+          "0.5": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 2,
+            "delays_s": [
+              27.0,
+              12.0
+            ]
+          },
+          "1.0": {
+            "runs": 4,
+            "detected": 2,
+            "misses": 2,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 2,
+            "delays_s": [
+              7.0,
+              5.0
+            ]
+          }
+        },
+        "navigation": {
+          "mean_final_horizontal_error_m": 25.805465548403603,
+          "max_final_horizontal_error_m": 94.08027104705995,
+          "resets": 113,
+          "reset_skips": 207,
+          "fallback_epochs": 55840,
+          "reason_codes": {
+            "missing": 0,
+            "stale": 0,
+            "rejected": 14,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 14,
+            "recovery": 0
+          },
+          "reason_events": {
+            "missing": 51766,
+            "stale": 1239,
+            "rejected": 5772,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 5765,
+            "recovery": 0
+          },
+          "reason_intervals": {
+            "missing": 181,
+            "stale": 19,
+            "rejected": 214,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 209,
+            "recovery": 0
+          }
+        }
+      }
+    ]
+  },
+  "held_out_diagnostic": {
+    "rows": [
+      {
+        "split": "held_out_diagnostic",
+        "seed": 900,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": 103.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 30.525694946929214,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 900,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": null,
+        "delay_s": null,
+        "final_horizontal_error_m": 0.3203239211342981,
+        "resets": 17,
+        "reset_skips": 3,
+        "fallback_epochs": 500,
+        "first_fallback": 51.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 0,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 0,
+          "stale": 15,
+          "rejected": 3,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 0,
+          "stale": 3,
+          "rejected": 3,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 900,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 103.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 30.525694946929214,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 900,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 348.0,
+        "delay_s": 48.0,
+        "final_horizontal_error_m": 15.809547229136083,
+        "resets": 9,
+        "reset_skips": 11,
+        "fallback_epochs": 2870,
+        "first_fallback": 51.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2288,
+          "stale": 126,
+          "rejected": 264,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 262,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 8,
+          "stale": 3,
+          "rejected": 12,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 10,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 900,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 103.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 30.525694946929214,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 900,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 316.0,
+        "delay_s": 16.0,
+        "final_horizontal_error_m": 16.540611892331192,
+        "resets": 8,
+        "reset_skips": 12,
+        "fallback_epochs": 3210,
+        "first_fallback": 51.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 151,
+          "rejected": 298,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 295,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 3,
+          "rejected": 13,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 900,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 103.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 30.525694946929214,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 900,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 308.0,
+        "delay_s": 8.0,
+        "final_horizontal_error_m": 15.797615260969328,
+        "resets": 8,
+        "reset_skips": 12,
+        "fallback_epochs": 3300,
+        "first_fallback": 51.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 256,
+          "rejected": 308,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 303,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 3,
+          "rejected": 13,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 901,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": null,
+        "delay_s": null,
+        "final_horizontal_error_m": 0.5209729370880001,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 901,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": null,
+        "delay_s": null,
+        "final_horizontal_error_m": 0.5225705552151388,
+        "resets": 14,
+        "reset_skips": 6,
+        "fallback_epochs": 70,
+        "first_fallback": 173.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 0,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 0,
+          "stale": 5,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 0,
+          "stale": 1,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 901,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 423.0,
+        "delay_s": 123.0,
+        "final_horizontal_error_m": 31.720281194542927,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 901,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 423.0,
+        "delay_s": 123.0,
+        "final_horizontal_error_m": 34.023035034586364,
+        "resets": 12,
+        "reset_skips": 8,
+        "fallback_epochs": 1840,
+        "first_fallback": 173.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 1430,
+          "stale": 271,
+          "rejected": 185,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 184,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 5,
+          "stale": 2,
+          "rejected": 8,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 7,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 901,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 316.0,
+        "delay_s": 16.0,
+        "final_horizontal_error_m": 21.088808771336492,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 901,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 316.0,
+        "delay_s": 16.0,
+        "final_horizontal_error_m": 25.363394696053888,
+        "resets": 9,
+        "reset_skips": 11,
+        "fallback_epochs": 2910,
+        "first_fallback": 173.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 141,
+          "rejected": 296,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 295,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 2,
+          "rejected": 12,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 901,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 307.0,
+        "delay_s": 7.0,
+        "final_horizontal_error_m": 20.517718824347167,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 901,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 307.0,
+        "delay_s": 7.0,
+        "final_horizontal_error_m": 21.755976045062884,
+        "resets": 9,
+        "reset_skips": 11,
+        "fallback_epochs": 3000,
+        "first_fallback": 173.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 231,
+          "rejected": 305,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 304,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 2,
+          "rejected": 12,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 902,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": null,
+        "delay_s": null,
+        "final_horizontal_error_m": 0.4569993655098821,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 902,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": 144.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 77.53210861479567,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4560,
+        "first_fallback": 144.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4290,
+          "stale": 56,
+          "rejected": 473,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 473,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 15,
+          "stale": 1,
+          "rejected": 17,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 17,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 902,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 316.0,
+        "delay_s": 16.0,
+        "final_horizontal_error_m": 22.719637266895298,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 902,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 144.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 77.53210861479567,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4560,
+        "first_fallback": 144.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4290,
+          "stale": 56,
+          "rejected": 473,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 473,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 15,
+          "stale": 1,
+          "rejected": 17,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 17,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 902,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 310.0,
+        "delay_s": 10.0,
+        "final_horizontal_error_m": 25.42491518804516,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 902,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 144.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 77.53210861479567,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4560,
+        "first_fallback": 144.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4290,
+          "stale": 56,
+          "rejected": 473,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 473,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 15,
+          "stale": 1,
+          "rejected": 17,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 17,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 902,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 306.0,
+        "delay_s": 6.0,
+        "final_horizontal_error_m": 15.359172752283397,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 902,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 144.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 77.53210861479567,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4560,
+        "first_fallback": 144.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4290,
+          "stale": 56,
+          "rejected": 473,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 473,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 15,
+          "stale": 1,
+          "rejected": 17,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 17,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 903,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": 158.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 31.241888681197764,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 903,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": 158.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 26.920995032922512,
+        "resets": 4,
+        "reset_skips": 16,
+        "fallback_epochs": 4420,
+        "first_fallback": 158.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4004,
+          "stale": 216,
+          "rejected": 458,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 458,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 14,
+          "stale": 1,
+          "rejected": 16,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 16,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 903,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 158.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 31.241888681197764,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 903,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 158.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 26.920995032922512,
+        "resets": 4,
+        "reset_skips": 16,
+        "fallback_epochs": 4420,
+        "first_fallback": 158.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4004,
+          "stale": 216,
+          "rejected": 458,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 458,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 14,
+          "stale": 1,
+          "rejected": 16,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 16,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 903,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 158.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 31.241888681197764,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 903,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 158.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 26.920995032922512,
+        "resets": 4,
+        "reset_skips": 16,
+        "fallback_epochs": 4420,
+        "first_fallback": 158.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4004,
+          "stale": 216,
+          "rejected": 458,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 458,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 14,
+          "stale": 1,
+          "rejected": 16,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 16,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 903,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 158.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 31.241888681197764,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 903,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 158.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 26.920995032922512,
+        "resets": 4,
+        "reset_skips": 16,
+        "fallback_epochs": 4420,
+        "first_fallback": 158.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4004,
+          "stale": 216,
+          "rejected": 458,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 458,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 14,
+          "stale": 1,
+          "rejected": 16,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 16,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 904,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": 74.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.953397005328437,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 904,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": 76.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.646589840094574,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 5320,
+        "first_fallback": 68.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4862,
+          "stale": 141,
+          "rejected": 544,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 543,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 17,
+          "stale": 1,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 19,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 904,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 74.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.953397005328437,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 904,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 76.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.646589840094574,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 5320,
+        "first_fallback": 68.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4862,
+          "stale": 141,
+          "rejected": 544,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 543,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 17,
+          "stale": 1,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 19,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 904,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 74.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.953397005328437,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 904,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 76.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.646589840094574,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 5320,
+        "first_fallback": 68.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4862,
+          "stale": 141,
+          "rejected": 544,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 543,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 17,
+          "stale": 1,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 19,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 904,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 74.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.953397005328437,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 904,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 76.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 9.646589840094574,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 5320,
+        "first_fallback": 68.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4862,
+          "stale": 141,
+          "rejected": 544,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 543,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 17,
+          "stale": 1,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 19,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 905,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": 90.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 29.975630902089016,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 905,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": 90.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 29.155569040575255,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 5100,
+        "first_fallback": 90.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4862,
+          "stale": 0,
+          "rejected": 529,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 529,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 17,
+          "stale": 0,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 19,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 905,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 90.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 29.975630902089016,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 905,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 90.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 29.155569040575255,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 5100,
+        "first_fallback": 90.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4862,
+          "stale": 0,
+          "rejected": 529,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 529,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 17,
+          "stale": 0,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 19,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 905,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 90.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 29.975630902089016,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 905,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 90.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 29.155569040575255,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 5100,
+        "first_fallback": 90.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4862,
+          "stale": 0,
+          "rejected": 529,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 529,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 17,
+          "stale": 0,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 19,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 905,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 90.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 29.975630902089016,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 905,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 90.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 29.155569040575255,
+        "resets": 2,
+        "reset_skips": 18,
+        "fallback_epochs": 5100,
+        "first_fallback": 90.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4862,
+          "stale": 0,
+          "rejected": 529,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 529,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 17,
+          "stale": 0,
+          "rejected": 19,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 19,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 906,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": null,
+        "delay_s": null,
+        "final_horizontal_error_m": 0.2016425523157075,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 906,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": null,
+        "delay_s": null,
+        "final_horizontal_error_m": 0.2016425523157075,
+        "resets": 20,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 0,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 0,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 0,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 0,
+          "recovery": 0
+        },
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 906,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 314.0,
+        "delay_s": 14.0,
+        "final_horizontal_error_m": 12.874467522577383,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 906,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 314.0,
+        "delay_s": 14.0,
+        "final_horizontal_error_m": 13.187113836545189,
+        "resets": 10,
+        "reset_skips": 10,
+        "fallback_epochs": 2860,
+        "first_fallback": 314.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 156,
+          "rejected": 297,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 297,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 1,
+          "rejected": 11,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 906,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 308.0,
+        "delay_s": 8.0,
+        "final_horizontal_error_m": 9.40625945061344,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 906,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 308.0,
+        "delay_s": 8.0,
+        "final_horizontal_error_m": 9.816919371070457,
+        "resets": 10,
+        "reset_skips": 10,
+        "fallback_epochs": 2920,
+        "first_fallback": 308.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 216,
+          "rejected": 303,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 303,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 1,
+          "rejected": 11,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 906,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 305.0,
+        "delay_s": 5.0,
+        "final_horizontal_error_m": 9.578778671210397,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 906,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 305.0,
+        "delay_s": 5.0,
+        "final_horizontal_error_m": 9.705925114417875,
+        "resets": 10,
+        "reset_skips": 10,
+        "fallback_epochs": 2950,
+        "first_fallback": 305.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 246,
+          "rejected": 306,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 306,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 1,
+          "rejected": 11,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 907,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": null,
+        "delay_s": null,
+        "final_horizontal_error_m": 0.5352601995935741,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 907,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": 274.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 4.31346678490283,
+        "resets": 7,
+        "reset_skips": 13,
+        "fallback_epochs": 3260,
+        "first_fallback": 274.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2860,
+          "stale": 256,
+          "rejected": 338,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 338,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 10,
+          "stale": 1,
+          "rejected": 12,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 12,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 907,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 315.0,
+        "delay_s": 15.0,
+        "final_horizontal_error_m": 9.933180667763322,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 907,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 274.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 4.31346678490283,
+        "resets": 7,
+        "reset_skips": 13,
+        "fallback_epochs": 3260,
+        "first_fallback": 274.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2860,
+          "stale": 256,
+          "rejected": 338,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 338,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 10,
+          "stale": 1,
+          "rejected": 12,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 12,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 907,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 306.0,
+        "delay_s": 6.0,
+        "final_horizontal_error_m": 13.12420486796393,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 907,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 274.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 4.31346678490283,
+        "resets": 7,
+        "reset_skips": 13,
+        "fallback_epochs": 3260,
+        "first_fallback": 274.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2860,
+          "stale": 256,
+          "rejected": 338,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 338,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 10,
+          "stale": 1,
+          "rejected": 12,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 12,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 907,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 305.0,
+        "delay_s": 5.0,
+        "final_horizontal_error_m": 14.005450421281704,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 907,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 274.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 4.31346678490283,
+        "resets": 7,
+        "reset_skips": 13,
+        "fallback_epochs": 3260,
+        "first_fallback": 274.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2860,
+          "stale": 256,
+          "rejected": 338,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 338,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 10,
+          "stale": 1,
+          "rejected": 12,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 12,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 908,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": 156.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 13.35536135301353,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 908,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": 156.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 13.746549924110392,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4440,
+        "first_fallback": 156.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4004,
+          "stale": 236,
+          "rejected": 460,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 460,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 14,
+          "stale": 1,
+          "rejected": 16,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 16,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 908,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 156.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 13.35536135301353,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 908,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 156.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 13.746549924110392,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4440,
+        "first_fallback": 156.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4004,
+          "stale": 236,
+          "rejected": 460,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 460,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 14,
+          "stale": 1,
+          "rejected": 16,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 16,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 908,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 156.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 13.35536135301353,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 908,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 156.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 13.746549924110392,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4440,
+        "first_fallback": 156.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4004,
+          "stale": 236,
+          "rejected": 460,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 460,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 14,
+          "stale": 1,
+          "rejected": 16,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 16,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 908,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 156.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 13.35536135301353,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 908,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 156.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 13.746549924110392,
+        "resets": 3,
+        "reset_skips": 17,
+        "fallback_epochs": 4440,
+        "first_fallback": 156.1,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 4004,
+          "stale": 236,
+          "rejected": 460,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 460,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 14,
+          "stale": 1,
+          "rejected": 16,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 16,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "alarm",
+          "rejected",
+          "stale",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 909,
+        "rate": 0.0,
+        "guard_ref_health": false,
+        "alarm_time": 416.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 4.584376008676702,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 909,
+        "rate": 0.0,
+        "guard_ref_health": true,
+        "alarm_time": 427.0,
+        "delay_s": null,
+        "final_horizontal_error_m": 1.6320768411209208,
+        "resets": 11,
+        "reset_skips": 9,
+        "fallback_epochs": 2020,
+        "first_fallback": 102.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 1430,
+          "stale": 236,
+          "rejected": 182,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 180,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 5,
+          "stale": 3,
+          "rejected": 9,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 7,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 909,
+        "rate": 0.2,
+        "guard_ref_health": false,
+        "alarm_time": 333.0,
+        "delay_s": 33.0,
+        "final_horizontal_error_m": 5.14977352777091,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 909,
+        "rate": 0.2,
+        "guard_ref_health": true,
+        "alarm_time": 329.0,
+        "delay_s": 29.0,
+        "final_horizontal_error_m": 13.376712259632948,
+        "resets": 8,
+        "reset_skips": 12,
+        "fallback_epochs": 3030,
+        "first_fallback": 102.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 16,
+          "rejected": 284,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 282,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 2,
+          "rejected": 12,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 909,
+        "rate": 0.5,
+        "guard_ref_health": false,
+        "alarm_time": 313.0,
+        "delay_s": 13.0,
+        "final_horizontal_error_m": 5.500691496947619,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 909,
+        "rate": 0.5,
+        "guard_ref_health": true,
+        "alarm_time": 312.0,
+        "delay_s": 12.0,
+        "final_horizontal_error_m": 11.708501563470117,
+        "resets": 8,
+        "reset_skips": 12,
+        "fallback_epochs": 3060,
+        "first_fallback": 102.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 181,
+          "rejected": 300,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 299,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 2,
+          "rejected": 12,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 909,
+        "rate": 1.0,
+        "guard_ref_health": false,
+        "alarm_time": 308.0,
+        "delay_s": 8.0,
+        "final_horizontal_error_m": 6.336605470781331,
+        "resets": 0,
+        "reset_skips": 0,
+        "fallback_epochs": 0,
+        "first_fallback": null,
+        "intervals": 0,
+        "reason_codes": {},
+        "reason_events": {},
+        "reason_intervals": {},
+        "history_reasons": []
+      },
+      {
+        "split": "held_out_diagnostic",
+        "seed": 909,
+        "rate": 1.0,
+        "guard_ref_health": true,
+        "alarm_time": 307.0,
+        "delay_s": 7.0,
+        "final_horizontal_error_m": 11.55013815256768,
+        "resets": 8,
+        "reset_skips": 12,
+        "fallback_epochs": 3160,
+        "first_fallback": 102.10000000000001,
+        "intervals": 21,
+        "reason_codes": {
+          "missing": 0,
+          "stale": 0,
+          "rejected": 1,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 1,
+          "recovery": 0
+        },
+        "reason_events": {
+          "missing": 2574,
+          "stale": 236,
+          "rejected": 306,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 304,
+          "recovery": 0
+        },
+        "reason_intervals": {
+          "missing": 9,
+          "stale": 2,
+          "rejected": 12,
+          "forced": 0,
+          "nonfinite": 0,
+          "alarm": 11,
+          "recovery": 0
+        },
+        "history_reasons": [
+          "rejected",
+          "stale",
+          "alarm",
+          "missing"
+        ]
+      }
+    ],
+    "summaries": [
+      {
+        "guard_ref_health": false,
+        "clean": {
+          "runs": 10,
+          "exposure_s": 6000,
+          "alarms": 6,
+          "alarm_times": [
+            103.0,
+            158.0,
+            74.0,
+            90.0,
+            156.0,
+            416.0
+          ]
+        },
+        "attacks": {
+          "0.2": {
+            "runs": 10,
+            "detected": 5,
+            "misses": 5,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 5,
+            "delays_s": [
+              123.0,
+              16.0,
+              14.0,
+              15.0,
+              33.0
+            ]
+          },
+          "0.5": {
+            "runs": 10,
+            "detected": 5,
+            "misses": 5,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 5,
+            "delays_s": [
+              16.0,
+              10.0,
+              8.0,
+              6.0,
+              13.0
+            ]
+          },
+          "1.0": {
+            "runs": 10,
+            "detected": 5,
+            "misses": 5,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 5,
+            "delays_s": [
+              7.0,
+              6.0,
+              5.0,
+              5.0,
+              8.0
+            ]
+          }
+        },
+        "navigation": {
+          "mean_final_horizontal_error_m": 17.231177217794404,
+          "max_final_horizontal_error_m": 31.720281194542927,
+          "resets": 0,
+          "reset_skips": 0,
+          "fallback_epochs": 0,
+          "reason_codes": {},
+          "reason_events": {},
+          "reason_intervals": {}
+        }
+      },
+      {
+        "guard_ref_health": true,
+        "clean": {
+          "runs": 10,
+          "exposure_s": 6000,
+          "alarms": 7,
+          "alarm_times": [
+            144.0,
+            158.0,
+            76.0,
+            90.0,
+            274.0,
+            156.0,
+            427.0
+          ]
+        },
+        "attacks": {
+          "0.2": {
+            "runs": 10,
+            "detected": 4,
+            "misses": 6,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 6,
+            "delays_s": [
+              48.0,
+              123.0,
+              14.0,
+              29.0
+            ]
+          },
+          "0.5": {
+            "runs": 10,
+            "detected": 4,
+            "misses": 6,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 6,
+            "delays_s": [
+              16.0,
+              16.0,
+              8.0,
+              12.0
+            ]
+          },
+          "1.0": {
+            "runs": 10,
+            "detected": 4,
+            "misses": 6,
+            "no_alarm_misses": 0,
+            "preattack_alarms": 6,
+            "delays_s": [
+              8.0,
+              7.0,
+              5.0,
+              7.0
+            ]
+          }
+        },
+        "navigation": {
+          "mean_final_horizontal_error_m": 21.164330531880875,
+          "max_final_horizontal_error_m": 77.53210861479567,
+          "resets": 255,
+          "reset_skips": 545,
+          "fallback_epochs": 146100,
+          "reason_codes": {
+            "missing": 0,
+            "stale": 0,
+            "rejected": 37,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 37,
+            "recovery": 0
+          },
+          "reason_events": {
+            "missing": 130416,
+            "stale": 6103,
+            "rejected": 14846,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 14818,
+            "recovery": 0
+          },
+          "reason_intervals": {
+            "missing": 456,
+            "stale": 51,
+            "rejected": 548,
+            "forced": 0,
+            "nonfinite": 0,
+            "alarm": 530,
+            "recovery": 0
+          }
+        }
+      }
+    ]
+  }
+}
