@@ -16,6 +16,7 @@ from .integrity import Cusum, dr_statistic
 from .learning import WINDOW
 from .sim import DEG
 from .range_coupling import BaselineRangeCoupler
+from .zupt import AdaptiveZeroVelocity, zupt_update, mounted_odometry_update
 
 
 @dataclass
@@ -68,6 +69,11 @@ class Config:
     baseline_range_anchor: tuple | None = None  # replace RTK vector by one scalar range
     earth_rate_enu: tuple | None = None
     local_gravity: float | None = None
+    zupt: bool = False
+    zupt_accel_var: float | None = None  # frozen held-out calibration; None = noise-only floor
+    zupt_gyro_var: float | None = None
+    zupt_sigma: float = 0.05
+    motion_every: int = 10
     label: str = ""
 
 
@@ -111,8 +117,10 @@ def mount_matrix(pitch, yaw):
     return C_bv.T
 
 
-def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog:
+def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=None) -> RunLog:
     """pred: (idx, mu, var) learned predictions at pseudo epochs (idx = IMU end index)."""
+    if cfg.motion_every < 1 or not np.isfinite(cfg.zupt_sigma) or cfg.zupt_sigma <= 0:
+        raise ValueError("positive motion cadence and ZUPT sigma required")
     noise = NoiseParams.from_spec(imu_spec)
     C_vb = None if cfg.mount_py is None else mount_matrix(*cfg.mount_py)
 
@@ -136,6 +144,23 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
     range_trace = []
     n = len(truth.t)
     dt = truth.dt
+
+    detector = None
+    if cfg.zupt:
+        d = imu_spec.densities()
+        detector = AdaptiveZeroVelocity(
+            cfg.zupt_accel_var if cfg.zupt_accel_var is not None else 4*d['accel']**2/dt,
+            cfg.zupt_gyro_var if cfg.zupt_gyro_var is not None else 4*d['gyro']**2/dt,
+            dt=dt, gravity=9.81 if cfg.local_gravity is None else cfg.local_gravity)
+    motion = {"zupt_attempted": 0, "zupt_accepted": 0, "odometry_attempted": 0,
+              "odometry_accepted": 0, "zupt_times": []}
+    odo_at = {}
+    if odometry is not None:
+        for j, ot in enumerate(odometry.t):
+            idx = int(round((ot - truth.t[0]) / dt))
+            if idx < 1 or idx >= n or abs(truth.t[idx] - ot) > 1e-7 or idx in odo_at:
+                raise ValueError("odometry epochs must be unique and aligned to propagated IMU grid")
+            odo_at[idx] = j
 
     pred_map = {}
     if pred is not None:
@@ -174,6 +199,27 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
         kk = k + 1
         t = truth.t[kk]
         tau = t - t_last_gnss
+
+        # Only samples already propagated are visible to the causal detector.
+        stationary = False if detector is None else detector.step(
+            imu.gyro[k], imu.accel[k], np.linalg.norm(A.v))
+        if stationary and kk % cfg.motion_every == 0:
+            motion['zupt_attempted'] += 1
+            info = zupt_update(A, cfg.zupt_sigma, gate=float(chi2.ppf(.999, 3)))
+            motion['zupt_accepted'] += int(info.accepted)
+            if info.accepted:
+                motion['zupt_times'].append(float(t))
+            if B is not None:
+                zupt_update(B, cfg.zupt_sigma, gate=float(chi2.ppf(.999, 3)))
+        if kk in odo_at:
+            j = odo_at[kk]
+            if odometry.valid[j]:
+                motion['odometry_attempted'] += 1
+                for F in ([A] if B is None else [A, B]):
+                    info = mounted_odometry_update(F, odometry.speed[j], odometry.sigma[j],
+                        imu.gyro[k], odometry.C_vb, odometry.lever_b)
+                    if F is A:
+                        motion['odometry_accepted'] += int(info.accepted)
 
         # ---------- motion pseudo-measurement ----------
         if cfg.pseudo != "none" and kk % cfg.pseudo_every == 0 and kk >= WINDOW:
@@ -304,7 +350,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None) -> RunLog
         P_pos=np.array(logs["P"]), v_est=np.array(logs["ve"]), v_true=np.array(logs["vt"]),
         gnss_t=np.array(gq["t"]), stat_q=np.array(gq["q"]), stat_g=np.array(gq["g"]),
         alarm_time=alarm_time, kappa_hist=np.array(cal.history), runtime_per_step_us=rt,
-        extra={"range_alarm_time": range_alarm_time, "range_trace": range_trace,
+        extra={"motion": motion, "range_alarm_time": range_alarm_time, "range_trace": range_trace,
                "fallback_frac": n_fallback / max(n_pseudo, 1), "vb_est": np.array(logs["vb"]),
                "since_gnss": np.array(logs["tg"])},
     )
