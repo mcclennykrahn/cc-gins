@@ -1,0 +1,12 @@
+{
+  "base_commit": "75ec52561751d1098f39e94b2af0739846b5a81f",
+  "sha256": {
+    "results/v08_stage4/metrics.json": "54289189dc65cf7cd5f1abcd41eae432a507d3d554519ed191183d8b1a90ebbe",
+    "results/v08_stage3/metrics.json": "bf9affcad3f50282b7a33f462f408da84aafad759a753ecdef75c1fe0585bea3",
+    "results/v08_stage4/revalidate.py": "a6b3e175ab864893fea1e6992edfb43714df270aec361178a01b3e5d6afb6f35",
+    "results/v08_stage4/selfcheck.py": "19a7db067034ed98656705c3baccbb200ed518a553c9a8f4aeed4e3448aca554"
+  },
+  "fresh_held_out": false,
+  "detection": "FAIL",
+  "confirmed_v08": false
+}
