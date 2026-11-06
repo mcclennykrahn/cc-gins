@@ -9,8 +9,11 @@ WINDOW = 100  # 1 s @ 100 Hz
 
 
 class MotionNet(nn.Module):
-    def __init__(self, ch: int = 6, hidden: int = 64):
+    def __init__(self, ch: int = 6, hidden: int = 64, variance_activation: str = "hard"):
+        if variance_activation not in ("hard", "smooth"):
+            raise ValueError("unknown variance activation")
         super().__init__()
+        self.variance_activation = variance_activation
         self.conv = nn.Sequential(
             nn.Conv1d(ch, 32, 5, padding=2), nn.GELU(),
             nn.Conv1d(32, hidden, 5, stride=2, padding=2), nn.GELU(),
@@ -25,7 +28,12 @@ class MotionNet(nn.Module):
         feat = self.conv(xn.transpose(1, 2)).mean(dim=2)
         stats = torch.cat([xn.mean(dim=1), xn.std(dim=1)], dim=1)
         out = self.head(torch.cat([feat, stats], dim=1))
-        mu, logvar = out[:, :3], out[:, 3:].clamp(-12.0, 4.0)
+        mu, raw = out[:, :3], out[:, 3:]
+        # Smooth clipping retains a restoring gradient outside the bounds.
+        # Historical checkpoints retain hard clipping and identical predictions.
+        logvar = (raw.clamp(-12.0, 4.0) if self.variance_activation == "hard" else
+                  -12.0 + torch.nn.functional.softplus(raw + 12.0)
+                  - torch.nn.functional.softplus(raw - 4.0))
         return mu, logvar
 
 
@@ -37,8 +45,8 @@ class MotionNetTCN(MotionNet):
     consumed. Internal features are not claimed causal at each window position.
     Normalization/statistical pooling and dual heads reuse the legacy interface.
     """
-    def __init__(self):
-        super().__init__(ch=8)
+    def __init__(self, variance_activation: str = "hard"):
+        super().__init__(ch=8, variance_activation=variance_activation)
         self.conv = nn.Sequential(
             nn.Conv1d(8, 32, 5, padding=2, dilation=1), nn.GELU(),
             nn.Conv1d(32, 64, 5, padding=4, dilation=2), nn.GELU(),
@@ -88,8 +96,9 @@ def beta_nll(mu, logvar, y, beta: float = 0.5):
 
 def train_motionnet(imu_list, vb_list, epochs: int = 6, batch: int = 512, lr: float = 2e-3,
                     stride: int = 10, seed: int = 0, log=print, init: "MotionNet | None" = None,
-                    architecture: str | None = None, attitude_list=None, bias_list=None):
-    """Train from scratch, or fine-tune a copy of `init` (keeping its input normalization)."""
+                    architecture: str | None = None, attitude_list=None, bias_list=None,
+                    variance_activation: str = "hard"):
+    """Train from scratch, or fine-tune `init`, retaining its normalization/variance activation."""
     torch.manual_seed(seed)
     np.random.seed(seed)
     # Omitted architecture preserves the historical six-channel Python API.
@@ -118,7 +127,8 @@ def train_motionnet(imu_list, vb_list, epochs: int = 6, batch: int = 512, lr: fl
         import copy
         net = copy.deepcopy(init)
     else:
-        net = MotionNetTCN() if arch == "proposal_tcn" else MotionNet()
+        net = (MotionNetTCN(variance_activation=variance_activation) if arch == "proposal_tcn"
+               else MotionNet(variance_activation=variance_activation))
         flat = X.reshape(-1, X.shape[-1])
         net.x_mean.copy_(flat.mean(0))
         net.x_std.copy_(flat.std(0) + 1e-6)
@@ -158,8 +168,9 @@ def predict(net: MotionNet, imu6: np.ndarray, idx: np.ndarray, batch: int = 4096
 
 
 def save(net, path):
-    if isinstance(net, MotionNetTCN):
-        torch.save(dict(architecture="proposal_tcn", state_dict=net.state_dict()), path)
+    if isinstance(net, MotionNetTCN) or net.variance_activation != "hard":
+        torch.save(dict(architecture=architecture(net), variance_activation=net.variance_activation,
+                        state_dict=net.state_dict()), path)
     else:
         torch.save(net.state_dict(), path)
 
@@ -171,7 +182,9 @@ def load(path, expected_architecture=None):
         raise ValueError("unknown checkpoint architecture")
     if expected_architecture is not None and arch != expected_architecture:
         raise ValueError("checkpoint architecture mismatch")
-    net = MotionNetTCN() if arch == "proposal_tcn" else MotionNet()
+    activation = payload.get("variance_activation", "hard")
+    net = (MotionNetTCN(variance_activation=activation) if arch == "proposal_tcn"
+           else MotionNet(variance_activation=activation))
     net.load_state_dict(payload["state_dict"] if "state_dict" in payload else payload)
     net.eval()
     return net

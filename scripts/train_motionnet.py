@@ -12,9 +12,10 @@ from ccgins.scenarios import TRAIN_SEEDS, VAL_SEEDS, make_scenario
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--architecture", choices=["legacy_cnn", "proposal_tcn"], default="proposal_tcn")
+ap.add_argument("--variance-activation", choices=["hard", "smooth"], default="smooth")
 ap.add_argument("--epochs", type=int, default=8)
 ap.add_argument("--n-train", type=int, default=len(TRAIN_SEEDS))
-ap.add_argument("--out", default="results/proposal_alignment/motionnet_tcn.pt")
+ap.add_argument("--out", default="results/proposal_alignment_next/exploratory_motionnet_tcn.pt")
 args = ap.parse_args()
 Path(args.out).parent.mkdir(parents=True, exist_ok=True)
 
@@ -28,7 +29,7 @@ for s in TRAIN_SEEDS[: args.n_train]:
     biases.append(np.concatenate([sc.imu.gyro_bias, sc.imu.accel_bias], axis=1))
 print(f"generated {len(imus)} training trajectories in {time.time() - t0:.1f}s")
 t0 = time.time()
-net = learning.train_motionnet(imus, vbs, epochs=args.epochs, architecture=args.architecture,
+net = learning.train_motionnet(imus, vbs, epochs=args.epochs, architecture=args.architecture, variance_activation=args.variance_activation,
     attitude_list=attitudes if args.architecture == "proposal_tcn" else None,
     bias_list=biases if args.architecture == "proposal_tcn" else None)
 print(f"trained in {time.time() - t0:.1f}s")
@@ -48,6 +49,8 @@ zs = [np.sign(e) * np.sqrt(q) for e, q in zip(errs, z2)]
 neff = np.mean([learning.correlation_factor(z) for z in zs], axis=0)
 errs, z2 = np.concatenate(errs), np.concatenate(z2)
 rep = {
+    "architecture": args.architecture,
+    "variance_activation": net.variance_activation,
     "val_rmse_fwd_lat_up": np.sqrt((errs**2).mean(0)).round(4).tolist(),
     "val_coverage95_raw_variance": (z2 <= chi2.ppf(0.95, 1)).mean(0).round(4).tolist(),
     "val_mean_normalized_sq_err": z2.mean(0).round(3).tolist(),

@@ -1,5 +1,5 @@
-# First run: python -m ccgins.alignment_experiment
-# Uses the small smoke-trained model; no benchmark performance claim.
+# Validated legacy architecture; exploratory TCN remains explicitly opt-in.
+# This short assembly config is not the historical full benchmark protocol.
 scenario:
   seed: 900
   duration: 80.0
@@ -14,7 +14,7 @@ filter:
   monitor: dual
   cusum_h: 50.0
 learning:
-  architecture: proposal_tcn
-  model: results/proposal_alignment/proposal_tcn.pt
+  architecture: legacy_cnn
+  model: results/motionnet.pt
 metrics:
   t_start: 30.0

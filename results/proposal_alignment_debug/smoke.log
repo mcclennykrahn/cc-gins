@@ -1,0 +1,54 @@
+epoch 1/6 beta-NLL 22.3345
+epoch 2/6 beta-NLL 10.5981
+epoch 3/6 beta-NLL 6.2719
+epoch 4/6 beta-NLL 5.9345
+epoch 5/6 beta-NLL 5.7550
+epoch 6/6 beta-NLL 5.7496
+epoch 1/6 beta-NLL 22.7052
+epoch 2/6 beta-NLL 10.9045
+epoch 3/6 beta-NLL 5.2813
+epoch 4/6 beta-NLL 5.0332
+epoch 5/6 beta-NLL 5.2656
+epoch 6/6 beta-NLL 5.1803
+{
+  "legacy_cnn": {
+    "rmse_h": 3.0014928685784215,
+    "coverage95_h": 0.7954091816367266,
+    "coverage95_h_outage": 0.775,
+    "max_err_outage_20s": 7.788131840634604,
+    "gaussian_nll": 1.9383365092139608,
+    "rmse_fwd_lat_up": [
+      11.67122406907983,
+      0.25518722814017125,
+      0.11867518930654758
+    ],
+    "coverage95_fwd_lat_up": [
+      0.8767383059418458,
+      1.0,
+      1.0
+    ]
+  },
+  "proposal_tcn": {
+    "rmse_h": 3.848627014773021,
+    "coverage95_h": 0.6816367265469061,
+    "coverage95_h_outage": 0.5,
+    "max_err_outage_20s": 10.89913981626283,
+    "gaussian_nll": 11.595937507851904,
+    "rmse_fwd_lat_up": [
+      13.010410045623921,
+      0.08082143112986973,
+      0.05234950445642868
+    ],
+    "coverage95_fwd_lat_up": [
+      0.8938053097345133,
+      0.9292035398230089,
+      0.9058154235145386
+    ]
+  },
+  "nhc": {
+    "rmse_h": 3.963106821161904,
+    "coverage95_h": 0.6746506986027944,
+    "coverage95_h_outage": 0.5,
+    "max_err_outage_20s": 11.21361602396141
+  }
+}

@@ -1,0 +1,11 @@
+usage: train_motionnet.py [-h] [--architecture {legacy_cnn,proposal_tcn}]
+                          [--variance-activation {hard,smooth}]
+                          [--epochs EPOCHS] [--n-train N_TRAIN] [--out OUT]
+
+options:
+  -h, --help            show this help message and exit
+  --architecture {legacy_cnn,proposal_tcn}
+  --variance-activation {hard,smooth}
+  --epochs EPOCHS
+  --n-train N_TRAIN
+  --out OUT
