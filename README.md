@@ -26,6 +26,7 @@
 | **ACI 在线校准** | `ccgins/aci.py` | 自适应共形推断（Gibbs & Candès 2021）：GNSS 健康时，以先验速度为参考，在线求解各通道方差尺度 κ；GNSS 中断时冻结 κ，并按中断时长做膨胀：κ(1+β·τ/T_ref) |
 | **双通道 DR-CUSUM 欺骗检测** | `ccgins/integrity.py` | 独立航位推算通道 B（只用 IMU 和伪观测，不用 GNSS）每 30 s 由主滤波器重置一次；用 GNSS 与 B 的预测之差做 χ² 统计量，送入 CUSUM；报警后剔除 GNSS |
 | 单通道 NIS-CUSUM 基线 | `pipeline.py`（`monitor="single"`） | 对主滤波器的 GNSS 新息 NIS 做 CUSUM |
+| **InEKF / ESKF 一致性对照** | `ccgins/comparison.py` | i300 实测配对中断实验；`python -m ccgins.comparison` 输出 `results/inekf_vs_eskf/{report.md,metrics.json}`，报告 95% 覆盖率与位置 ANEES |
 | 评估 | `ccgins/metrics.py` | 水平/3D RMSE、各段中断内的最大和末端误差、95% 覆盖率（2D NEES ≤ χ²₂(0.95)）、ANEES、单步耗时 |
 | **混合伪观测** | `pipeline.py`（`pseudo="hybrid"`） | 侧向/垂向用 NHC（σ=0.1），前向用学习速度；相关膨胀与 ACI 只作用于前向通道 |
 | v2：快速 ACI + κ 回退 | `pipeline.py`（`hybrid_max_kappa`） | ACI γ=0.05、窗口 100；前向 κ>10 时该历元丢弃前向通道（退化为纯 NHC） |
