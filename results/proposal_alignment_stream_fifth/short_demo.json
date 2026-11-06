@@ -1,0 +1,97 @@
+{
+  "source": "synthetic IMU and synthetic GNSS; offline only",
+  "checkpoint": "results/motionnet.pt",
+  "timing": {
+    "imu_samples": 4001,
+    "wall_seconds": 1.1195192919985857,
+    "mean_ms": 0.2720829950010912,
+    "p95_ms": 1.1628449865384027,
+    "flush_ms": 29.148573012207635,
+    "hz": 3573.8553400516607,
+    "buffering_delay_s": 1.01
+  },
+  "final_position": [
+    152.6860484765627,
+    234.40296306467948,
+    0.011068491897467435
+  ],
+  "aci_references": 54,
+  "alarm_time": null,
+  "recent_gnss": [
+    {
+      "t": 31.0,
+      "arrival_time": 32.0,
+      "processed_arrival_time": 32.01,
+      "alarm": false,
+      "status": "accepted",
+      "nis": 3.866333663337294,
+      "q": 3.866333663337294,
+      "g": 0.0,
+      "excluded": false,
+      "accepted": true,
+      "eligible": true,
+      "kappa_used": 1.0,
+      "kappa_next": 1.0
+    },
+    {
+      "t": 32.0,
+      "arrival_time": 33.0,
+      "processed_arrival_time": 33.01,
+      "alarm": false,
+      "status": "accepted",
+      "nis": 3.786425610123981,
+      "q": 2.878020549954794,
+      "g": 0.0,
+      "excluded": false,
+      "accepted": true,
+      "eligible": true,
+      "kappa_used": 1.0,
+      "kappa_next": 1.0
+    },
+    {
+      "t": 33.0,
+      "arrival_time": 34.0,
+      "processed_arrival_time": 34.01,
+      "alarm": false,
+      "status": "accepted",
+      "nis": 1.7823597011914594,
+      "q": 2.326504517871395,
+      "g": 0.0,
+      "excluded": false,
+      "accepted": true,
+      "eligible": true,
+      "kappa_used": 1.0,
+      "kappa_next": 1.0
+    },
+    {
+      "t": 39.0,
+      "arrival_time": 40.0,
+      "processed_arrival_time": 40.0,
+      "alarm": false,
+      "status": "accepted",
+      "nis": 2.262276476619106,
+      "q": 2.4378803784467022,
+      "g": 0.0,
+      "excluded": false,
+      "accepted": true,
+      "eligible": true,
+      "kappa_used": 1.0,
+      "kappa_next": 1.0
+    },
+    {
+      "t": 40.0,
+      "arrival_time": 41.0,
+      "processed_arrival_time": 40.0,
+      "alarm": false,
+      "status": "accepted",
+      "nis": 2.4257119582813678,
+      "q": 3.4965885750733334,
+      "g": 0.0,
+      "excluded": false,
+      "accepted": true,
+      "eligible": true,
+      "kappa_used": 1.0,
+      "kappa_next": 1.0
+    }
+  ]
+}

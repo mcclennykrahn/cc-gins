@@ -1,0 +1,13 @@
+{
+  "baseline": "40b412d65e44aa80e3fa0b8417d3771e0b88abbd",
+  "model": "gpt-6.1-sol",
+  "python": "3.13.5",
+  "numpy": "2.5.4",
+  "torch": "2.15.0+cpu",
+  "threads_per_process": 1,
+  "hardware": "",
+  "checkpoint": "results/motionnet.pt",
+  "checkpoint_sha256": "e2495238df1cf3093155f26cec929d2341f03abb489f04b8acb9dd6a9f515445",
+  "historical_results_diff": "git diff --exit-code baseline -- results :!results/proposal_alignment_stream_fifth passed",
+  "data": "simulated IMU; synthetic GNSS; offline artifact replay only"
+}

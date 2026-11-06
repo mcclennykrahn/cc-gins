@@ -18,7 +18,7 @@ Proposal evidence: `docs/project_proposal.md` §§3–9; improvement/literature 
 | coverage §3.5/7 M4 | Nominal long-run coverage and consistent closed loop | Published v3 full/outage simulation 0.699/0.833; shift 0.730/0.876; KITTI FT outage 0.681; i2Nav mounted v3 0.574, correlation-NHC 0.887. ACI is NOT a mathematical closed-loop integrity guarantee. | partial | `results/outage_table.md`, `results/outage_shift_table.md`, `results/kitti/outage_table.md`, `results/i2nav/outage_table.md` |
 | dual §3.6 M5 | GNSS-free DR guard, CUSUM, healthy-window reset | Batch dual guard and single-channel comparison present; reset uses current health rather than proving entire-window health; alarms latch without recovery M epochs. | partial | `ccgins/integrity.py`, `ccgins/pipeline.py`, `tests/test_learning_pipeline.py`, `results/spoof_table.md`, `results/i2nav/spoof_table.md` |
 | hpl §3.6/7 | HPL and HPE>HPL reporting | No HPL output or exceedance metric; NEES coverage is different. | unimplemented | `ccgins/metrics.py`, `ccgins/pipeline.py`, `ccgins/integrity.py` |
-| stream §4 | Sensor→learning→ACI→integrity online assembly | Baseline fixed NHC/ZUPT/wheel parity retained. Opt-in LearnedStreamingNavigator: causal learned_vel/learned_nhc, ACI, GNSS κ_g, DR-CUSUM, bounded delayed on-grid GNSS; no hybrid/wheel combination, replay, HPL/recovery. | partial | `ccgins/stream.py`, `ccgins/stream_learning.py`, `tests/test_stream_parity.py`, `tests/test_stream_learning.py`, `results/proposal_alignment_stream/report.md` |
+| stream §4 | Sensor→learning→ACI→integrity online assembly | Baseline parity retained. Learned stream adds off-grid/delayed/OOO GNSS, hybrid + wheel layering, bounded queues/history, processed callbacks and one-file offline replay. NIS/dual CUSUM retained; HPL/recovery and learned ZUPT remain gaps. | partial | `ccgins/stream.py`, `ccgins/stream_learning.py`, `tests/test_stream_parity.py`, `tests/test_stream_learning.py`, `results/proposal_alignment_stream_fifth/report.md` |
 | cli §4 M6 | Configuration end-to-end assembly and reports | Simulation CLI supports learned checkpoint, ACI, dual monitor and robust GNSS via Config; scripts handle real datasets. | complete | `ccgins/cli.py`, `configs/example_sim.yaml`, `tests/test_cli.py` |
 | simulation §5.1 M0 | Two MEMS grades; outages, jumps, colored noise, ramp attacks | Simulation noise/bias/vibration, colored GNSS and configurable outages/ramp; no comprehensive two-grade jump/NLOS benchmark. | partial | `ccgins/sim.py`, `ccgins/scenarios.py`, `tests/test_filters.py`, `results/outage_table.md`, `results/spoof_table.md` |
 | kitti §5.2 | Disjoint drives; real IMU plus synthetic GNSS | Drive splits and test segments implemented; GNSS truth+noise/outage/spoof, NOT real received GNSS. | complete | `ccgins/kitti_scenarios.py`, `ccgins/data/kitti.py`, `scripts/run_kitti_experiment.py`, `tests/test_hybrid_kitti.py`, `results/kitti/outage_table.md` |
@@ -114,3 +114,21 @@ full-protocol validation/test numbers above are retained. Fourth-batch diagnosti
 are in `results/proposal_tcn_diagnosis/`; no test-based selection or redesign.
 Current bookkeeping counts: {'complete': 5, 'partial': 17,
 'experiment_substitute': 2, 'unimplemented': 4}.
+
+## 2026-11-06 fifth-batch streaming update
+
+See [fifth stream report](../results/proposal_alignment_stream_fifth/report.md) and
+[event-time builder semantics](stream_offgrid_semantics.md). Off-grid split
+propagation shares the base path and applies to both main and DR. Hybrid forward
+fallback and mounted wheels layer before GNSS. Bounded queue errors and processed
+callbacks are explicit. One-file replay is offline only, not hardware integration.
+The 10 original synthetic test seeds use the canonical historical checkpoint;
+matched-grid comparisons do not establish off-grid batch equality.
+
+The realistic ramp fixture is a low-noise stationary mechanism test, not a
+calibrated false-alarm/hour result or recovery test. M3/M4/M5 remain partial; HPL
+and failsafe guarantees remain unimplemented. TCN diagnosis was skipped this
+batch; legacy_cnn remains primary and TCN is not promoted.
+
+Current bookkeeping counts: {'complete': 5, 'partial': 17,
+'experiment_substitute': 2, 'unimplemented': 4}. No row changed acceptance class.

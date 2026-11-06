@@ -561,3 +561,9 @@ ADIS16460/B **4.5441→5.4187 m**。这不是普遍精度改进。
 没有新增独立道路或真实轮速证据，也不主张轮速零值停车辅助具有普遍收益。
 
 复现：`OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.parity_experiment --workers 4`
+
+Fifth-batch learned stream: [report](results/proposal_alignment_stream_fifth/report.md),
+[off-grid/replay API](docs/stream_offgrid_semantics.md). Legacy CNN
+`results/motionnet.pt` remains primary; TCN is available but not promoted.
+Off-grid delayed GNSS, hybrid/wheels and offline artifact replay are supported;
+HPL, failsafe/recovery robustness and learned-stream ZUPT remain gaps.
