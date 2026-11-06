@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "audit_stage": "post-pullback; baseline preserved in commit ecb70c8",
+  "audit_stage": "third batch; original twenty-seed simulation training resolved; earlier audit retained in git",
   "counts": {
     "complete": 5,
-    "partial": 16,
+    "partial": 17,
     "experiment_substitute": 2,
-    "unimplemented": 5
+    "unimplemented": 4
   },
   "items": [
     {
@@ -90,7 +90,7 @@
       "id": "network",
       "proposal": "§3.4 M3",
       "expected": "3-layer dilated TCN, roll/pitch, bias-compensated IMU, β-NLL heads",
-      "reality": "Baseline: plain six-channel stride CNN, no attitude/dilation. Pullback: MotionNetTCN 1/2/4 dilations, eight normalized IMU+roll/pitch channels, beta-NLL, live filter attitude/current-bias correction in batch; default new sim training and CLI architecture selection. Legacy weights still load. Mini paired metrics measured; full held-out architecture validation remains missing.",
+      "reality": "Baseline: plain six-channel stride CNN, no attitude/dilation. Pullback: MotionNetTCN 1/2/4 dilations, eight normalized IMU+roll/pitch channels, beta-NLL, live filter attitude/current-bias correction in batch; default new sim training and CLI architecture selection. Legacy weights still load. Mini paired metrics measured; full held-out architecture validation remains missing. Third batch: original training budget resolved, both architectures 100–119 x 600 s, 12 epochs smooth; independent real-drive M3 acceptance still open.",
       "status": "partial",
       "evidence": [
         "ccgins/learning.py",
@@ -102,8 +102,11 @@
         "tests/test_proposal_tcn.py",
         "ccgins/alignment_experiment.py",
         "configs/proposal_alignment_smoke.yaml",
-        "results/proposal_alignment/report.md"
-      ]
+        "results/proposal_alignment/report.md",
+        "configs/proposal_alignment_full.yaml",
+        "results/proposal_alignment_full/report.md"
+      ],
+      "original_training_budget": "resolved"
     },
     {
       "id": "datasets",
@@ -154,12 +157,14 @@
       "id": "gnss_aci",
       "proposal": "§3.5",
       "expected": "Online GNSS κ_g from vector NIS",
-      "reality": "No GNSS conformal calibrator in pipeline; AdaptiveR is Sage-Husa, not κ_g.",
-      "status": "unimplemented",
+      "reality": "Opt-in joint vector NIS GNSS kappa_g in tested batch ACI/pipeline path; next-fix scaling and reference eligibility, separate calibration-only network pilot; integrity acceptance open.",
+      "status": "partial",
       "evidence": [
         "ccgins/aci.py",
         "ccgins/pipeline.py",
-        "ccgins/adaptive.py"
+        "ccgins/adaptive.py",
+        "tests/test_gnss_aci.py",
+        "results/proposal_alignment_full/gnss_aci_pilot.json"
       ]
     },
     {
@@ -284,14 +289,16 @@
       "id": "protocol",
       "proposal": "§5/7 M6",
       "expected": "Locked splits, paired baselines, ≥20 MC, mean/std",
-      "reality": "Simulation 100–119 train,500–503 val,900–909 test,700–705 calibration. Only 10 test seeds; KITTI held-out drives; i2Nav same-drive temporal folds. This session adds frozen mini paired protocol, not full acceptance.",
+      "reality": "Simulation 100–119 train,500–503 val,900–909 test,700–705 calibration. Only 10 test seeds; KITTI held-out drives; i2Nav same-drive temporal folds. This session adds frozen mini paired protocol, not full acceptance. Third batch completes original twenty-seed training for both arches, validations 500–503 and all paired tests 900–909; still ten tests, not twenty-run acceptance.",
       "status": "partial",
       "evidence": [
         "ccgins/scenarios.py",
         "ccgins/kitti_scenarios.py",
         "ccgins/i2nav_scenarios.py",
         "scripts/run_outage_experiment.py",
-        "results/outage_metrics.json"
+        "results/outage_metrics.json",
+        "results/proposal_alignment_full/report.md",
+        "configs/proposal_alignment_full.yaml"
       ]
     },
     {
@@ -377,6 +384,18 @@
         "results/adaptive_motion/report.md",
         "results/stream_motion/report.md"
       ]
+    }
+  ],
+  "updates": [
+    {
+      "date": "2026-11-06",
+      "batch": "third",
+      "original_training_budget": "resolved",
+      "report": "results/proposal_alignment_full/report.md",
+      "full_M3_acceptance": false,
+      "validation_ranked_architecture": "proposal_tcn",
+      "primary_retained": "legacy_cnn",
+      "tcn_promoted": false
     }
   ]
 }

@@ -35,7 +35,13 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.cli run --co
 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.alignment_next
 ```
 
-剩余偏差：GNSS κ_g、在线安装角/18维状态、HPL/超界率、报警恢复、流式 learning/ACI/integrity、B5 VB/Student-t、≥20 次 MC/全消融/独立道路泛化，以及 M7 UrbanNav 原始伪距/平滑/在线微调。KITTI GNSS 为合成；i2Nav 为真实 RTK，但仅一次行驶的时间折。
+此前批次剩余偏差（κ_g 现状见下方第三批）：GNSS κ_g、在线安装角/18维状态、HPL/超界率、报警恢复、流式 learning/ACI/integrity、B5 VB/Student-t、≥20 次 MC/全消融/独立道路泛化，以及 M7 UrbanNav 原始伪距/平滑/在线微调。KITTI GNSS 为合成；i2Nav 为真实 RTK，但仅一次行驶的时间折。
+
+## 原始训练预算恢复（第三批）
+
+[完整协议报告](results/proposal_alignment_full/report.md) / [实现与边界](docs/proposal_alignment_full.md)：两种架构均完成 **100–119 共 20 条 × 600 s、相同 12 epoch** 的原始训练预算；验证 500–503、测试 900–909，smooth 方差预先固定。完整测试 RMSE：legacy **5.154 m**、TCN **31.537 m**、NHC 控制 **3.269 m**。TCN 验证略优（4.043 vs 4.061 m）但测试失败，**不提升为 primary；legacy 保留工作主方法**。NHC 控制未启用学习 ACI/双监测，配置差异见报告；历史发布表格/检查点未改写，旧 reduced-train 证据保留。
+
+新增 `Config(gnss_aci=True)`：从三维向量 NIS 在线求 GNSS κ_g，前一尺度进入当前 GNSS/监测更新，新尺度仅用于下一历元；合成校准种子 pilot 与主测试分开。分组相关性估计逐条轨迹计算再平均，不混同此前双监测误报警/锁存问题。完整 streaming learning/ACI/DR-CUSUM、在线安装角/18 状态、HPL/恢复、独立道路泛化与 UrbanNav TC 仍未完成，无完整导航完好性保证。详见报告的实测范围。
 
 ## 已实现内容
 

@@ -1,0 +1,16 @@
+{
+  "baseline": "e1562135aacf67ce2f06076b3c202fa855da0791",
+  "protocol_commit": "f0c8e55",
+  "python": "3.13.5",
+  "platform": "Linux-6.12.94+-x86_64-with-glibc2.41",
+  "numpy": "2.5.4",
+  "torch": "2.15.0+cpu",
+  "threads": 1,
+  "source_sha256": {
+    "ccgins/alignment_full.py": "47b56400c840d53ce059e75aef4954c11dffff34a646bf09686ebdc0f16b04db",
+    "ccgins/learning.py": "8c3e1aecc64ee88d5c7653fa5e56043a9e6248ce9b4ce315dd82f7b082fe2bdd",
+    "ccgins/pipeline.py": "673e3213c2c669379a8783bccb0b5121cdb766a6419b6b1e1feaaee5c9e18a5c",
+    "ccgins/aci.py": "32d2bc1d3fe138b508c0745c463c8b841d8e84528cd546c9fc8baf3f22b14ca7",
+    "configs/proposal_alignment_full.yaml": "68cf4613a017b5a3c15d785e46a0f2bac11015425c39b2297b9f221855d3be33"
+  }
+}

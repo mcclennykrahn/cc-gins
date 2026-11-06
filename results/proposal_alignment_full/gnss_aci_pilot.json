@@ -1,0 +1,1708 @@
+{
+  "data_source": "synthetic IMU and synthetic 1 Hz GNSS",
+  "diagnostic_only": true,
+  "records": [
+    {
+      "seed": 700,
+      "duration": 120.0,
+      "outages": [
+        [
+          80.0,
+          20.0
+        ]
+      ],
+      "monitor": "none",
+      "gnss_aci": false,
+      "navigation": {
+        "rmse_h": 1.2725123454793914,
+        "rmse_3d": 1.2830137514126758,
+        "runtime_us": 308.6275663335982,
+        "anees_pos": 4.744249643413006,
+        "coverage95_h": 0.3940066592674806,
+        "max_err_outage_20s": 2.194047127511305,
+        "end_err_outage_20s": 2.194047127511305,
+        "coverage95_h_outage": 0.775,
+        "anees_pos_outage": 1.495665751791165
+      },
+      "alarm_time": null,
+      "gnss_aci_trace": []
+    },
+    {
+      "seed": 700,
+      "duration": 120.0,
+      "outages": [
+        [
+          80.0,
+          20.0
+        ]
+      ],
+      "monitor": "none",
+      "gnss_aci": true,
+      "navigation": {
+        "rmse_h": 1.271768167216961,
+        "rmse_3d": 1.2847280753558674,
+        "runtime_us": 220.69232500022434,
+        "anees_pos": 4.937651010554226,
+        "coverage95_h": 0.3951165371809101,
+        "max_err_outage_20s": 2.201756525737719,
+        "end_err_outage_20s": 2.201756525737719,
+        "coverage95_h_outage": 0.78,
+        "anees_pos_outage": 1.5058505184261008
+      },
+      "alarm_time": null,
+      "gnss_aci_trace": [
+        {
+          "t": 1.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.788117173202643
+        },
+        {
+          "t": 2.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.0829032329535748
+        },
+        {
+          "t": 3.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 4.293667503692377
+        },
+        {
+          "t": 4.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.8444529027229821
+        },
+        {
+          "t": 5.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 2.769101593529294
+        },
+        {
+          "t": 6.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.9860727858914384
+        },
+        {
+          "t": 7.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 5.154561162762179
+        },
+        {
+          "t": 8.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 2.5227177978215742
+        },
+        {
+          "t": 9.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 4.808164351251648
+        },
+        {
+          "t": 10.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 2.425864566401076
+        },
+        {
+          "t": 11.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.1579433185350811
+        },
+        {
+          "t": 12.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.9830730473098124
+        },
+        {
+          "t": 13.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 5.772264230883489
+        },
+        {
+          "t": 14.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 2.721558560851348
+        },
+        {
+          "t": 15.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.2537896535320052
+        },
+        {
+          "t": 16.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.6321500803794082
+        },
+        {
+          "t": 17.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.3539066524150536
+        },
+        {
+          "t": 18.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 9.831803423162592
+        },
+        {
+          "t": 19.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 4.037040899669698
+        },
+        {
+          "t": 20.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.7002353827346112
+        },
+        {
+          "t": 21.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 3.454086186725014
+        },
+        {
+          "t": 22.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.428351294742214
+        },
+        {
+          "t": 23.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 3.2580607118742155
+        },
+        {
+          "t": 24.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.279231961655221
+        },
+        {
+          "t": 25.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.2142496224594712
+        },
+        {
+          "t": 26.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.9425289386001592
+        },
+        {
+          "t": 27.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.8396656963088951
+        },
+        {
+          "t": 28.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 3.086214139176863
+        },
+        {
+          "t": 29.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.30115753312125176
+        },
+        {
+          "t": 30.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 4.561841356652424
+        },
+        {
+          "t": 31.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.14402127139103474
+        },
+        {
+          "t": 32.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.485411711490296
+        },
+        {
+          "t": 33.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 10.048920496829757
+        },
+        {
+          "t": 34.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.70136103104357
+        },
+        {
+          "t": 35.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.020535503006613
+        },
+        {
+          "t": 36.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.4718466754986714
+        },
+        {
+          "t": 37.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.236261941579594
+        },
+        {
+          "t": 38.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.1337400915239386
+        },
+        {
+          "t": 39.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.352353159517929
+        },
+        {
+          "t": 40.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 4.553731950638446
+        },
+        {
+          "t": 41.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.9723253389327566
+        },
+        {
+          "t": 42.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.3632634275861837
+        },
+        {
+          "t": 43.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.2757898116552953
+        },
+        {
+          "t": 44.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.41874414813696015
+        },
+        {
+          "t": 45.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.889423933533057
+        },
+        {
+          "t": 46.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.8024028478459445
+        },
+        {
+          "t": 47.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.5228434544693414
+        },
+        {
+          "t": 48.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 6.475714873738565
+        },
+        {
+          "t": 49.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.2746581044793166
+        },
+        {
+          "t": 50.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.227079234146822
+        },
+        {
+          "t": 51.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.483797832629363
+        },
+        {
+          "t": 52.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.0714224737334956
+        },
+        {
+          "t": 53.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.6710733429513356
+        },
+        {
+          "t": 54.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.743615488700878
+        },
+        {
+          "t": 55.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.7253946939522281
+        },
+        {
+          "t": 56.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.131313325736667
+        },
+        {
+          "t": 57.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.9285012705482942
+        },
+        {
+          "t": 58.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.046560087719674
+        },
+        {
+          "t": 59.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.019469347791052
+        },
+        {
+          "t": 60.0,
+          "kappa_used": 1.0,
+          "kappa_next": 0.716460335098844,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.7937472710402065
+        },
+        {
+          "t": 61.0,
+          "kappa_used": 0.716460335098844,
+          "kappa_next": 0.716460335098844,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.421556496380012
+        },
+        {
+          "t": 62.0,
+          "kappa_used": 0.716460335098844,
+          "kappa_next": 0.716460335098844,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.8163078105329932
+        },
+        {
+          "t": 63.0,
+          "kappa_used": 0.716460335098844,
+          "kappa_next": 0.716460335098844,
+          "eligible": true,
+          "accepted": true,
+          "nis": 4.897417510407767
+        },
+        {
+          "t": 64.0,
+          "kappa_used": 0.716460335098844,
+          "kappa_next": 0.716460335098844,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.523336939157069
+        },
+        {
+          "t": 65.0,
+          "kappa_used": 0.716460335098844,
+          "kappa_next": 0.6537966761339781,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.4725486108501058
+        },
+        {
+          "t": 66.0,
+          "kappa_used": 0.6537966761339781,
+          "kappa_next": 0.6537966761339781,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.320729424650563
+        },
+        {
+          "t": 67.0,
+          "kappa_used": 0.6537966761339781,
+          "kappa_next": 0.6537966761339781,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.2823980566591895
+        },
+        {
+          "t": 68.0,
+          "kappa_used": 0.6537966761339781,
+          "kappa_next": 0.6537966761339781,
+          "eligible": true,
+          "accepted": true,
+          "nis": 10.640417006501036
+        },
+        {
+          "t": 69.0,
+          "kappa_used": 0.6537966761339781,
+          "kappa_next": 0.6537966761339781,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.86858555583873
+        },
+        {
+          "t": 70.0,
+          "kappa_used": 0.6537966761339781,
+          "kappa_next": 0.825564651820095,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.849713490479824
+        },
+        {
+          "t": 71.0,
+          "kappa_used": 0.825564651820095,
+          "kappa_next": 0.825564651820095,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.3307405173293636
+        },
+        {
+          "t": 72.0,
+          "kappa_used": 0.825564651820095,
+          "kappa_next": 0.825564651820095,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.8396752631789768
+        },
+        {
+          "t": 73.0,
+          "kappa_used": 0.825564651820095,
+          "kappa_next": 0.825564651820095,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.7070475639899325
+        },
+        {
+          "t": 74.0,
+          "kappa_used": 0.825564651820095,
+          "kappa_next": 0.825564651820095,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.8719328957174183
+        },
+        {
+          "t": 75.0,
+          "kappa_used": 0.825564651820095,
+          "kappa_next": 0.7665663596081331,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.248200621018935
+        },
+        {
+          "t": 76.0,
+          "kappa_used": 0.7665663596081331,
+          "kappa_next": 0.7665663596081331,
+          "eligible": true,
+          "accepted": true,
+          "nis": 7.0284755246044055
+        },
+        {
+          "t": 77.0,
+          "kappa_used": 0.7665663596081331,
+          "kappa_next": 0.7665663596081331,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.6864336407075478
+        },
+        {
+          "t": 78.0,
+          "kappa_used": 0.7665663596081331,
+          "kappa_next": 0.7665663596081331,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.6788224711248568
+        },
+        {
+          "t": 79.0,
+          "kappa_used": 0.7665663596081331,
+          "kappa_next": 0.7665663596081331,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.766703939094428
+        },
+        {
+          "t": 100.0,
+          "kappa_used": 0.7665663596081331,
+          "kappa_next": 0.7271748914254362,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.9533293390960872
+        },
+        {
+          "t": 101.0,
+          "kappa_used": 0.7271748914254362,
+          "kappa_next": 0.7271748914254362,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.0270410984435214
+        },
+        {
+          "t": 102.0,
+          "kappa_used": 0.7271748914254362,
+          "kappa_next": 0.7271748914254362,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.428242200967755
+        },
+        {
+          "t": 103.0,
+          "kappa_used": 0.7271748914254362,
+          "kappa_next": 0.7271748914254362,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.826269127999862
+        },
+        {
+          "t": 104.0,
+          "kappa_used": 0.7271748914254362,
+          "kappa_next": 0.7271748914254362,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.025951664047970554
+        },
+        {
+          "t": 105.0,
+          "kappa_used": 0.7271748914254362,
+          "kappa_next": 0.7122995629577453,
+          "eligible": true,
+          "accepted": true,
+          "nis": 7.72931485628951
+        },
+        {
+          "t": 106.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.7122995629577453,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.827900227679769
+        },
+        {
+          "t": 107.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.7122995629577453,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.3063473255307256
+        },
+        {
+          "t": 108.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.7122995629577453,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.7280844218376004
+        },
+        {
+          "t": 109.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.7122995629577453,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.1482264891659026
+        },
+        {
+          "t": 110.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.7122995629577453,
+          "eligible": false,
+          "accepted": false,
+          "nis": 19.4973064838137
+        },
+        {
+          "t": 111.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.6981189783280118,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.045184003855071
+        },
+        {
+          "t": 112.0,
+          "kappa_used": 0.6981189783280118,
+          "kappa_next": 0.6981189783280118,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.7439934429943083
+        },
+        {
+          "t": 113.0,
+          "kappa_used": 0.6981189783280118,
+          "kappa_next": 0.6981189783280118,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.589293328090826
+        },
+        {
+          "t": 114.0,
+          "kappa_used": 0.6981189783280118,
+          "kappa_next": 0.6981189783280118,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.9430140006927694
+        },
+        {
+          "t": 115.0,
+          "kappa_used": 0.6981189783280118,
+          "kappa_next": 0.6981189783280118,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.9991311181431928
+        },
+        {
+          "t": 116.0,
+          "kappa_used": 0.6981189783280118,
+          "kappa_next": 0.6864362550825306,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.1444949432333833
+        },
+        {
+          "t": 117.0,
+          "kappa_used": 0.6864362550825306,
+          "kappa_next": 0.6864362550825306,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.249616304624667
+        },
+        {
+          "t": 118.0,
+          "kappa_used": 0.6864362550825306,
+          "kappa_next": 0.6864362550825306,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.5023440040921204
+        },
+        {
+          "t": 119.0,
+          "kappa_used": 0.6864362550825306,
+          "kappa_next": 0.6864362550825306,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.412943973058086
+        },
+        {
+          "t": 120.0,
+          "kappa_used": 0.6864362550825306,
+          "kappa_next": 0.6864362550825306,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.0033885116987227
+        }
+      ]
+    },
+    {
+      "seed": 700,
+      "duration": 120.0,
+      "outages": [
+        [
+          80.0,
+          20.0
+        ]
+      ],
+      "monitor": "dual",
+      "gnss_aci": false,
+      "navigation": {
+        "rmse_h": 1.2725123454793914,
+        "rmse_3d": 1.2830137514126758,
+        "runtime_us": 301.0734195825838,
+        "anees_pos": 4.744249643413006,
+        "coverage95_h": 0.3940066592674806,
+        "max_err_outage_20s": 2.194047127511305,
+        "end_err_outage_20s": 2.194047127511305,
+        "coverage95_h_outage": 0.775,
+        "anees_pos_outage": 1.495665751791165
+      },
+      "alarm_time": null,
+      "gnss_aci_trace": []
+    },
+    {
+      "seed": 700,
+      "duration": 120.0,
+      "outages": [
+        [
+          80.0,
+          20.0
+        ]
+      ],
+      "monitor": "dual",
+      "gnss_aci": true,
+      "navigation": {
+        "rmse_h": 1.271768167216961,
+        "rmse_3d": 1.2847280753558674,
+        "runtime_us": 248.40763066701282,
+        "anees_pos": 4.937651010554226,
+        "coverage95_h": 0.3951165371809101,
+        "max_err_outage_20s": 2.201756525737719,
+        "end_err_outage_20s": 2.201756525737719,
+        "coverage95_h_outage": 0.78,
+        "anees_pos_outage": 1.5058505184261008
+      },
+      "alarm_time": null,
+      "gnss_aci_trace": [
+        {
+          "t": 1.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.788117173202643
+        },
+        {
+          "t": 2.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.0829032329535748
+        },
+        {
+          "t": 3.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 4.293667503692377
+        },
+        {
+          "t": 4.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.8444529027229821
+        },
+        {
+          "t": 5.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 2.769101593529294
+        },
+        {
+          "t": 6.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.9860727858914384
+        },
+        {
+          "t": 7.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 5.154561162762179
+        },
+        {
+          "t": 8.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 2.5227177978215742
+        },
+        {
+          "t": 9.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 4.808164351251648
+        },
+        {
+          "t": 10.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 2.425864566401076
+        },
+        {
+          "t": 11.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.1579433185350811
+        },
+        {
+          "t": 12.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.9830730473098124
+        },
+        {
+          "t": 13.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 5.772264230883489
+        },
+        {
+          "t": 14.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 2.721558560851348
+        },
+        {
+          "t": 15.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.2537896535320052
+        },
+        {
+          "t": 16.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.6321500803794082
+        },
+        {
+          "t": 17.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.3539066524150536
+        },
+        {
+          "t": 18.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 9.831803423162592
+        },
+        {
+          "t": 19.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 4.037040899669698
+        },
+        {
+          "t": 20.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.7002353827346112
+        },
+        {
+          "t": 21.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 3.454086186725014
+        },
+        {
+          "t": 22.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.428351294742214
+        },
+        {
+          "t": 23.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 3.2580607118742155
+        },
+        {
+          "t": 24.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.279231961655221
+        },
+        {
+          "t": 25.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.2142496224594712
+        },
+        {
+          "t": 26.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 1.9425289386001592
+        },
+        {
+          "t": 27.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.8396656963088951
+        },
+        {
+          "t": 28.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 3.086214139176863
+        },
+        {
+          "t": 29.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 0.30115753312125176
+        },
+        {
+          "t": 30.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": false,
+          "accepted": true,
+          "nis": 4.561841356652424
+        },
+        {
+          "t": 31.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.14402127139103474
+        },
+        {
+          "t": 32.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.485411711490296
+        },
+        {
+          "t": 33.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 10.048920496829757
+        },
+        {
+          "t": 34.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.70136103104357
+        },
+        {
+          "t": 35.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.020535503006613
+        },
+        {
+          "t": 36.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.4718466754986714
+        },
+        {
+          "t": 37.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.236261941579594
+        },
+        {
+          "t": 38.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.1337400915239386
+        },
+        {
+          "t": 39.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.352353159517929
+        },
+        {
+          "t": 40.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 4.553731950638446
+        },
+        {
+          "t": 41.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.9723253389327566
+        },
+        {
+          "t": 42.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.3632634275861837
+        },
+        {
+          "t": 43.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.2757898116552953
+        },
+        {
+          "t": 44.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.41874414813696015
+        },
+        {
+          "t": 45.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.889423933533057
+        },
+        {
+          "t": 46.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.8024028478459445
+        },
+        {
+          "t": 47.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.5228434544693414
+        },
+        {
+          "t": 48.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 6.475714873738565
+        },
+        {
+          "t": 49.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.2746581044793166
+        },
+        {
+          "t": 50.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.227079234146822
+        },
+        {
+          "t": 51.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.483797832629363
+        },
+        {
+          "t": 52.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.0714224737334956
+        },
+        {
+          "t": 53.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.6710733429513356
+        },
+        {
+          "t": 54.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.743615488700878
+        },
+        {
+          "t": 55.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.7253946939522281
+        },
+        {
+          "t": 56.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.131313325736667
+        },
+        {
+          "t": 57.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.9285012705482942
+        },
+        {
+          "t": 58.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.046560087719674
+        },
+        {
+          "t": 59.0,
+          "kappa_used": 1.0,
+          "kappa_next": 1.0,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.019469347791052
+        },
+        {
+          "t": 60.0,
+          "kappa_used": 1.0,
+          "kappa_next": 0.716460335098844,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.7937472710402065
+        },
+        {
+          "t": 61.0,
+          "kappa_used": 0.716460335098844,
+          "kappa_next": 0.716460335098844,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.421556496380012
+        },
+        {
+          "t": 62.0,
+          "kappa_used": 0.716460335098844,
+          "kappa_next": 0.716460335098844,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.8163078105329932
+        },
+        {
+          "t": 63.0,
+          "kappa_used": 0.716460335098844,
+          "kappa_next": 0.716460335098844,
+          "eligible": true,
+          "accepted": true,
+          "nis": 4.897417510407767
+        },
+        {
+          "t": 64.0,
+          "kappa_used": 0.716460335098844,
+          "kappa_next": 0.716460335098844,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.523336939157069
+        },
+        {
+          "t": 65.0,
+          "kappa_used": 0.716460335098844,
+          "kappa_next": 0.6537966761339781,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.4725486108501058
+        },
+        {
+          "t": 66.0,
+          "kappa_used": 0.6537966761339781,
+          "kappa_next": 0.6537966761339781,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.320729424650563
+        },
+        {
+          "t": 67.0,
+          "kappa_used": 0.6537966761339781,
+          "kappa_next": 0.6537966761339781,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.2823980566591895
+        },
+        {
+          "t": 68.0,
+          "kappa_used": 0.6537966761339781,
+          "kappa_next": 0.6537966761339781,
+          "eligible": true,
+          "accepted": true,
+          "nis": 10.640417006501036
+        },
+        {
+          "t": 69.0,
+          "kappa_used": 0.6537966761339781,
+          "kappa_next": 0.6537966761339781,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.86858555583873
+        },
+        {
+          "t": 70.0,
+          "kappa_used": 0.6537966761339781,
+          "kappa_next": 0.825564651820095,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.849713490479824
+        },
+        {
+          "t": 71.0,
+          "kappa_used": 0.825564651820095,
+          "kappa_next": 0.825564651820095,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.3307405173293636
+        },
+        {
+          "t": 72.0,
+          "kappa_used": 0.825564651820095,
+          "kappa_next": 0.825564651820095,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.8396752631789768
+        },
+        {
+          "t": 73.0,
+          "kappa_used": 0.825564651820095,
+          "kappa_next": 0.825564651820095,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.7070475639899325
+        },
+        {
+          "t": 74.0,
+          "kappa_used": 0.825564651820095,
+          "kappa_next": 0.825564651820095,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.8719328957174183
+        },
+        {
+          "t": 75.0,
+          "kappa_used": 0.825564651820095,
+          "kappa_next": 0.7665663596081331,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.248200621018935
+        },
+        {
+          "t": 76.0,
+          "kappa_used": 0.7665663596081331,
+          "kappa_next": 0.7665663596081331,
+          "eligible": true,
+          "accepted": true,
+          "nis": 7.0284755246044055
+        },
+        {
+          "t": 77.0,
+          "kappa_used": 0.7665663596081331,
+          "kappa_next": 0.7665663596081331,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.6864336407075478
+        },
+        {
+          "t": 78.0,
+          "kappa_used": 0.7665663596081331,
+          "kappa_next": 0.7665663596081331,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.6788224711248568
+        },
+        {
+          "t": 79.0,
+          "kappa_used": 0.7665663596081331,
+          "kappa_next": 0.7665663596081331,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.766703939094428
+        },
+        {
+          "t": 100.0,
+          "kappa_used": 0.7665663596081331,
+          "kappa_next": 0.7271748914254362,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.9533293390960872
+        },
+        {
+          "t": 101.0,
+          "kappa_used": 0.7271748914254362,
+          "kappa_next": 0.7271748914254362,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.0270410984435214
+        },
+        {
+          "t": 102.0,
+          "kappa_used": 0.7271748914254362,
+          "kappa_next": 0.7271748914254362,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.428242200967755
+        },
+        {
+          "t": 103.0,
+          "kappa_used": 0.7271748914254362,
+          "kappa_next": 0.7271748914254362,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.826269127999862
+        },
+        {
+          "t": 104.0,
+          "kappa_used": 0.7271748914254362,
+          "kappa_next": 0.7271748914254362,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.025951664047970554
+        },
+        {
+          "t": 105.0,
+          "kappa_used": 0.7271748914254362,
+          "kappa_next": 0.7122995629577453,
+          "eligible": true,
+          "accepted": true,
+          "nis": 7.72931485628951
+        },
+        {
+          "t": 106.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.7122995629577453,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.827900227679769
+        },
+        {
+          "t": 107.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.7122995629577453,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.3063473255307256
+        },
+        {
+          "t": 108.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.7122995629577453,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.7280844218376004
+        },
+        {
+          "t": 109.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.7122995629577453,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.1482264891659026
+        },
+        {
+          "t": 110.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.7122995629577453,
+          "eligible": false,
+          "accepted": false,
+          "nis": 19.4973064838137
+        },
+        {
+          "t": 111.0,
+          "kappa_used": 0.7122995629577453,
+          "kappa_next": 0.6981189783280118,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.045184003855071
+        },
+        {
+          "t": 112.0,
+          "kappa_used": 0.6981189783280118,
+          "kappa_next": 0.6981189783280118,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.7439934429943083
+        },
+        {
+          "t": 113.0,
+          "kappa_used": 0.6981189783280118,
+          "kappa_next": 0.6981189783280118,
+          "eligible": true,
+          "accepted": true,
+          "nis": 5.589293328090826
+        },
+        {
+          "t": 114.0,
+          "kappa_used": 0.6981189783280118,
+          "kappa_next": 0.6981189783280118,
+          "eligible": true,
+          "accepted": true,
+          "nis": 1.9430140006927694
+        },
+        {
+          "t": 115.0,
+          "kappa_used": 0.6981189783280118,
+          "kappa_next": 0.6981189783280118,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.9991311181431928
+        },
+        {
+          "t": 116.0,
+          "kappa_used": 0.6981189783280118,
+          "kappa_next": 0.6864362550825306,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.1444949432333833
+        },
+        {
+          "t": 117.0,
+          "kappa_used": 0.6864362550825306,
+          "kappa_next": 0.6864362550825306,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.249616304624667
+        },
+        {
+          "t": 118.0,
+          "kappa_used": 0.6864362550825306,
+          "kappa_next": 0.6864362550825306,
+          "eligible": true,
+          "accepted": true,
+          "nis": 0.5023440040921204
+        },
+        {
+          "t": 119.0,
+          "kappa_used": 0.6864362550825306,
+          "kappa_next": 0.6864362550825306,
+          "eligible": true,
+          "accepted": true,
+          "nis": 3.412943973058086
+        },
+        {
+          "t": 120.0,
+          "kappa_used": 0.6864362550825306,
+          "kappa_next": 0.6864362550825306,
+          "eligible": true,
+          "accepted": true,
+          "nis": 2.0033885116987227
+        }
+      ]
+    }
+  ]
+}

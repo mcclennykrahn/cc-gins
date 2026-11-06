@@ -10,11 +10,11 @@ Proposal evidence: `docs/project_proposal.md` §§3–9; improvement/literature 
 | noise §3.2/4 | GM biases, second-order discretization, IMU YAML profiles | Random-walk biases, first-order Phi; dataclass noise and optional Earth correction. | partial | `ccgins/filters.py`, `ccgins/sim.py`, `tests/test_earth.py`, `configs/example_sim.yaml` |
 | gnss §3.3 | LC position/optional velocity and lever arm | Position LC with lever arm supported/tested; optional GNSS velocity absent. | partial | `ccgins/filters.py`, `tests/test_filters.py`, `tests/test_robust.py` |
 | robust §3.3 | Gate and robust Huber/Student-t GNSS | Huber plus chi-square gate wired via Config/CLI; forced reacquisition after repeated rejects; default robust off. | complete | `ccgins/pipeline.py`, `ccgins/filters.py`, `ccgins/cli.py`, `tests/test_robust.py`, `tests/test_cli.py` |
-| network §3.4 M3 | 3-layer dilated TCN, roll/pitch, bias-compensated IMU, β-NLL heads | Baseline: plain six-channel stride CNN, no attitude/dilation. Pullback: MotionNetTCN 1/2/4 dilations, eight normalized IMU+roll/pitch channels, beta-NLL, live filter attitude/current-bias correction in batch; default new sim training and CLI architecture selection. Legacy weights still load. Mini paired metrics measured; full held-out architecture validation remains missing. | partial | `ccgins/learning.py`, `scripts/train_motionnet.py`, `tests/test_learning_pipeline.py`, `results/motionnet_val.json`, `results/kitti/motionnet_val.json`, `results/i2nav/motionnet_val.json`, `tests/test_proposal_tcn.py`, `ccgins/alignment_experiment.py`, `configs/proposal_alignment_smoke.yaml`, `results/proposal_alignment/report.md` |
+| network §3.4 M3 | 3-layer dilated TCN, roll/pitch, bias-compensated IMU, β-NLL heads | Baseline: plain six-channel stride CNN, no attitude/dilation. Pullback: MotionNetTCN 1/2/4 dilations, eight normalized IMU+roll/pitch channels, beta-NLL, live filter attitude/current-bias correction in batch; default new sim training and CLI architecture selection. Legacy weights still load. Original simulation training budget **resolved**: both arches trained on 100–119 × 600 s, same 12 epochs and smooth variance; full-protocol val/test evidence in the new report. Independent real-drive validation and M3 acceptance remain missing. | partial | `ccgins/learning.py`, `scripts/train_motionnet.py`, `tests/test_learning_pipeline.py`, `results/motionnet_val.json`, `results/kitti/motionnet_val.json`, `results/i2nav/motionnet_val.json`, `tests/test_proposal_tcn.py`, `ccgins/alignment_experiment.py`, `configs/proposal_alignment_smoke.yaml`, `results/proposal_alignment/report.md`, `configs/proposal_alignment_full.yaml`, `results/proposal_alignment_full/report.md` |
 | datasets §3.4/5 | Sliding windows and real body-velocity supervision | Simulation/KITTI/i2Nav windows and labels; KITTI body velocity corrected using R-transformed ENU rather than horizontal vf/vl. | complete | `ccgins/learning.py`, `ccgins/data/kitti.py`, `ccgins/data/i2nav.py`, `scripts/train_motionnet_kitti.py`, `scripts/train_motionnet_i2nav.py`, `tests/test_learning_pipeline.py`, `tests/test_i2nav.py` |
 | nhc §3.4/6 B1-B4 | Fixed NHC, learned NHC and learned full velocity | All batch modes selectable; hybrid/v2/v3 add forward rejection and fixed lateral/vertical NHC. | complete | `ccgins/pipeline.py`, `ccgins/cli.py`, `tests/test_hybrid_kitti.py`, `tests/test_learning_pipeline.py`, `results/outage_table.md` |
 | aci §3.5 M4 | Per-learning-channel online κ and outage inflation | learned_vel calibrates three channels; hybrid/v2/v3 only forward; pre-pseudo reference is GNSS-constrained prior, t>30 and recent accepted GNSS. Clipped alpha/sliding window/bounded κ; correlated closed-loop reference. | partial | `ccgins/aci.py`, `ccgins/pipeline.py`, `tests/test_aci.py`, `tests/test_learning_pipeline.py`, `results/outage_table.md`, `results/outage_shift_table.md` |
-| gnss_aci §3.5 | Online GNSS κ_g from vector NIS | No GNSS conformal calibrator in pipeline; AdaptiveR is Sage-Husa, not κ_g. | unimplemented | `ccgins/aci.py`, `ccgins/pipeline.py`, `ccgins/adaptive.py` |
+| gnss_aci §3.5 | Online GNSS κ_g from vector NIS | Opt-in joint vector-NIS κ_g, pre-update C+κ_g R, next-fix scale, healthy accepted unforced references; tested batch path/calibration pilot. Integrity threshold/attack acceptance remains open; AdaptiveR is a separate Sage-Husa path. | partial | `ccgins/aci.py`, `ccgins/pipeline.py`, `tests/test_gnss_aci.py`, `results/proposal_alignment_full/gnss_aci_pilot.json` |
 | coverage §3.5/7 M4 | Nominal long-run coverage and consistent closed loop | Published v3 full/outage simulation 0.699/0.833; shift 0.730/0.876; KITTI FT outage 0.681; i2Nav mounted v3 0.574, correlation-NHC 0.887. ACI is NOT a mathematical closed-loop integrity guarantee. | partial | `results/outage_table.md`, `results/outage_shift_table.md`, `results/kitti/outage_table.md`, `results/i2nav/outage_table.md` |
 | dual §3.6 M5 | GNSS-free DR guard, CUSUM, healthy-window reset | Batch dual guard and single-channel comparison present; reset uses current health rather than proving entire-window health; alarms latch without recovery M epochs. | partial | `ccgins/integrity.py`, `ccgins/pipeline.py`, `tests/test_learning_pipeline.py`, `results/spoof_table.md`, `results/i2nav/spoof_table.md` |
 | hpl §3.6/7 | HPL and HPE>HPL reporting | No HPL output or exceedance metric; NEES coverage is different. | unimplemented | `ccgins/metrics.py`, `ccgins/pipeline.py`, `ccgins/integrity.py` |
@@ -24,7 +24,7 @@ Proposal evidence: `docs/project_proposal.md` §§3–9; improvement/literature 
 | kitti §5.2 | Disjoint drives; real IMU plus synthetic GNSS | Drive splits and test segments implemented; GNSS truth+noise/outage/spoof, NOT real received GNSS. | complete | `ccgins/kitti_scenarios.py`, `ccgins/data/kitti.py`, `scripts/run_kitti_experiment.py`, `tests/test_hybrid_kitti.py`, `results/kitti/outage_table.md` |
 | i2nav §5.3 | Real MEMS/RTK cross-device, KF-GINS validation | Real RTK, four co-mounted IMUs, opposite time halves of ONE drive; no independent roads or KF-GINS comparison. | partial | `ccgins/i2nav_scenarios.py`, `scripts/run_i2nav_experiment.py`, `tests/test_i2nav.py`, `results/i2nav/outage_paired.md` |
 | baselines §6 | B0–B5/Ours, A1–A4 | B0–B4 variants and ACI/inflation/filter/single-monitor ablations recorded. B5 VB/Student-t not present; Sage-Husa/Huber are different. No unified full Ours benchmark with GNSS κ_g/HPL. | partial | `scripts/run_outage_experiment.py`, `scripts/run_spoof_experiment.py`, `results/outage_table.md`, `results/spoof_table.md`, `ccgins/adaptive.py` |
-| protocol §5/7 M6 | Locked splits, paired baselines, ≥20 MC, mean/std | Simulation 100–119 train,500–503 val,900–909 test,700–705 calibration. Only 10 test seeds; KITTI held-out drives; i2Nav same-drive temporal folds. This session adds frozen mini paired protocol, not full acceptance. | partial | `ccgins/scenarios.py`, `ccgins/kitti_scenarios.py`, `ccgins/i2nav_scenarios.py`, `scripts/run_outage_experiment.py`, `results/outage_metrics.json` |
+| protocol §5/7 M6 | Locked splits, paired baselines, ≥20 MC, mean/std | Simulation 100–119 train,500–503 val,900–909 test,700–705 calibration. Only 10 test seeds; KITTI held-out drives; i2Nav same-drive temporal folds. Original 20×600 s training restored for both arches in the full protocol; ten paired test seeds, not ≥20-test-run acceptance. | partial | `ccgins/scenarios.py`, `ccgins/kitti_scenarios.py`, `ccgins/i2nav_scenarios.py`, `scripts/run_outage_experiment.py`, `results/outage_metrics.json` |
 | metrics §7 | RMSE, velocity/yaw, %DT, NEES/NIS fit, HPL, FAs/hour, efficiency | Position RMSE/outage endpoints/NEES/coverage/runtime; spoof delays and detection counts. Missing unified yaw/%DT/NIS-fit/HPL/memory/FA-per-hour suite. | partial | `ccgins/metrics.py`, `scripts/run_spoof_experiment.py`, `tests/test_comparison.py`, `results/inekf_vs_eskf/metrics.json` |
 | reports §4/9 M6 | Automatic full report and plots | Separate experiment scripts and tables; no unified make_report.py full M6 acceptance. | partial | `scripts/run_outage_experiment.py`, `scripts/plot_i2nav_summary.py`, `results/i2nav/outage_table.md` |
 | export §4 | TorchScript/ONNX export | State-dict persistence only; no export utility. | unimplemented | `ccgins/learning.py` |
@@ -45,7 +45,7 @@ All table numbers above are pre-existing, not re-run. Simulation GNSS is synthet
 
 Legacy `results/motionnet.pt`, `results/kitti/motionnet_kitti.pt`, and `results/i2nav/motionnet_fold{A,B}.pt` are six-channel MotionNet state dictionaries; all four loaders were regression-tested successfully in tests/test_proposal_tcn.py. The TCN checkpoint uses architecture metadata; historical plain state dictionaries remain supported.
 
-Counts: {'complete': 5, 'partial': 16, 'experiment_substitute': 2, 'unimplemented': 5}
+Current counts after third batch: {'complete': 5, 'partial': 17, 'experiment_substitute': 2, 'unimplemented': 4}
 
 ## Pullback outcome
 
@@ -68,3 +68,30 @@ working default. Fixed-threshold dual false alarms/latching were isolated in a
 validation-only pilot. Full-chain streaming learning/ACI/integrity, GNSS κ_g,
 18-state mounting, HPL/recovery and UrbanNav TC remain incomplete. No audit status
 is upgraded to complete on the basis of this reduced-train simulation.
+
+## 2026-11-06 third-batch original-budget update
+
+**Original training budget resolved**: both legacy_cnn and proposal_tcn completed
+all seeds 100–119 × 600 s with identical 12-epoch optimizer opportunity and smooth
+log variance. See [full report](../results/proposal_alignment_full/report.md) for
+paired validation/test results and architecture decision, and
+[scope/API documentation](proposal_alignment_full.md). This supersedes the reduced
+training limitation above; it does not erase earlier measured evidence or establish
+M3 acceptance, independent real-drive validation or ≥20-test-run acceptance.
+
+Separate calibration 700–705 is grouped within seed before equal-seed averaging;
+its n_eff correlation inflation is not an independent sample count. No test-driven
+corr_scale change or atmospheric/bias latch fix is claimed. The locked primary
+comparison retains the prior equal correlation/monitor settings. Prior false-alarm
+and latched GNSS exclusion findings remain distinct from correlation estimation.
+
+GNSS κ_g now exists in the actual batch ACI/pipeline path, opt-in and tested with
+joint χ²₃ NIS, full covariance, next-fix causality, outage freezing and rejection/
+forced/alarm eligibility regressions. A separate loaded-network calibration pilot
+is reported; it is not primary test tuning or a full navigation integrity guarantee.
+Streaming learning/ACI/DR-CUSUM remains incomplete and explicitly rejected, as does
+streaming GNSS κ_g. No new full-chain covariance-equality result is claimed.
+Online mounting/18-state, HPL/recovery, real-drive TCN, B5, ≥20 tests and UrbanNav TC
+remain gaps. Historical published tables/checkpoints were not rewritten.
+
+Full-protocol measured decision: validation RMSE TCN 4.042560 m vs legacy 4.060636 m; test RMSE TCN 31.536755 m vs legacy 5.153636 m, NHC control 3.269130 m. TCN was not promoted; legacy remains the working primary. Full pytest: 130 passed in 56.48s.

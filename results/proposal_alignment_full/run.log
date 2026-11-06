@@ -1,0 +1,85 @@
+epoch 1/12 beta-NLL 3.8496
+epoch 2/12 beta-NLL 0.0171
+epoch 3/12 beta-NLL 0.0077
+epoch 4/12 beta-NLL 0.0055
+epoch 5/12 beta-NLL -0.0026
+epoch 6/12 beta-NLL -0.0112
+epoch 7/12 beta-NLL -0.0228
+epoch 8/12 beta-NLL -0.0287
+epoch 9/12 beta-NLL -0.0330
+epoch 10/12 beta-NLL -0.0359
+epoch 11/12 beta-NLL -0.0376
+epoch 12/12 beta-NLL -0.0386
+PILOT legacy_cnn smooth -2.78939621917885
+epoch 1/12 beta-NLL 2.4595
+epoch 2/12 beta-NLL 0.0253
+epoch 3/12 beta-NLL 0.0151
+epoch 4/12 beta-NLL 0.0085
+epoch 5/12 beta-NLL 0.0032
+epoch 6/12 beta-NLL -0.0001
+epoch 7/12 beta-NLL -0.0058
+epoch 8/12 beta-NLL -0.0109
+epoch 9/12 beta-NLL -0.0155
+epoch 10/12 beta-NLL -0.0197
+epoch 11/12 beta-NLL -0.0224
+epoch 12/12 beta-NLL -0.0244
+PILOT proposal_tcn smooth -2.9660238238337593
+LOCKED SELECTION {'activation': 'smooth', 'criterion': 'mean reference-conditioned validation Gaussian NLL over both architectures and all validation seeds', 'scores': {'smooth': -2.8777100215063047}, 'config_sha256': '68cf4613a017b5a3c15d785e46a0f2bac11015425c39b2297b9f221855d3be33'}
+NAV legacy_cnn val 501 RMSE_h=3.9864184396501265
+NAV legacy_cnn val 500 RMSE_h=1.5407408067683175
+NAV legacy_cnn val 502 RMSE_h=1.955625715024099
+NAV legacy_cnn val 503 RMSE_h=8.75976101872964
+NAV legacy_cnn test 901 RMSE_h=1.745458102468335
+NAV legacy_cnn test 900 RMSE_h=2.824460828124547
+NAV legacy_cnn test 903 RMSE_h=14.226698513189303
+NAV legacy_cnn test 902 RMSE_h=3.195904221228966
+NAV legacy_cnn test 904 RMSE_h=2.674717120970259
+NAV legacy_cnn test 905 RMSE_h=10.709279139677678
+NAV legacy_cnn test 906 RMSE_h=3.3181017627364624
+NAV legacy_cnn test 907 RMSE_h=2.5856650718100007
+NAV legacy_cnn test 908 RMSE_h=7.564319221691887
+NAV legacy_cnn test 909 RMSE_h=2.691754879729308
+NAV proposal_tcn val 500 RMSE_h=1.3723861738296843
+NAV proposal_tcn val 501 RMSE_h=3.9064852804680537
+NAV proposal_tcn val 502 RMSE_h=2.096728988316825
+NAV proposal_tcn val 503 RMSE_h=8.79464058891546
+NAV proposal_tcn test 900 RMSE_h=3.100519443691525
+NAV proposal_tcn test 901 RMSE_h=25.676659467954046
+NAV proposal_tcn test 902 RMSE_h=61.612113942590916
+NAV proposal_tcn test 903 RMSE_h=75.03962373223624
+NAV proposal_tcn test 904 RMSE_h=2.7885570366466483
+NAV proposal_tcn test 905 RMSE_h=2.265837555283473
+NAV proposal_tcn test 906 RMSE_h=17.66506644101184
+NAV proposal_tcn test 907 RMSE_h=2.8157301395596694
+NAV proposal_tcn test 908 RMSE_h=42.35586029823562
+NAV nhc test 900 RMSE_h=3.5395934249836944
+NAV nhc test 901 RMSE_h=2.325729216214484
+NAV nhc test 902 RMSE_h=3.8172119670647517
+NAV nhc test 903 RMSE_h=3.7859463317858997
+NAV proposal_tcn test 909 RMSE_h=82.04758237174903
+NAV nhc test 904 RMSE_h=3.234764151903383
+NAV nhc test 905 RMSE_h=1.6257306004349694
+NAV nhc test 906 RMSE_h=4.427594503034204
+NAV nhc test 907 RMSE_h=4.12512484220216
+NAV nhc test 908 RMSE_h=1.4897598401154561
+NAV nhc test 909 RMSE_h=4.31984270914746
+{
+  "legacy_cnn": {
+    "rmse_h": 5.153635886162675,
+    "coverage95_h": 0.7391510261357658,
+    "coverage95_h_outage": 0.7896190476190477,
+    "gaussian_nll": -2.6945222621711347
+  },
+  "proposal_tcn": {
+    "rmse_h": 31.5367550428959,
+    "coverage95_h": 0.7032801262936328,
+    "coverage95_h_outage": 0.7560952380952382,
+    "gaussian_nll": -2.9406820905790085
+  },
+  "nhc": {
+    "rmse_h": 3.2691297586886465,
+    "coverage95_h": 0.7127521487458341,
+    "coverage95_h_outage": 0.8280000000000001,
+    "gaussian_nll": null
+  }
+}

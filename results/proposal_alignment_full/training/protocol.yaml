@@ -1,0 +1,79 @@
+# Locked original training budget; smooth selected in e156213. No test tuning.
+train_seeds:
+- 100
+- 101
+- 102
+- 103
+- 104
+- 105
+- 106
+- 107
+- 108
+- 109
+- 110
+- 111
+- 112
+- 113
+- 114
+- 115
+- 116
+- 117
+- 118
+- 119
+val_seeds:
+- 500
+- 501
+- 502
+- 503
+test_seeds:
+- 900
+- 901
+- 902
+- 903
+- 904
+- 905
+- 906
+- 907
+- 908
+- 909
+duration: 600.0
+outages:
+- - 150.0
+  - 30.0
+- - 280.0
+  - 60.0
+- - 420.0
+  - 120.0
+epochs: 12
+batch: 128
+lr: 0.002
+stride: 20
+training_seed: 0
+threads: 1
+variance_candidates:
+- smooth
+filter:
+  filter: inekf
+  pseudo: hybrid
+  nhc_sigma: 0.1
+  aci: true
+  aci_beta: 2.0
+  aci_gamma: 0.01
+  aci_window: 300
+  corr_scale:
+  - 40.0
+  - 40.0
+  - 40.0
+  robust_gnss_delta: 1.5
+  monitor: dual
+  cusum_k: 3.0
+  cusum_h: 50.0
+  dr_reset_period: 30.0
+  init_seed: 0
+calibration_seeds:
+- 700
+- 701
+- 702
+- 703
+- 704
+- 705

@@ -1,0 +1,15 @@
+{
+  "activation": "smooth",
+  "criterion": "mean reference-conditioned validation Gaussian NLL over both architectures and all validation seeds",
+  "scores": {
+    "smooth": -2.8777100215063047
+  },
+  "config_sha256": "68cf4613a017b5a3c15d785e46a0f2bac11015425c39b2297b9f221855d3be33",
+  "architecture_validation_criterion": "mean navigation horizontal RMSE over val 500\u2013503 only",
+  "validation_rmse_h": {
+    "legacy_cnn": 4.060636495043045,
+    "proposal_tcn": 4.0425602578825055
+  },
+  "validation_ranked_architecture": "proposal_tcn",
+  "test_comparison_is_not_hyperparameter_selection": true
+}
