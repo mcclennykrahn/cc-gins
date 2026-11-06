@@ -16,7 +16,7 @@ from .integrity import Cusum, dr_statistic
 from .learning import WINDOW
 from .sim import DEG
 from .range_coupling import BaselineRangeCoupler
-from .zupt import AdaptiveZeroVelocity, zupt_update, mounted_odometry_update
+from .zupt import AdaptiveZeroVelocity, zupt_update, mounted_odometry_update, OdometryStopGuard
 
 
 @dataclass
@@ -73,6 +73,7 @@ class Config:
     zupt_require_gnss_stop: bool = True  # opt out only with independent external stop assurance
     zupt_accel_var: float | None = None  # frozen held-out calibration; None = noise-only floor
     zupt_gyro_var: float | None = None
+    zupt_odometry_stop: bool = False  # explicit independent wheel-zero confirmation
     zupt_sigma: float = 0.05
     motion_every: int = 10
     label: str = ""
@@ -155,6 +156,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
             dt=dt, gravity=9.81 if cfg.local_gravity is None else cfg.local_gravity)
     motion = {"zupt_attempted": 0, "zupt_accepted": 0, "odometry_attempted": 0,
               "odometry_accepted": 0, "zupt_times": []}
+    odo_stop = OdometryStopGuard()
     stop_verified = False
     stop_confirmations = 0
     previous_fix = None
@@ -210,11 +212,13 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
             imu.gyro[k], imu.accel[k], np.linalg.norm(A.v))
         # A quiet IMU and a small FILTER speed cannot independently prove rest.
         # Once GNSS has confirmed rest, retain it through an outage only while
-        # the IMU dwell remains uninterrupted. New outage stops stay unconfirmed.
+        # the IMU dwell remains uninterrupted. New outage stops need the opt-in
+        # independent wheel-zero guard; the GNSS-only default cannot confirm them.
         if detector is not None and detector.quiet == 0:
             stop_verified = False
             stop_confirmations = 0
-        stop_allowed = stop_verified or not cfg.zupt_require_gnss_stop
+        stop_allowed = (stop_verified or not cfg.zupt_require_gnss_stop or
+                        (cfg.zupt_odometry_stop and odo_stop.confirmed(t)))
         if stationary and not stop_allowed and kk % cfg.motion_every == 0:
             motion['unconfirmed_stop_vetoes'] += 1
         if stationary and stop_allowed and kk % cfg.motion_every == 0:
@@ -234,6 +238,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                         imu.gyro[k], odometry.C_vb, odometry.lever_b)
                     if F is A:
                         motion['odometry_accepted'] += int(info.accepted)
+                        odo_stop.observe(t, odometry.speed[j], odometry.sigma[j], info.accepted)
 
         # ---------- motion pseudo-measurement ----------
         if cfg.pseudo != "none" and kk % cfg.pseudo_every == 0 and kk >= WINDOW:

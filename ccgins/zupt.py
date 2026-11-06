@@ -220,3 +220,22 @@ def mounted_odometry_model(nav, gyro, C_vb, lever_b):
 def mounted_odometry_update(nav, speed, sigma, gyro, C_vb, lever_b, gate=10.827566):
     h, H = mounted_odometry_model(nav, gyro, C_vb, lever_b)
     return nav.update(np.array([speed]) - h, H, np.array([[sigma**2]]), gate=gate)
+
+
+class OdometryStopGuard:
+    """Two accepted wheel-zero upper bounds, <=0.2 s apart; never held indefinitely.
+
+    Forward zero alone cannot exclude lateral motion/slip. Enable only for a
+    calibrated ground vehicle with independently valid wheel data.
+    """
+    def __init__(self):
+        self.last = -np.inf
+        self.count = 0
+
+    def observe(self, t, speed, sigma, accepted):
+        zero = accepted and abs(speed) + 3*sigma < .1
+        self.count = (self.count + 1 if 0 < t-self.last <= .200000001 else 1) if zero else 0
+        self.last = t
+
+    def confirmed(self, t):
+        return self.count >= 2 and 0 <= t-self.last <= .200000001

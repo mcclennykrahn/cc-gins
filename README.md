@@ -18,7 +18,7 @@
 | **基线伪距耦合原型** | `ccgins/range_coupling.py` | `Config.baseline_range_anchor`：每历元将 RTK 基线及其协方差投影为单个距离，与 IMU 预测天线位置耦合；预更新标量 CUSUM 捕获径向杆臂误差。仅径向可观，替代原 RTK 更新，不重复融合；非原始卫星伪距 |
 | InEKF 松组合 | `ccgins/filters.py::InEKF` | 右不变 SE₂(3) 误差加可加性零偏，GNSS 观测带杆臂 |
 | **零速检测 / ZUPT / 里程计** | `ccgins/zupt.py` | 按传感器噪声密度与留出 IMU 振动标定的因果检测，含速度/转动/重力/持续时间防护；主 `pipeline.run` 可选 ZUPT 与带安装角/轮速点杆臂的里程计更新；ESKF/InEKF 共用 Joseph 更新和 χ² 门限 |
-| **实时流式封装** | `ccgins/stream.py` | `StreamingNavigator`：`push_imu` / `push_gnss` 增量处理，乱序 GNSS 缓存后按时间戳插入，`get_state` 返回位置、速度、姿态与协方差；复用现有 ESKF/InEKF |
+| **实时流式封装** | `ccgins/stream.py` | `StreamingNavigator`：`push_imu` / `push_gnss` / `push_odometry` 增量处理，乱序 GNSS 缓存后按时间戳插入，`get_state` 返回位置、速度、姿态与协方差；复用现有 ESKF/InEKF |
 | **自适应 GNSS 量测噪声 R** | `ccgins/adaptive.py` | 基于新息的 Sage-Husa 滑窗估计（遗忘因子加权），按 `[min_scale, max_scale] × R_nominal` 逐轴夹紧；`Config.adaptive_r=False`（默认）时不启用 |
 | **配置驱动 CLI** | `ccgins/cli.py` | `ccgins run --config … --out …`（或 `python -m ccgins.cli`）跑仿真/中断场景，写出 `report.md` 与 `metrics.json`；示例配置 `configs/example_sim.yaml` |
 | NHC 基线 | `pipeline.py`（`pseudo="nhc"`） | 侧向和垂向速度为 0，σ 固定为 0.1 m/s |
@@ -97,7 +97,7 @@ print(state.t, state.position, state.velocity, state.attitude)
 print(state.position_covariance)
 ```
 
-滤波器推进时会按时间顺序应用缓冲的 GNSS；若 GNSS 历元落在两个 IMU 采样之间，会在该时刻切分积分区间，因此结果与 `pipeline.run` 的批处理顺序一致。`tests/test_stream.py` 验证了同一仿真数据上的批处理一致性（位置/速度/位置协方差）以及乱序 GNSS 的等价性。流式接口只封装 IMU+GNSS；伪观测、ACI、完整性监测与自适应 R 仍使用批量 `pipeline.run` 的选项。已经推进过去的 GNSS 历元无法回溯，会抛出 `ValueError`。
+滤波器推进时会按时间顺序应用缓冲的 GNSS；若 GNSS 历元落在两个 IMU 采样之间，会在该时刻切分积分区间，在 IMU 网格上的 GNSS 与 `pipeline.run` 顺序一致，离网格切分是流式扩展。`tests/test_stream.py` 验证了同一仿真数据上的批处理一致性（位置/速度/位置协方差）以及乱序 GNSS 的等价性。流式接口支持 IMU+GNSS、因果自适应 ZUPT 与显式安装/杆臂轮速；NHC/学习伪观测、ACI、完整性监测与自适应 R 仍为批量功能。已经推进过去的 GNSS 历元无法回溯，会抛出 `ValueError`。
 
 ### 自适应 GNSS 量测噪声 R（可选，默认关闭）
 
@@ -378,7 +378,7 @@ docs/        调研与方案文档
 对照使用相同 IMU 与初值。标量残差只能检测不一致，不能唯一归因于杆臂，也不能独立约束切向位置。
 这一步没有原始卫星观测、接收机钟差或多星几何，不代表完整 GNSS 紧组合。
 
-### 自适应 ZUPT 与显式几何里程计（主批量流程）
+### 自适应 ZUPT 与显式几何里程计（批量与流式）
 
 `Config(zupt=True)` 在 `pipeline.run` 中启用零速更新；默认仅用噪声密度地板，
 实车应先用独立标定 IMU 的 `AdaptiveZeroVelocity.calibrate(gyro, accel, spec, dt)`，
@@ -390,7 +390,7 @@ docs/        调研与方案文档
 默认 `zupt_require_gnss_stop=True`：连续两次被接受的真实 GNSS 位置对满足
 `(位移模长 + 2√λmax(R₁+R₂))/Δt < 0.25 m/s`（历元间隔 ≤2 s）才确认停车。
 任何 IMU 持续条件中断，或任何表明运动的有效 GNSS 对（即使被滤波器拒绝）都会撤销确认。
-确认停车可在 IMU 持续静止时延续到中断内，但中断中新停车无法确认。
+确认停车可在 IMU 持续静止时延续到中断内；默认 GNSS-only 保护无法确认中断中新停车。可显式启用 `zupt_odometry_stop=True`，使用独立有效轮速的零速证据（详见下节）。
 仅在有独立外部停车保证时才能关闭此保护。未保护的车辆振动配置实测曾因误检导致严重发散，
 完整失败结果保留于 `results/adaptive_motion_vehicle/`，低阈值无更新结果保留于
 `results/adaptive_motion_conservative/`。这些开发试验不是盲测或泛化验证。
@@ -407,7 +407,7 @@ docs/        调研与方案文档
 复现：`OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.motion_experiment --workers 4`。
 
 
-本批实际运行 **192 条轨迹 / 96 组配对**：4 IMU × 2 时间折 × ESKF/InEKF ×
+此前自适应 ZUPT 批次实际运行 **192 条轨迹 / 96 组配对**：4 IMU × 2 时间折 × ESKF/InEKF ×
 无中断/六段中断 × 有/无更新 × 3 个保留配置；每配置有 96 个配对中断事件。
 使用初值种子 0，基线为安装角标定 + 相关性膨胀 NHC，启用地球补偿和真实 RTK 历元 σ。
 全部原 73 测试与新增 10 测试通过：**83 passed in 32.45s**。
@@ -427,3 +427,35 @@ ADIS16465 3.2207→3.2207 m，i300 2.5962→2.5962 m。
 所有配置为同一条行驶的开发试验，GNSS 保护是在观察到失败后加入，不应视为独立盲测。
 完整配置、逐 IMU 一致性、全部中断最大/末端误差、失败和复现命令见
 [批次报告](results/adaptive_motion/batch_summary.md)；里程计仅完成集成与控制测试，未声称实测轮速性能。
+
+### 流式 motion 更新与 SYNTHETIC 轮速中断试验
+
+`StreamingNavigator.from_truth(..., cfg)` 现在读取全部 ZUPT 标定方差、重力、
+持续时间/速度防护和更新频率；直接构造时传 `motion_cfg=cfg, imu_spec=spec, dt=dt`。
+外部轮速用 `nav.push_odometry(t, speed, sigma, C_vb, lever_b, valid=True)`，
+必须在相应 `push_imu(t, ...)` **之前**入队，可预先缓存；不接受重复/过去历元，
+不插值或保持轮速。安装矩阵、测点杆臂、地球旋转修正与批量共用同一观测模型。
+`nav.motion` 对应批量 `log.extra['motion']`。
+
+```python
+cfg = Config(zupt=True, zupt_accel_var=cal.accel_var,
+             zupt_gyro_var=cal.gyro_var, zupt_odometry_stop=True)
+nav = StreamingNavigator.from_truth(truth, imu_spec, gnss_spec, cfg)
+# 每次先缓存该历元的轮速，再推进 IMU；GNSS 可提前缓存或在同历元 IMU 后喂入。
+nav.push_odometry(t, wheel_speed, wheel_sigma, C_vb, lever_b, valid=not slipping)
+nav.push_imu(t, accel, gyro)
+```
+
+可选的独立轮速停车保护要求连续两次**被滤波器接受**的轮速满足
+`abs(speed)+3*sigma < 0.1 m/s`，相邻间隔 ≤0.2 s，证据在 0.2 s 后过期。
+它只替代 GNSS 停车确认，仍须满足 IMU 因果检测、滤波速度与 ZUPT 门控。
+轮速更新在该历元 ZUPT **之后**，所以证据最早用于下一历元，避免同历元循环自证。
+必须由调用方保证车辆前向零速可作为停车证据、安装/方差已标定，并排除滑移；横向运动无法靠单轴轮速排除。
+默认配置和旧批量行为保持不变。
+
+有意的流式差异：ZUPT 要求固定 IMU 采样间隔，检测只看已经传播的前一采样；
+传播 → ZUPT → 轮速 → 同历元 GNSS 的顺序与批量一致。离网格 GNSS 可以切分传播，
+但批量 API 本身按 IMU 索引工作，仅网格输入承诺一致性。轮速必须位于传播后的 IMU 网格，
+起始 IMU 历元不应用轮速。流式可在起始历元应用 GNSS；批量循环从下一历元开始，
+因此做一致性回放应排除起始 GNSS。流式 GNSS 接收显式协方差，真实数据回放须由调用方
+应用与批量相同的历元 σ 与地板。已过期数据不能回溯；迟到 GNSS 的拒绝语义保持不变。
