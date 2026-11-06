@@ -1,7 +1,7 @@
 {
   "stage_id": "cc_diagnostics_s4",
   "verdict": "PASS",
-  "scope": "Independent source review and focused regression; campaign artifacts require final selfcheck",
+  "scope": "Independent source review, focused regression, completed campaign rows, aggregate sums, report and executed selfcheck",
   "blocking_issues": [],
   "pytest": "21 passed in 18.73s",
   "pytest_log": "/workspace/ccgins-v08/reviews/stage4_independent_pytest.log",
@@ -16,11 +16,14 @@
     "reason_intervals counts once per reason per affected interval including the open interval.",
     "Summary snapshots copy dictionaries and cumulative values survive begin().",
     "Independent synthetic tests verify onset equality, preattack/no-alarm miss partition and pooled count summation.",
-    "Phase-specific evaluator invocations overwrite metrics.json; final campaign must use all or preserve outputs separately."
+    "Phase-specific evaluator invocations overwrite metrics.json; final campaign must use all or preserve outputs separately.",
+    "Executed selfcheck successfully; independent row-based arithmetic verified all alarm partitions, cumulative reason sums, fallback totals and pooled horizontal errors.",
+    "Report cumulative reason table matches independently summed rows; historical Stage3 differences disclosed without causal attribution."
   ],
   "confirmed_v08": false,
   "detection": "FAIL",
   "tcn_promoted": false,
   "cusum_promoted": false,
-  "written_at": "2026-11-06T16:01:08.058516+00:00"
+  "written_at": "2026-11-06T16:01:08.058516+00:00",
+  "campaign_artifacts": "PASS"
 }
