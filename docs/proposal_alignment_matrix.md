@@ -52,3 +52,19 @@ Counts: {'complete': 5, 'partial': 16, 'experiment_substitute': 2, 'unimplemente
 The architecture row remains partial: the requested network and batch filter-input wiring now exist with focused tests and a measured locked paired smoke, but full drive/fold retraining and ≥20-run validation are outstanding. New network training uses reference attitude/true simulated biases; deployed inference uses filter estimates. This conditioning gap is explicitly reported.
 
 See `results/proposal_alignment/report.md` and `metrics.json` for measured results and `configs/proposal_alignment_smoke.yaml` for frozen parameters. TCN did not outperform legacy CNN in this small undertrained test; no historical table was replaced. `configs/proposal_primary.yaml` runs the complete currently supported primary batch spine through CLI; GNSS κ_g/HPL/online mounting/recovery remain absent.
+
+## 2026-11-06 next-batch measured update
+
+[Next report](../results/proposal_alignment_next/report.md) and
+[debug investigation](proposal_tcn_debug.md) supersede the mini-smoke-only assessment
+above without replacing its frozen measurements. Four 600 s training seeds,
+validation 500–503, and all ten test seeds 900–909 with nominal outages completed.
+This is reduced training, not full M3 acceptance. Optional smooth variance bounds
+address a demonstrated hard-clamp gradient defect; reference-conditioned vertical
+variance extrapolation explains the earlier catastrophic NLL tail, but is not
+established to originate from lower-bound saturation during training. Validation
+preferred TCN; held-out navigation did not confirm it. Legacy remains the validated
+working default. Fixed-threshold dual false alarms/latching were isolated in a
+validation-only pilot. Full-chain streaming learning/ACI/integrity, GNSS κ_g,
+18-state mounting, HPL/recovery and UrbanNav TC remain incomplete. No audit status
+is upgraded to complete on the basis of this reduced-train simulation.

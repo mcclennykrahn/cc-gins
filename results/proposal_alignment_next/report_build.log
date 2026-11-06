@@ -1,0 +1,35 @@
+# Next paired evaluation — reduced train (2026-11-06)
+
+**Reduced-train / not full M3 acceptance. All 10 test seeds 900–909 completed for both architectures and NHC; full nominal 30/60/120 s outages.** All IMU and GNSS data here are synthetic simulation. Historical published legacy tables/checkpoints were not rewritten.
+
+Baseline: `58b3dc976046e4f2107b84e5eee8fff9a9bfe59a`. See [debug findings](../../docs/proposal_tcn_debug.md), [raw smoke rerun](../proposal_alignment_debug/smoke/metrics.json), and [per-channel probe](../proposal_alignment_debug/probe.json).
+
+## Precommitted assessment
+
+`configs/proposal_alignment_next.yaml` was locked before training: train 100–103 × 600 s, val 500–503, test 900–909 × 600 s. Calibration 700–705 untouched. Outages are (start, duration) = (150,30), (280,60), (420,120) s. Identical Adam lr .002, cosine schedule, 12 epochs, batch 128, stride 20, initialization seed 0, one Torch/BLAS thread per process. Three independent local navigation processes; completed runs retained across a scheduling restart. This reduces the train pool from 20 to 4, not test coverage or outage duration.
+
+Config SHA256: `3b74b3dbf23bfeeb3f57073a206c5f04645b0bce3baf6ea4a66c30ea306dba57`. Only hard/smooth variance activation was selected, by mean validation Gaussian NLL pooled equally over architectures and validation seeds. Selected **smooth** before test navigation; scores: {'hard': -1.600951339120371, 'smooth': -1.7108198261316874}. Same selected hyperparameters and ACI for both architectures. No test-based tuning or ACI/correlation sweep. Model hashes, environment, resolved filters and every seed are in metrics.json.
+
+Network diagnostics are reference-conditioned (TCN uses reference roll/pitch and true simulated biases; legacy raw IMU). Navigation uses live estimated filter attitude/current estimated biases, separately for A and DR B. Truth only initializes the shared existing protocol and scores errors. Network NLL is Gaussian NLL including .5 log(2π), averaged across three channels and windows; negative continuous-density NLL is valid. Navigation RMSE/coverage start at 30 s; outage coverage includes all outage epochs. Table values are unweighted means of seed metrics.
+
+Paired learned settings: InEKF, hybrid fixed lateral/up NHC σ=.1, ACI α=.05/γ=.01/window=300/outage β=2/T_ref=60, corr_scale=[40,40,40], Huber=1.5, dual CUSUM k=3/h=50, reset=30 s. These inherited smoke thresholds are **not calibrated integrity thresholds**. NHC is a supplemental control with the same nominal sensor/filter/noise settings but ACI/monitor disabled and no learned forward channel.
+
+| Method | RMSE_h m | Network NLL | Nav coverage | Outage coverage | notes |
+|---|---:|---:|---:|---:|---|
+| legacy_cnn (selected) | 4.137701 | -1.849681 | 0.718102 | 0.791095 | smooth; 10 seeds |
+| proposal_tcn (selected) | 13.242062 | -1.669093 | 0.709718 | 0.810619 | smooth; 10 seeds |
+| nhc (control) | 3.269130 | — | 0.712752 | 0.828000 | control, no ACI/dual |
+
+Validation navigation means (architecture assessment only; no new settings selected):
+
+| Method | Val RMSE_h m | Test seed RMSE_h std m |
+|---|---:|---:|
+| legacy_cnn | 11.925570 | 2.414972 |
+| proposal_tcn | 6.495384 | 16.992875 |
+
+Validation-ranked architecture: **proposal_tcn**. Test-reported TCN minus legacy RMSE_h: **+9.104361 m**.
+**Legacy remains the validated primary working method; it has the lower test RMSE among the paired learned configurations with validation-selected settings. TCN is not established as an improvement / not primary.** Both the stacked legacy CNN and proposal TCN remain available. A better network likelihood does not establish a better closed-loop navigation method.
+
+## Debug evidence and limits
+
+The reproduced smoke aggregates exactly equal the frozen prior smoke metrics. `probe.py` shows TCN seed 900 NLL channels 4.919387 / 0.420892 / 35.277800, with vertical variance reaching exp(-12). Seed 901 vertical NLL is 24.418560. This explains the catastrophic standalone NLL tail; reference/serve mismatch cannot explain those reference-conditioned measurements.

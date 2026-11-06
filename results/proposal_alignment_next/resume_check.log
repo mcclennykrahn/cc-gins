@@ -1,0 +1,25 @@
+PILOT legacy_cnn hard -1.715645246951011
+PILOT proposal_tcn hard -1.4862574312897308
+PILOT legacy_cnn smooth -1.7586988217181383
+PILOT proposal_tcn smooth -1.6629408305452364
+LOCKED SELECTION {'activation': 'smooth', 'criterion': 'mean reference-conditioned validation Gaussian NLL over both architectures and all validation seeds', 'scores': {'hard': -1.600951339120371, 'smooth': -1.7108198261316874}, 'config_sha256': '3b74b3dbf23bfeeb3f57073a206c5f04645b0bce3baf6ea4a66c30ea306dba57'}
+{
+  "legacy_cnn": {
+    "rmse_h": 4.1377008634198065,
+    "coverage95_h": 0.718102087353096,
+    "coverage95_h_outage": 0.7910952380952381,
+    "gaussian_nll": -1.8496805302616888
+  },
+  "proposal_tcn": {
+    "rmse_h": 13.242062105843539,
+    "coverage95_h": 0.7097175934046658,
+    "coverage95_h_outage": 0.8106190476190477,
+    "gaussian_nll": -1.6690931061293874
+  },
+  "nhc": {
+    "rmse_h": 3.2691297586886465,
+    "coverage95_h": 0.7127521487458341,
+    "coverage95_h_outage": 0.8280000000000001,
+    "gaussian_nll": null
+  }
+}

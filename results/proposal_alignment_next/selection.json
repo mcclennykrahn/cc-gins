@@ -1,0 +1,9 @@
+{
+  "activation": "smooth",
+  "criterion": "mean reference-conditioned validation Gaussian NLL over both architectures and all validation seeds",
+  "scores": {
+    "hard": -1.600951339120371,
+    "smooth": -1.7108198261316874
+  },
+  "config_sha256": "3b74b3dbf23bfeeb3f57073a206c5f04645b0bce3baf6ea4a66c30ea306dba57"
+}

@@ -1,0 +1,134 @@
+epoch 1/12 beta-NLL 7.0166
+epoch 2/12 beta-NLL 5.0324
+epoch 3/12 beta-NLL 4.9029
+epoch 4/12 beta-NLL 4.3557
+epoch 5/12 beta-NLL 0.4404
+epoch 6/12 beta-NLL 0.0373
+epoch 7/12 beta-NLL 0.0419
+epoch 8/12 beta-NLL 0.0404
+epoch 9/12 beta-NLL 0.0354
+epoch 10/12 beta-NLL 0.0302
+epoch 11/12 beta-NLL 0.0281
+epoch 12/12 beta-NLL 0.0264
+PILOT legacy_cnn hard -1.715645246951011
+epoch 1/12 beta-NLL 6.9785
+epoch 2/12 beta-NLL 5.0250
+epoch 3/12 beta-NLL 4.8646
+epoch 4/12 beta-NLL 4.5859
+epoch 5/12 beta-NLL 1.3461
+epoch 6/12 beta-NLL 0.0213
+epoch 7/12 beta-NLL 0.0078
+epoch 8/12 beta-NLL 0.0107
+epoch 9/12 beta-NLL 0.0081
+epoch 10/12 beta-NLL 0.0084
+epoch 11/12 beta-NLL 0.0060
+epoch 12/12 beta-NLL 0.0039
+PILOT proposal_tcn hard -1.4862574312897308
+epoch 1/12 beta-NLL 6.9744
+epoch 2/12 beta-NLL 5.0160
+epoch 3/12 beta-NLL 4.7549
+epoch 4/12 beta-NLL 1.9180
+epoch 5/12 beta-NLL 0.0224
+epoch 6/12 beta-NLL 0.0292
+epoch 7/12 beta-NLL 0.0378
+epoch 8/12 beta-NLL 0.0396
+epoch 9/12 beta-NLL 0.0290
+epoch 10/12 beta-NLL 0.0241
+epoch 11/12 beta-NLL 0.0220
+epoch 12/12 beta-NLL 0.0207
+PILOT legacy_cnn smooth -1.7586988217181383
+epoch 1/12 beta-NLL 6.9796
+epoch 2/12 beta-NLL 4.9879
+epoch 3/12 beta-NLL 4.5588
+epoch 4/12 beta-NLL 1.2918
+epoch 5/12 beta-NLL 0.0258
+epoch 6/12 beta-NLL 0.0031
+epoch 7/12 beta-NLL -0.0045
+epoch 8/12 beta-NLL -0.0098
+epoch 9/12 beta-NLL -0.0142
+epoch 10/12 beta-NLL -0.0156
+epoch 11/12 beta-NLL -0.0181
+epoch 12/12 beta-NLL -0.0202
+PILOT proposal_tcn smooth -1.6629408305452364
+LOCKED SELECTION {'activation': 'smooth', 'criterion': 'mean reference-conditioned validation Gaussian NLL over both architectures and all validation seeds', 'scores': {'hard': -1.600951339120371, 'smooth': -1.7108198261316874}, 'config_sha256': '3b74b3dbf23bfeeb3f57073a206c5f04645b0bce3baf6ea4a66c30ea306dba57'}
+NAV legacy_cnn val 500 1.8308951481811284
+NAV legacy_cnn val 501 24.247199247419136
+NAV legacy_cnn val 502 10.610001797931053
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/cc-gins/ccgins/alignment_next.py", line 80, in <module>
+    if __name__=='__main__': main()
+                             ~~~~^^
+  File "/workspace/cc-gins/ccgins/alignment_next.py", line 67, in main
+    log=run(sc.truth,sc.imu,sc.gnss,sc.imu_spec,sc.gnss_spec,cfg,model=net)
+  File "/workspace/cc-gins/ccgins/pipeline.py", line 223, in run
+    A.propagate(imu.gyro[k], imu.accel[k], dt)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/cc-gins/ccgins/filters.py", line 92, in propagate
+    Phi = np.eye(15) + F * dt
+          ~~~~~~^^^^
+  File "/workspace/cc-gins/.venv/lib/python3.13/site-packages/numpy/lib/_twodim_base_impl.py", line 178, in eye
+    @finalize_array_function_like
+    
+KeyboardInterrupt
+PILOT legacy_cnn hard -1.715645246951011
+PILOT proposal_tcn hard -1.4862574312897308
+PILOT legacy_cnn smooth -1.7586988217181383
+PILOT proposal_tcn smooth -1.6629408305452364
+LOCKED SELECTION {'activation': 'smooth', 'criterion': 'mean reference-conditioned validation Gaussian NLL over both architectures and all validation seeds', 'scores': {'hard': -1.600951339120371, 'smooth': -1.7108198261316874}, 'config_sha256': '3b74b3dbf23bfeeb3f57073a206c5f04645b0bce3baf6ea4a66c30ea306dba57'}
+NAV legacy_cnn val 503 RMSE_h=11.014183960265756
+NAV legacy_cnn test 901 RMSE_h=1.770391490016369
+NAV legacy_cnn test 900 RMSE_h=3.052672420557436
+NAV legacy_cnn test 902 RMSE_h=2.588376921911359
+NAV legacy_cnn test 904 RMSE_h=6.444950757524842
+NAV legacy_cnn test 903 RMSE_h=2.7939885777980353
+NAV legacy_cnn test 906 RMSE_h=5.360306421764144
+NAV legacy_cnn test 907 RMSE_h=2.4188460407994907
+NAV legacy_cnn test 905 RMSE_h=1.6003331034902089
+NAV legacy_cnn test 908 RMSE_h=8.051570163415768
+NAV legacy_cnn test 909 RMSE_h=7.295572736920416
+NAV proposal_tcn val 500 RMSE_h=1.953640777051244
+NAV proposal_tcn val 501 RMSE_h=9.787958869671927
+NAV proposal_tcn val 502 RMSE_h=1.7426675254032482
+NAV proposal_tcn val 503 RMSE_h=12.497267073961387
+NAV proposal_tcn test 900 RMSE_h=19.725385251103337
+NAV proposal_tcn test 901 RMSE_h=1.8826490586273763
+NAV proposal_tcn test 902 RMSE_h=35.7431970441409
+NAV proposal_tcn test 903 RMSE_h=10.855931273276038
+NAV proposal_tcn test 904 RMSE_h=2.9246408147457332
+NAV proposal_tcn test 905 RMSE_h=1.626451354772516
+NAV proposal_tcn test 906 RMSE_h=4.527306369999853
+NAV proposal_tcn test 907 RMSE_h=2.8891391075708883
+NAV proposal_tcn test 908 RMSE_h=50.200118553071675
+NAV nhc test 900 RMSE_h=3.5395934249836944
+NAV nhc test 901 RMSE_h=2.325729216214484
+NAV nhc test 902 RMSE_h=3.8172119670647517
+NAV nhc test 903 RMSE_h=3.7859463317858997
+NAV nhc test 904 RMSE_h=3.234764151903383
+NAV nhc test 905 RMSE_h=1.6257306004349694
+NAV proposal_tcn test 909 RMSE_h=2.0458022311270643
+NAV nhc test 906 RMSE_h=4.427594503034204
+NAV nhc test 907 RMSE_h=4.12512484220216
+NAV nhc test 908 RMSE_h=1.4897598401154561
+NAV nhc test 909 RMSE_h=4.31984270914746
+{
+  "legacy_cnn": {
+    "rmse_h": 4.1377008634198065,
+    "coverage95_h": 0.718102087353096,
+    "coverage95_h_outage": 0.7910952380952381,
+    "gaussian_nll": -1.8496805302616888
+  },
+  "proposal_tcn": {
+    "rmse_h": 13.242062105843539,
+    "coverage95_h": 0.7097175934046658,
+    "coverage95_h_outage": 0.8106190476190477,
+    "gaussian_nll": -1.6690931061293874
+  },
+  "nhc": {
+    "rmse_h": 3.2691297586886465,
+    "coverage95_h": 0.7127521487458341,
+    "coverage95_h_outage": 0.8280000000000001,
+    "gaussian_nll": null
+  }
+}

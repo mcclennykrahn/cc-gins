@@ -10,23 +10,30 @@
 
 逐项审计见 [proposal_alignment_matrix.md](docs/proposal_alignment_matrix.md) / [matrix.json](results/proposal_alignment/matrix.json)。方案/综述是设计证据，不代表实现。ACI 不构成数学上的闭环完好性保证。
 
-**Primary（M0–M6）**：批量 InEKF-LC + 学习车体速度/hybrid + ACI/中断膨胀 + Huber GNSS + 双通道 DR-CUSUM。`configs/proposal_primary.yaml` 可完整运行该研究主线。学习/ACI/监测仍为 batch-only，StreamingNavigator 对这些配置报错。
+**Primary（M0–M6）**：批量 InEKF-LC + 学习车体速度/hybrid + ACI/中断膨胀 + Huber GNSS + 双通道 DR-CUSUM。`configs/proposal_primary.yaml` 使用历史已验证 legacy 检查点运行该研究主线；TCN 不作默认工作方法。学习/ACI/监测仍为 batch-only，StreamingNavigator 对这些配置报错。
 **Exploratory**：`baseline_range_anchor` 单 RTK 基线距离、`adaptive_r` Sage-Husa、流式扩展、ZUPT/轮速研究。保留这些能力，不替代主线验证。
 
-本次拉回 §3.4：新增 `MotionNetTCN`，三层膨胀卷积 1/2/4 + roll/pitch + 均值/log 方差头 + β-NLL。尾窗内采用对称 padding，不宣称内部特征逐点因果；端点推理只读取过去 IMU/滤波姿态，用当前滤波零偏扣除 IMU 窗口。历史 `MotionNet` 和检查点保留兼容。**下方历史表格全部使用 legacy CNN，未重跑或替换。** 仿真新训练脚本默认 TCN；旧 Python 六通道训练调用、KITTI/i2Nav 历史复现脚本仍为 legacy。
+此前拉回 §3.4：新增 `MotionNetTCN`，三层膨胀卷积 1/2/4 + roll/pitch + 均值/log 方差头 + β-NLL。尾窗内采用对称 padding，不宣称内部特征逐点因果；端点推理只读取过去 IMU/滤波姿态，用当前滤波零偏扣除 IMU 窗口。历史 `MotionNet` 和检查点保留兼容。**下方历史表格全部使用 legacy CNN，未重跑或替换。** 仿真新训练脚本默认 TCN；旧 Python 六通道训练调用、KITTI/i2Nav 历史复现脚本仍为 legacy。
 
 ```bash
-# 固定迷你配对：两条训练、一个验证、两个测试种子，全部合成 IMU/GNSS
-OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.alignment_experiment
-# 完整主线 assembly，使用上一步小模型，仅作 smoke
-OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.cli run --config configs/proposal_primary.yaml --out results/proposal_alignment/cli_primary
+# 重现此前迷你配对，另存 debug 目录；全部合成 IMU/GNSS
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.alignment_experiment --out results/proposal_alignment_debug/smoke
+# 主线 assembly，默认历史 legacy 模型；短场景仅作 smoke
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.cli run --config configs/proposal_primary.yaml --out results/proposal_alignment_debug/legacy_primary_cli
 # 新训练默认 TCN，使用仿真真值姿态/零偏作监督输入，部署使用滤波估计
-.venv/bin/python scripts/train_motionnet.py --architecture proposal_tcn --out results/proposal_alignment/motionnet_tcn.pt
+.venv/bin/python scripts/train_motionnet.py --architecture proposal_tcn --variance-activation smooth --out results/proposal_alignment_next/exploratory_motionnet_tcn.pt
 # 历史架构复现另存，避免覆盖发布模型
-.venv/bin/python scripts/train_motionnet.py --architecture legacy_cnn --out results/proposal_alignment/legacy_retrained.pt
+.venv/bin/python scripts/train_motionnet.py --architecture legacy_cnn --out results/proposal_alignment_next/exploratory_legacy.pt
 ```
 
-固定参数与实测配对结果见 [smoke report](results/proposal_alignment/report.md) / [metrics](results/proposal_alignment/metrics.json)。本次两种子平均水平 RMSE：legacy CNN **3.001 m**、TCN **3.849 m**、NHC **3.963 m**；TCN 的 NLL **11.596** 对比 legacy **1.938**，全程位置覆盖率 **0.682** 对比 **0.795**，因此本次 TCN 表现更差，没有调参掩盖退化。小样本不证明 TCN 精度提升；网络 NLL/覆盖率用参考姿态/仿真真零偏，导航推理用滤波姿态/估计零偏，分开报告。
+固定参数与实测配对结果见 [smoke report](results/proposal_alignment/report.md) / [metrics](results/proposal_alignment/metrics.json)。此前两种子平均水平 RMSE（本批复跑完全一致）：legacy CNN **3.001 m**、TCN **3.849 m**、NHC **3.963 m**；TCN 的 NLL **11.596** 对比 legacy **1.938**，全程位置覆盖率 **0.682** 对比 **0.795**，因此本次 TCN 表现更差，没有调参掩盖退化。小样本不证明 TCN 精度提升；网络 NLL/覆盖率用参考姿态/仿真真零偏，导航推理用滤波姿态/估计零偏，分开报告。
+
+下一批调试与完整名义中断配对见 [next report](results/proposal_alignment_next/report.md) / [metrics](results/proposal_alignment_next/metrics.json) / [debug findings](docs/proposal_tcn_debug.md)。预先锁定四条 600 s 训练（100–103）、验证 500–503、**测试 900–909 全十种子**；属于 reduced-train，不是完整 M3 验收。验证选择相同 smooth 方差边界，修复 hard clamp 越界零梯度风险，旧模型数值行为保留。原 smoke 的灾难 NLL 主要来自垂向方差外推过度自信；并未证实训练时垂向下限死梯度是其原因。新网络 NLL legacy **−1.850** / TCN **−1.669**，但导航 RMSE 为 **4.138 / 13.242 m**（NHC 控制 **3.269 m**）。TCN 验证导航较好但测试未确认，**not improved / not primary；legacy 仍为已验证工作主方法**，两种卷积架构均保留。验证 pilot 显示无攻击时双监测误报警并锁存 GNSS 排除可显著恶化导航；没有看测试后改阈值。历史发布表格与检查点未重写，NHC 控制的较低 RMSE 也不代表完整学习/ACI/双监测主链验收。
+
+```bash
+# 新配对协议：仅验证选择，完整十测试种子/30、60、120 s 中断
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m ccgins.alignment_next
+```
 
 剩余偏差：GNSS κ_g、在线安装角/18维状态、HPL/超界率、报警恢复、流式 learning/ACI/integrity、B5 VB/Student-t、≥20 次 MC/全消融/独立道路泛化，以及 M7 UrbanNav 原始伪距/平滑/在线微调。KITTI GNSS 为合成；i2Nav 为真实 RTK，但仅一次行驶的时间折。
 
@@ -69,7 +76,7 @@ pip install numpy scipy pandas matplotlib pyyaml tqdm pytest
 pip install -e .
 
 python -m pytest -q                                   # 单元测试
-python scripts/train_motionnet.py --architecture proposal_tcn  # 另存 results/proposal_alignment/，保留历史模型
+python scripts/train_motionnet.py --architecture proposal_tcn  # 另存 results/proposal_alignment_next/，保留历史模型
 python scripts/run_outage_experiment.py               # GNSS 中断实验（10 个测试种子，约 4 分钟）
 python scripts/run_outage_experiment.py --shift       # 分布偏移下的中断实验
 python scripts/run_spoof_experiment.py                # 慢漂移欺骗实验（约 3.5 分钟）
