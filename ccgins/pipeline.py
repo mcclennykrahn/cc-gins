@@ -52,6 +52,8 @@ class Config:
     monitor: str = "none"            # none | single | dual
     cusum_k: float = 3.0
     cusum_h: float = 50.0
+    recovery_epochs: int = 0       # 0 preserves permanent historical latch
+    recovery_q: float = 3.0        # heuristic agreement threshold, not FA calibration
     dr_reset_period: float = 30.0
     exclude_on_alarm: bool = True
     init_seed: int = 0
@@ -207,10 +209,12 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
     gnss_at = {int(k): m for m, k in enumerate(gnss.idx)}
     t_last_gnss = 0.0
     rejects = 0
-    cus = Cusum(cfg.cusum_k, cfg.cusum_h)
+    cus = Cusum(cfg.cusum_k, cfg.cusum_h, recovery_epochs=cfg.recovery_epochs,
+                recovery_q=cfg.recovery_q)
     B = A.copy() if cfg.monitor == "dual" else None
     t_last_reset = 0.0
     alarm_time = None
+    recovery_times = []
 
     logs = {k: [] for k in ("t", "pe", "pt", "P", "ve", "vt", "vb", "tg")}
     gq = {"t": [], "q": [], "g": []}
@@ -301,7 +305,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
             if ok and cfg.pseudo == "hybrid":
                 n_pseudo += 1
                 h, H = bvm(A, (0, 1, 2))
-                healthy_ref = (tau < 1.5) and (t > 30.0) and (alarm_time is None)
+                healthy_ref = (tau < 1.5) and (t > 30.0) and (not cus.alarm)
                 if cfg.aci and healthy_ref:
                     c = np.einsum("ij,jk,ik->i", H[:1], A.P, H[:1])
                     cal.observe(z[:1] - h[:1], s2[:1], c)
@@ -340,7 +344,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                     B.update(zzB[sel] - hB[sel], HB[sel], np.diag(vvB[sel]))
             elif ok:
                 h, H = bvm(A, chans)
-                healthy_ref = (tau < 1.5) and (t > 30.0) and (alarm_time is None)
+                healthy_ref = (tau < 1.5) and (t > 30.0) and (not cus.alarm)
                 if cfg.aci and healthy_ref:
                     c = np.einsum("ij,jk,ik->i", H, A.P, H)
                     cal.observe(z - h, s2, c)
@@ -393,15 +397,17 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                     q = float((zg - h) @ np.linalg.solve(S, zg - h))
                 else:
                     q = np.nan
+                was = cus.alarm
                 if cfg.monitor != "none":
-                    was = cus.alarm
                     cus.step(q)
-                    if cus.alarm and not was:
+                    if was and not cus.alarm:
+                        recovery_times.append(float(t))
+                    if cus.alarm and alarm_time is None:
                         alarm_time = t
                     gq["t"].append(t)
                     gq["q"].append(q)
                     gq["g"].append(cus.g)
-                use = not (cus.alarm and cfg.exclude_on_alarm)
+                use = not ((was or cus.alarm) and cfg.exclude_on_alarm)
                 if use:
                     h, H = A.gnss_model(lever)
                     force = rejects >= cfg.max_consecutive_rejects
@@ -457,7 +463,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
         P_pos=np.array(logs["P"]), v_est=np.array(logs["ve"]), v_true=np.array(logs["vt"]),
         gnss_t=np.array(gq["t"]), stat_q=np.array(gq["q"]), stat_g=np.array(gq["g"]),
         alarm_time=alarm_time, kappa_hist=np.array(cal.history), runtime_per_step_us=rt,
-        extra={"gnss_aci": gnss_cal_trace, "covariance": np.array(full_cov) if log_covariance else None,
+        extra={"recovery_times": recovery_times, "gnss_aci": gnss_cal_trace, "covariance": np.array(full_cov) if log_covariance else None,
                "motion": motion, "range_alarm_time": range_alarm_time, "range_trace": range_trace,
                "fallback_frac": n_fallback / max(n_pseudo, 1), "vb_est": np.array(logs["vb"]),
                "since_gnss": np.array(logs["tg"])},

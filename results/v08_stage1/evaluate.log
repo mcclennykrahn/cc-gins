@@ -1,0 +1,2 @@
+validation_mechanism clean alarms 0 attack detections 4 attack recoveries [1, 1, 1, 1] max position/covariance delta 0.0 0.0
+held_out_mechanism clean alarms 0 attack detections 10 attack recoveries [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] max position/covariance delta 0.0 0.0

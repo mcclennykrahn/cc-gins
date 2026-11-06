@@ -56,7 +56,8 @@ class LearnedStreamingNavigator(StreamingNavigator):
             beta=cfg.aci_beta, t_ref=cfg.aci_t_ref, enabled=cfg.aci)
         self.gnss_cal = GNSSACICalibrator(alpha=cfg.aci_alpha, gamma=cfg.aci_gamma,
             window=cfg.aci_window) if cfg.gnss_aci else None
-        self.cusum = Cusum(cfg.cusum_k, cfg.cusum_h)
+        self.cusum = Cusum(cfg.cusum_k, cfg.cusum_h, recovery_epochs=cfg.recovery_epochs,
+                           recovery_q=cfg.recovery_q)
         self.last_gnss = -np.inf
         self.last_reset = None
         self.start_time = None
@@ -280,12 +281,13 @@ class LearnedStreamingNavigator(StreamingNavigator):
         residual, C = pos-h, H@self.filter.P@H.T
         nis = float(residual@np.linalg.solve(C+Rg, residual))
         q = None
+        was = self.cusum.alarm
         if self.cfg.monitor != 'none':
             q = (dr_statistic(self.guard, pos, self.lever_arm, Rg) if self.guard is not None
                  else float(residual@np.linalg.solve(C+Rg, residual)))
             if self.cusum.step(q) and self.alarm_time is None:
                 self.alarm_time = float(self.t)
-        use = not (self.cusum.alarm and self.cfg.exclude_on_alarm)
+        use = not ((was or self.cusum.alarm) and self.cfg.exclude_on_alarm)
         forced = self._rejects >= self.max_consecutive_rejects
         accepted, eligible = False, False
         scale = 1. if self.gnss_cal is None else self.gnss_cal.kappa
@@ -300,6 +302,7 @@ class LearnedStreamingNavigator(StreamingNavigator):
             if self.gnss_cal is not None and eligible:
                 self.gnss_cal.observe(residual, cov, C)
         self._record(self.gnss_decisions, dict(t=float(self.t), arrival_time=self._active_arrival, processed_arrival_time=self._arrival_t, alarm=bool(self.cusum.alarm), status='accepted' if accepted else ('excluded' if not use else 'rejected'), nis=nis, q=q, g=float(self.cusum.g),
+            recoveries=self.cusum.recoveries, healthy_streak=self.cusum.healthy_streak,
             excluded=not use, accepted=accepted, eligible=bool(eligible), kappa_used=scale,
             kappa_next=1. if self.gnss_cal is None else self.gnss_cal.kappa))
         if self.callback is not None:

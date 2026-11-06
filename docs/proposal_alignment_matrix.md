@@ -132,3 +132,29 @@ batch; legacy_cnn remains primary and TCN is not promoted.
 
 Current bookkeeping counts: {'complete': 5, 'partial': 17,
 'experiment_substitute': 2, 'unimplemented': 4}. No row changed acceptance class.
+
+## 2026-11-06 v0.8-stage1 recovery update
+
+[Criteria](v08_criteria.md), [recovery contract](v08_recovery.md) and
+[Stage 1 measurements](../results/v08_stage1/report.md) define a research subset,
+not overall V0.8 completion. Opt-in consecutive-healthy-fix CUSUM recovery now
+shares batch/learned-stream logic; default recovery_epochs=0 retains historical
+latching. Alarm/completing recovery fixes are excluded, first alarm retained,
+ACI can resume after recovery, and batch recovery times/stream streaks are logged.
+Tests cover interrupted recovery, invalid evidence, re-alarm and loaded legacy
+matched-grid parity. The prior dual/stream rows describe historical limitations;
+they remain partial after this change.
+
+New short gross-transient mechanism runs: validation 4/4 detection/recovery,
+held-out 10/10 detection/recovery; clean alarms 0/4 and 0/10 respectively.
+Only 9/10 held-out trajectories include an accepted fix after recovery because
+one completes recovery at the final horizon. Final matched-grid position/full
+covariance differences are zero; no off-grid or general integrity guarantee.
+These are not default-noise ramp or calibrated FA/hour results. DETECTION still
+fails the new V0.8 gate; whole-window reset health and long-alarm recovery validity
+remain gaps. The pre-existing fifth-batch coverage 0.691387 is still under nominal.
+HPL stays unimplemented, raw UrbanNav TC experiment_substitute, legacy primary,
+TCN unpromoted. Historical evidence above and published tables are preserved.
+
+Current bookkeeping counts: {'complete': 5, 'partial': 17,
+'experiment_substitute': 2, 'unimplemented': 4}. No acceptance class changes.
