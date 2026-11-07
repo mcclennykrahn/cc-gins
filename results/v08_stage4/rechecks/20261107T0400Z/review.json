@@ -1,0 +1,15 @@
+{
+  "stage_id": "cc_diagnostics_s4",
+  "verdict": "PASS",
+  "pytest": "180 passed in 69.04s (0:01:09)",
+  "rows_audited": 112,
+  "scope": "Stored-row arithmetic audit independent of evaluator plus separate selfcheck and full regression; prior independent source review retained; no new external reviewer.",
+  "blocking_issues": [],
+  "fresh_held_out": false,
+  "detection": "FAIL",
+  "confirmed_v08": false,
+  "tcn_promoted": false,
+  "cusum_promoted": false,
+  "written_at": "2026-11-07T04:00:43.553168+00:00",
+  "stop_reason": "Evidence limit: existing stage complete; no new research gap closed"
+}
