@@ -1,0 +1,26 @@
+{
+  "verdict": "PASS",
+  "checks": [
+    {
+      "split": "validation",
+      "health": false,
+      "rows": 16
+    },
+    {
+      "split": "validation",
+      "health": true,
+      "rows": 16
+    },
+    {
+      "split": "held_out_diagnostic",
+      "health": false,
+      "rows": 40
+    },
+    {
+      "split": "held_out_diagnostic",
+      "health": true,
+      "rows": 40
+    }
+  ],
+  "scope": "Separate stored-row arithmetic; no fresh simulation or new external source review"
+}

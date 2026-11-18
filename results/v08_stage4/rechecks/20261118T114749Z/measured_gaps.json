@@ -1,0 +1,109 @@
+{
+  "stored_held_out_diagnostic": {
+    "guard_ref_health": true,
+    "clean": {
+      "runs": 10,
+      "exposure_s": 6000,
+      "alarms": 7,
+      "alarm_times": [
+        144.0,
+        158.0,
+        76.0,
+        90.0,
+        274.0,
+        156.0,
+        427.0
+      ]
+    },
+    "attacks": {
+      "0.2": {
+        "runs": 10,
+        "detected": 4,
+        "misses": 6,
+        "no_alarm_misses": 0,
+        "preattack_alarms": 6,
+        "delays_s": [
+          48.0,
+          123.0,
+          14.0,
+          29.0
+        ]
+      },
+      "0.5": {
+        "runs": 10,
+        "detected": 4,
+        "misses": 6,
+        "no_alarm_misses": 0,
+        "preattack_alarms": 6,
+        "delays_s": [
+          16.0,
+          16.0,
+          8.0,
+          12.0
+        ]
+      },
+      "1.0": {
+        "runs": 10,
+        "detected": 4,
+        "misses": 6,
+        "no_alarm_misses": 0,
+        "preattack_alarms": 6,
+        "delays_s": [
+          8.0,
+          7.0,
+          5.0,
+          7.0
+        ]
+      }
+    },
+    "navigation": {
+      "mean_final_horizontal_error_m": 21.164330531880875,
+      "max_final_horizontal_error_m": 77.53210861479567,
+      "resets": 255,
+      "reset_skips": 545,
+      "fallback_epochs": 146100,
+      "reason_codes": {
+        "missing": 0,
+        "stale": 0,
+        "rejected": 37,
+        "forced": 0,
+        "nonfinite": 0,
+        "alarm": 37,
+        "recovery": 0
+      },
+      "reason_events": {
+        "missing": 130416,
+        "stale": 6103,
+        "rejected": 14846,
+        "forced": 0,
+        "nonfinite": 0,
+        "alarm": 14818,
+        "recovery": 0
+      },
+      "reason_intervals": {
+        "missing": 456,
+        "stale": 51,
+        "rejected": 548,
+        "forced": 0,
+        "nonfinite": 0,
+        "alarm": 530,
+        "recovery": 0
+      }
+    }
+  },
+  "cumulative_enabled_all_splits": {
+    "reason_events": {
+      "missing": 182182,
+      "stale": 7342,
+      "rejected": 20618,
+      "alarm": 20583
+    },
+    "reason_intervals": {
+      "missing": 637,
+      "stale": 70,
+      "rejected": 762,
+      "alarm": 739
+    }
+  },
+  "fresh_held_out": false
+}

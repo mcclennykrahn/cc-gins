@@ -1,0 +1,14 @@
+{
+  "verdict": "PASS",
+  "scope": "Separate stored-row audit, selfcheck, full regression and same-agent artifact/source review; no new external reviewer",
+  "pytest": "180 passed in 71.62s (0:01:11)",
+  "rows_audited": 112,
+  "historical_files_unchanged": 38,
+  "fresh_held_out": false,
+  "detection": "FAIL",
+  "confirmed_v08": false,
+  "tcn_promoted": false,
+  "cusum_promoted": false,
+  "blocking_issues": [],
+  "base_commit": "d57f14e4632d22d87cc1ecaf2449b8f1b342df34"
+}
