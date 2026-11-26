@@ -38,6 +38,7 @@ class Config:
     hybrid_bias_min: int = 30         # need this many residuals before trusting the forward channel
     hybrid_bias_latch: bool = False   # once a bias is detected, never re-enable the forward channel
     nhc_sigma: float = 0.1           # m/s, fixed NHC
+    nhc_vertical_sigma: float | None = None  # m/s; None uses nhc_sigma for both channels
     pseudo_every: int = 10           # IMU samples (10 Hz)
     corr_scale: tuple | None = None  # per-channel variance inflation for temporally correlated errors (n_eff)
     aci: bool = False
@@ -88,6 +89,14 @@ class Config:
     zupt_sigma: float = 0.05
     motion_every: int = 10
     label: str = ""
+
+    def nhc_variances(self) -> np.ndarray:
+        """Fixed lateral/vertical vehicle-frame variances (also used by fallback)."""
+        sigmas = np.array([self.nhc_sigma, self.nhc_sigma if self.nhc_vertical_sigma is None
+                           else self.nhc_vertical_sigma], dtype=float)
+        if not np.all(np.isfinite(sigmas)) or np.any(sigmas <= 0):
+            raise ValueError("NHC sigmas must be finite and positive")
+        return sigmas**2
 
 
 @dataclass
@@ -148,6 +157,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
         raise ValueError("positive motion cadence and ZUPT sigma required")
     if cfg.gnss_aci and (cfg.adaptive_r or cfg.baseline_range_anchor is not None):
         raise ValueError("GNSS ACI cannot be combined with adaptive R or scalar range coupling")
+    nhc_var = cfg.nhc_variances()
     noise = NoiseParams.from_spec(imu_spec)
     C_vb = None if cfg.mount_py is None else mount_matrix(*cfg.mount_py)
 
@@ -301,7 +311,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
             ok = True
             if cfg.pseudo == "nhc":
                 z = np.zeros(2)
-                s2 = np.full(2, cfg.nhc_sigma**2)
+                s2 = nhc_var.copy()
             else:
                 if kk not in pred_map and live_prediction is None:
                     ok = False
@@ -339,7 +349,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                 if cfg.corr_scale is not None:
                     vf = vf * float(cfg.corr_scale[0])
                 zz = np.array([z[0], 0.0, 0.0])
-                vv = np.array([vf[0], cfg.nhc_sigma**2, cfg.nhc_sigma**2])
+                vv = np.r_[vf[0], nhc_var]
                 sel = [0, 1, 2]
                 ref_fallback = grh is not None and not ref_ok
                 if (np.sqrt(vf[0]) > cfg.hybrid_max_std or
@@ -361,7 +371,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                         if cfg.corr_scale is not None:
                             vfb *= float(cfg.corr_scale[0])
                         zzB = np.array([mb[0], 0., 0.])
-                        vvB = np.array([vfb[0], cfg.nhc_sigma**2, cfg.nhc_sigma**2])
+                        vvB = np.r_[vfb[0], nhc_var]
                     B.update(zzB[sel] - hB[sel], HB[sel], np.diag(vvB[sel]))
             elif ok:
                 h, H = bvm(A, chans)
@@ -375,10 +385,10 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                     # No trustworthy reference: drop learned forward aiding and
                     # retain lateral/vertical fixed NHC.  No ACI/bias update above.
                     sel = [1, 2]
-                    A.update(-h[sel], H[sel], np.eye(2) * cfg.nhc_sigma**2)
+                    A.update(-h[sel], H[sel], np.diag(nhc_var))
                     if B is not None:
                         hB, HB = bvm(B, chans)
-                        B.update(-hB[sel], HB[sel], np.eye(2) * cfg.nhc_sigma**2)
+                        B.update(-hB[sel], HB[sel], np.diag(nhc_var))
                     n_fallback += 1
                     guard_ref_fallbacks += 1
                     if guard_ref_first_fallback is None:

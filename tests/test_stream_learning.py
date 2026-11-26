@@ -46,6 +46,7 @@ def test_delayed_stream_matches_batch_semantics(tcn, pseudo):
     sc = make_scenario(710, duration=4.)
     sc.gnss.valid[sc.gnss.idx == 0] = False
     cfg = Config(pseudo=pseudo, aci=True, gnss_aci=True, monitor='dual', cusum_h=1e9,
+                 nhc_vertical_sigma=.03,
                  corr_scale=(3., 3., 3.))
     net = model(tcn)
     batch = run(sc.truth, sc.imu, sc.gnss, sc.imu_spec, sc.gnss_spec, cfg, model=net,
@@ -250,7 +251,7 @@ def test_hybrid_warmup_calibration_and_bias_fallback(bias_guard):
     sc=make_scenario(721,duration=34.)
     sc.gnss.valid[sc.gnss.idx==0]=False
     cfg=Config(pseudo='hybrid',aci=True,monitor='dual',cusum_h=1e12,
-               corr_scale=(40.,40.,40.),mount_py=(.05,.1),
+               corr_scale=(40.,40.,40.),mount_py=(.05,.1), nhc_vertical_sigma=.03,
                hybrid_bias_z=.1 if bias_guard else 0.,hybrid_bias_min=3,
                hybrid_bias_latch=bias_guard)
     net=model()

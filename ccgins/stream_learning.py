@@ -207,8 +207,8 @@ class LearnedStreamingNavigator(StreamingNavigator):
             # Untrustworthy reference: retain lateral/vertical fixed NHC and drop
             # the learned forward channel; ACI/biasing above did not update.
             sel = [1, 2]
-            self.filter.update(-h[sel], H[sel], np.eye(2) * self.cfg.nhc_sigma**2)
-            effective = np.array([self.cfg.nhc_sigma**2, self.cfg.nhc_sigma**2])
+            self.filter.update(-h[sel], H[sel], np.diag(self.cfg.nhc_variances()))
+            effective = self.cfg.nhc_variances()
             info = None
             self.guard_ref_fallbacks += 1
             if self.guard_ref_first_fallback is None:
@@ -225,7 +225,7 @@ class LearnedStreamingNavigator(StreamingNavigator):
             sb = vb[0, 1:]+mb[0, 1:]**2 if nhc else vb[0]
             if ref_fallback:
                 hb, Hb = self._body(self.guard, ch)
-                self.guard.update(-hb[1:], Hb[1:], np.eye(2) * self.cfg.nhc_sigma**2)
+                self.guard.update(-hb[1:], Hb[1:], np.diag(self.cfg.nhc_variances()))
             else:
                 ev = self.cal.effective_var(sb, outage)
                 if not nhc and self.cfg.corr_scale is not None:
@@ -274,7 +274,7 @@ class LearnedStreamingNavigator(StreamingNavigator):
             forward = self.cal.effective_var(v[:1], outage)[0]
             if self.cfg.corr_scale is not None:
                 forward *= self.cfg.corr_scale[0]
-            return np.array([forward, self.cfg.nhc_sigma**2, self.cfg.nhc_sigma**2])
+            return np.r_[forward, self.cfg.nhc_variances()]
         ev = variance(var)
         ref_fallback = self.guard_ref is not None and not ref_ok
         fallback = (self.bias_bad or np.sqrt(ev[0]) > self.cfg.hybrid_max_std or

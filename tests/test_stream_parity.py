@@ -10,9 +10,10 @@ from ccgins.stream import StreamingNavigator
 from ccgins.zupt import OdometryData
 
 
+@pytest.mark.parametrize('vertical_sigma', [None, .03])
 @pytest.mark.parametrize('kind', ['eskf', 'inekf'])
 @pytest.mark.parametrize('mode', ['nhc_baseline', 'nhc_zupt', 'guarded', 'wheel', 'wheel_stop'])
-def test_report_configurations_all_covariance(kind, mode):
+def test_report_configurations_all_covariance(kind, mode, vertical_sigma):
     truth = generate_trajectory(8., seed=12)
     spec = ImuSpec()
     gs = GnssSpec(rate_hz=5.)
@@ -25,7 +26,7 @@ def test_report_configurations_all_covariance(kind, mode):
     gnss.sigma_ep = np.tile([.01, .08, .03], (len(gnss.t), 1))
     cfg = Config(filter=kind, pseudo='nhc' if mode.startswith('nhc') else 'none',
                  zupt=mode != 'nhc_baseline', zupt_odometry_stop=mode == 'wheel_stop',
-                 mount_py=(.13, -.21), nhc_sigma=.47, use_epoch_sigma=True,
+                 mount_py=(.13, -.21), nhc_sigma=.47, nhc_vertical_sigma=vertical_sigma, use_epoch_sigma=True,
                  gnss_sigma_floor=.05, earth_rate_enu=(0., 5e-5, 5e-5), local_gravity=9.8,
                  p0_bias=(.001, .02), zupt_accel_var=.1, zupt_gyro_var=.001)
     odo = None

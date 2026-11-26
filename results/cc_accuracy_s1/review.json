@@ -1,0 +1,42 @@
+{
+  "stage_id": "cc_accuracy_s1",
+  "reviewer": "independent accuracy_review agent (read-only)",
+  "implementation_verdict": "PASS",
+  "accuracy_verdict": "NOT_IMPROVED",
+  "blocking_findings": [],
+  "review_scope": [
+    "batch/stream channel order and mounted NHC covariance",
+    "hybrid and guard/fallback covariance paths",
+    "valid legacy-default preservation",
+    "paired campaign and report arithmetic"
+  ],
+  "independent_tests": [
+    "54 passed in 25.42s: test_nhc_accuracy, test_stream_parity, test_stream_learning (before latest parity parameter addition)",
+    "26 passed in 7.68s: current test_stream_parity"
+  ],
+  "evidence": {
+    "development_mean_rmse_h": [
+      5.3506079887985445,
+      5.162875715195327
+    ],
+    "held_out_mean_rmse_h": [
+      2.493409165681597,
+      2.5052573794260975
+    ],
+    "held_out_pooled_rmse_h": [
+      2.5622421979538665,
+      2.5709895829111056
+    ],
+    "held_out_worse_seeds": [
+      19104,
+      19105
+    ]
+  },
+  "limitations": [
+    "small simulation-only campaign",
+    "no independent real-data or detection validation",
+    "candidate must remain unpromoted"
+  ],
+  "detection_gate": "FAIL",
+  "confirmed_v08": false
+}

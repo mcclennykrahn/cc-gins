@@ -76,6 +76,7 @@ class StreamingNavigator:
                 self.cfg.monitor != 'none' or self.cfg.adaptive_r or self.cfg.gnss_aci or
                 self.cfg.baseline_range_anchor is not None):
             raise ValueError("streaming supports none/fixed NHC, without ACI, monitoring, adaptive R or range coupling")
+        self.cfg.nhc_variances()
         if self.cfg.pseudo_every < 1:
             raise ValueError("positive pseudo cadence required")
         from .pipeline import mount_matrix
@@ -182,7 +183,7 @@ class StreamingNavigator:
             h, H = self.filter.body_vel_model((0, 1, 2))
             if self.C_vb is not None:
                 h, H = self.C_vb @ h, self.C_vb @ H
-            self.filter.update(-h[1:], H[1:], np.eye(2)*self.cfg.nhc_sigma**2)
+            self.filter.update(-h[1:], H[1:], np.diag(self.cfg.nhc_variances()))
         self._apply_due_gnss(t)
 
     def push_odometry(self, t, speed, sigma, C_vb, lever_b, valid=True):

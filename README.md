@@ -567,3 +567,14 @@ Fifth-batch learned stream: [report](results/proposal_alignment_stream_fifth/rep
 `results/motionnet.pt` remains primary; TCN is available but not promoted.
 Off-grid delayed GNSS, hybrid/wheels and offline artifact replay are supported;
 HPL, failsafe/recovery robustness and learned-stream ZUPT remain gaps.
+
+### Optional NHC accuracy configuration
+
+`configs/example_sim_accuracy.yaml` keeps the example scenario and sets
+`nhc_vertical_sigma: 0.03` m/s, retaining lateral `nhc_sigma: 0.1`.
+The optional vertical sigma applies to fixed NHC, hybrid NHC and fixed-NHC
+fallbacks in batch and streaming; `None` retains the scalar historical behavior.
+It does not alter learned NHC variances. Both sigmas must be finite and positive.
+See [paired accuracy evidence](results/cc_accuracy_s1/report.md) for measured
+results and limitations: seed 900 improves, but held-out mean RMSE worsens;
+the candidate is unpromoted. Existing defaults and DETECTION gates are unchanged.

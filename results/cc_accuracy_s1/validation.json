@@ -1,0 +1,13 @@
+{
+  "stage_id": "cc_accuracy_s1",
+  "base_commit": "a2e681146521c7c4e2da0667e391c421a43db770",
+  "selfcheck": "PASS",
+  "independent_review": "PASS",
+  "accuracy": "NOT_IMPROVED",
+  "hybrid_option_regression": "2 passed, 17 deselected in 6.48s",
+  "prior_full_regression": "180 passed in 220.07s (before added tests)",
+  "final_regression": "199 passed in 84.01s (0:01:24)",
+  "confirmed_v08": false,
+  "detection": "FAIL",
+  "diff_check": "PASS"
+}

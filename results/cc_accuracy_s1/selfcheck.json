@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "rows": 16,
+  "aggregates": {
+    "development": {
+      "baseline": {
+        "mean_rmse_h": 5.3506079887985445,
+        "pooled_rmse_h": 5.587421199756636
+      },
+      "candidate": {
+        "mean_rmse_h": 5.162875715195327,
+        "pooled_rmse_h": 5.410486344336863
+      }
+    },
+    "held_out": {
+      "baseline": {
+        "mean_rmse_h": 2.493409165681597,
+        "pooled_rmse_h": 2.5622421979538665
+      },
+      "candidate": {
+        "mean_rmse_h": 2.5052573794260975,
+        "pooled_rmse_h": 2.5709895829111056
+      }
+    }
+  },
+  "accuracy_verdict": "NOT_IMPROVED",
+  "confirmed_v08": false
+}
