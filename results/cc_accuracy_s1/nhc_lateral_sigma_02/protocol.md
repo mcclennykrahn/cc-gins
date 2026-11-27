@@ -1,0 +1,5 @@
+# nhc_lateral_sigma_02
+
+Fixed hypothesis before runs: soften lateral NHC sigma from .1 to .2 m/s, explicitly retain vertical .1 and pseudo_every=10. Lateral slip may violate zero lateral velocity; weaker weighting may reduce heading/bias distortion during outages. Development 900–902; fresh held-out 39301–39305. Unchanged example_sim scenario and scoring from 30 s; identical generated inputs per pair. Require lower development and held-out mean and pooled horizontal RMSE; disclose every regression. No retuning after exposure. Defaults unchanged unless supported.
+
+Architecture review: InEKF right-invariant navigation and additive biases use first-order covariance propagation. Integration and IMU bias/noise changes need separate calibration; held fixed for attribution. NHC weighting is selected. Stage3 outage guard/fallback is preserved; forward velocity remains weakly observed. Smoothing needs offline history/backward covariance and is deferred. Previous vertical uncertainty and 1 Hz cadence trials are closed negatives. DETECTION remains FAIL; confirmed_v08=false. Simulation-only results cannot establish real-data generalization.

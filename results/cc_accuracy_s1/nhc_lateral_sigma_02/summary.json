@@ -1,0 +1,43 @@
+{
+  "development": {
+    "baseline": {
+      "rmse_h": 5.3506079887985445,
+      "coverage95_h": 0.795025538529869,
+      "anees_pos": 1.683885223926347,
+      "pooled_rmse_h": 5.587421199756636
+    },
+    "candidate": {
+      "rmse_h": 5.5579248373633625,
+      "coverage95_h": 0.8409948922940261,
+      "anees_pos": 1.4859352225367324,
+      "pooled_rmse_h": 5.782359925360318
+    },
+    "worse_seeds": [
+      900,
+      901,
+      902
+    ]
+  },
+  "held_out": {
+    "baseline": {
+      "rmse_h": 6.044694414880335,
+      "coverage95_h": 0.8419720186542305,
+      "anees_pos": 1.342762372338531,
+      "pooled_rmse_h": 8.467377367648732
+    },
+    "candidate": {
+      "rmse_h": 6.073293119215399,
+      "coverage95_h": 0.8947368421052632,
+      "anees_pos": 1.189148596717701,
+      "pooled_rmse_h": 8.439113856676546
+    },
+    "worse_seeds": [
+      39302,
+      39303
+    ]
+  },
+  "candidate_id": "nhc_lateral_sigma_02",
+  "verdict": "NOT_IMPROVED",
+  "promoted": false,
+  "selfcheck": "PASS"
+}

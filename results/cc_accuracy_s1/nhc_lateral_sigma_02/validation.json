@@ -1,0 +1,11 @@
+{
+  "candidate_id": "nhc_lateral_sigma_02",
+  "new_work": true,
+  "selfcheck": "PASS: 16 unique paired rows, finite horizontal RMSE, recomputed summary; development baseline parity excluding runtime_us",
+  "pytest": "199 passed in 84.94s (0:01:24)",
+  "independent_review": "PASS",
+  "diff_check": "PASS",
+  "promoted": false,
+  "confirmed_v08": false,
+  "detection": "FAIL"
+}

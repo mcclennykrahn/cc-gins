@@ -1,0 +1,9 @@
+{
+  "scripts/evaluate_nhc_lateral.py": "67ee7f01c4c28f4b45d18b71eeb5daf5527cb80968910b0a467edf8e4cef56c6",
+  "results/cc_accuracy_s1/nhc_lateral_sigma_02/protocol.md": "b4b9f8f3938a112f2e23df91dfa22fcdab9cd2c027f5468aa58580a950019f4f",
+  "results/cc_accuracy_s1/nhc_lateral_sigma_02/review.json": "e68b34cc9ed5eb3bc5792f68502eb0260f6ba47b86dc4ac5a219d0667965576d",
+  "results/cc_accuracy_s1/nhc_lateral_sigma_02/paired_metrics.json": "78a691963a79f14396a358054e0c1ee95f0ba73f2b2c54cd54174ac814ebd337",
+  "results/cc_accuracy_s1/nhc_lateral_sigma_02/validation.json": "4bc9e32bb05f44476b32e446244747a356428fa7d1cc63fb20a354334427f197",
+  "results/cc_accuracy_s1/nhc_lateral_sigma_02/summary.json": "5b86e7e6dd54998ed31a8c9cd526fb17ff6e156c10e24054fe39e092beafbf43",
+  "results/cc_accuracy_s1/nhc_lateral_sigma_02/report.md": "86fc4f21b30338ca98a1877af8caf5f1b2019fe1287e6d878f9db7258607ea7c"
+}
