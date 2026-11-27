@@ -15,6 +15,7 @@ import numpy as np
 from ccgins.cli import _build_inputs, _filter_config, load_config
 from ccgins.filters import NavFilter, NoiseParams
 from ccgins.pipeline import run
+from ccgins.timing import in_window
 from scripts.audit_calibration import position_consistency
 from scripts.audit_scheme import budget
 
@@ -29,7 +30,7 @@ def phase_schedule(spec, times, dt, outages, available, outage):
         if step_dt != dt:
             raise ValueError('schedule requires a fixed IMU dt')
         t = float(times[len(trace)])
-        in_gap = any(start <= t < start + duration for start, duration in outages)
+        in_gap = any(in_window(t, start, start + duration) for start, duration in outages)
         enabled = outage if in_gap else available
         speed = float(abs((filt.R.T @ filt.v)[0])) if enabled else 12.
         filt.noise = NoiseParams.from_spec(spec, vmax_eff=speed, dt=dt)

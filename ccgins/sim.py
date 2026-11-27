@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from .timing import in_window
+
 from .geometry import euler_to_rot, so3_log
 
 G_NAV = np.array([0.0, 0.0, -9.81])
@@ -207,7 +209,7 @@ def simulate_gnss(truth: Truth, spec: GnssSpec, seed: int = 0) -> GnssData:
     pos = ant + white + mp
     valid = np.ones(m, bool)
     for (s, dur) in spec.outages:
-        valid &= ~((t >= s) & (t < s + dur))
+        valid &= ~in_window(t, s, s + dur)
     spoofed = np.zeros(m, bool)
     if spec.spoof_start is not None:
         spoofed = t >= spec.spoof_start

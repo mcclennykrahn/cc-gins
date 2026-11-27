@@ -21,6 +21,7 @@ import numpy as np
 import yaml
 
 from .metrics import CHI2_2_95, summarize
+from .timing import at_or_after, in_window
 from .pipeline import Config, run
 from .sim import GnssSpec, ImuSpec, generate_trajectory, simulate_gnss, simulate_imu
 
@@ -204,7 +205,7 @@ def _predictions(raw: dict, truth, imu, cfg: Config, config_path: Path):
 
 
 def _extend_metrics(log, outages, t_start: float) -> dict:
-    mask = log.t >= t_start
+    mask = at_or_after(log.t, t_start)
     if not np.any(mask):
         raise CliError(f"metrics.t_start={t_start} is after the last logged epoch")
     metrics = summarize(log, outages, t_start=t_start)
@@ -225,7 +226,7 @@ def _extend_metrics(log, outages, t_start: float) -> dict:
     })
     segs = []
     for start, duration in outages:
-        seg = mask & (log.t >= start) & (log.t < start + duration)
+        seg = mask & in_window(log.t, start, start + duration)
         if not np.any(seg):
             continue
         segs.append({

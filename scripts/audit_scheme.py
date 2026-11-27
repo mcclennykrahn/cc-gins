@@ -6,15 +6,16 @@ import numpy as np
 from ccgins.cli import load_config, _build_inputs, _filter_config
 from ccgins.pipeline import run
 from ccgins.filters import mechanize
+from ccgins.timing import at_or_after, in_window
 
 
 def segment_masks(t, outages, t_start=30.):
     """Half-open outages; terminal reacquisition is a separate available sample."""
-    selected = t >= t_start
+    selected = at_or_after(t, t_start)
     outage = np.zeros(len(t), dtype=bool)
     masks = {}
     for start, duration in outages:
-        mask = (t >= start) & (t < start + duration)
+        mask = in_window(t, start, start + duration)
         outage |= mask
         masks[f'outage_{start:g}_{start+duration:g}'] = mask & selected
     masks['available'] = selected & ~outage
@@ -22,7 +23,7 @@ def segment_masks(t, outages, t_start=30.):
     # Disjoint available intervals expose recovery transients.
     boundaries = sorted({t_start, float(t[-1])} | {float(x) for sd in outages for x in (sd[0], sum(sd)) if t_start <= x <= t[-1]})
     for a, b in zip(boundaries[:-1], boundaries[1:]):
-        mask = selected & ~outage & (t >= a) & (t < b)
+        mask = selected & ~outage & in_window(t, a, b)
         if mask.any():
             masks[f'available_{a:g}_{b:g}'] = mask
     if selected[-1] and not outage[-1]:

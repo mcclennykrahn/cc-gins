@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from .timing import at_or_after, in_window
+
 CHI2_2_95 = 5.991464547107979
 
 
@@ -13,7 +15,7 @@ def horizontal_errors(log):
 def summarize(log, outages, t_start: float = 60.0) -> dict:
     e = log.p_est - log.p_true
     eh = np.linalg.norm(e[:, :2], axis=1)
-    m = log.t >= t_start
+    m = at_or_after(log.t, t_start)
     out = {
         "rmse_h": float(np.sqrt(np.mean(eh[m] ** 2))),
         "rmse_3d": float(np.sqrt(np.mean(np.sum(e[m] ** 2, axis=1)))),
@@ -27,7 +29,7 @@ def summarize(log, outages, t_start: float = 60.0) -> dict:
     out["coverage95_h"] = float(np.mean(nees_h[m] <= CHI2_2_95))
     in_out = np.zeros_like(m)
     for (s, d) in outages:
-        w = m & (log.t >= s) & (log.t < s + d)
+        w = m & in_window(log.t, s, s + d)
         in_out |= w
         # Preserve historical keys for unique durations; distinguish repeats.
         suffix = f"{int(d)}s"
