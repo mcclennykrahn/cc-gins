@@ -37,7 +37,7 @@ def budget(t, error, outages, t_start=30.):
         rows[name] = dict(n=len(e), rmse_h=float(np.sqrt(h2.mean())),
                           rmse_v=float(np.sqrt(np.mean(e[:, 2]**2))),
                           max_h=float(np.sqrt(h2.max())), end_h=float(np.sqrt(h2[-1])),
-                          horizontal_sse_fraction=float(h2.sum()/total))
+                          horizontal_sse_fraction=float(h2.sum()/total) if total else None)
     return rows
 
 
