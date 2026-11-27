@@ -51,3 +51,22 @@ def test_gnss_rate_above_grid_rejected():
     truth = SimpleNamespace(dt=.1)
     with pytest.raises(ValueError, match='grid'):
         simulate_gnss(truth, GnssSpec(rate_hz=100.))
+
+
+def test_bias_diagnostics_are_optional_and_do_not_change_navigation():
+    from ccgins.pipeline import Config, run
+    from ccgins.sim import GnssSpec, generate_trajectory, simulate_gnss
+    truth = generate_trajectory(2., dt=.02, seed=9)
+    spec, gs = ImuSpec(), GnssSpec()
+    imu = simulate_imu(truth, spec, seed=9)
+    gnss = simulate_gnss(truth, gs, seed=9)
+    plain = run(truth, imu, gnss, spec, gs, Config(pseudo='nhc'))
+    diag = run(truth, imu, gnss, spec, gs, Config(pseudo='nhc'), log_covariance=True)
+    assert plain.extra['bias_est'] is None
+    assert diag.extra['bias_est'].shape == (len(diag.t), 6)
+    assert np.all(np.isfinite(diag.extra['bias_est']))
+    np.testing.assert_array_equal(plain.p_est, diag.p_est)
+    np.testing.assert_array_equal(plain.P_pos, diag.P_pos)
+    # First logged state is before any GNSS epoch; this guards against
+    # accidentally logging simulator bias truth as the estimated state.
+    assert not np.array_equal(diag.extra['bias_est'][0,:3], imu.gyro_bias[10])

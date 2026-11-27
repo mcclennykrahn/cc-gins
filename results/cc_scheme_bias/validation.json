@@ -1,0 +1,17 @@
+{
+  "candidate_id": "scheme_bias_consistency_audit",
+  "new_work": true,
+  "audit_complete": false,
+  "pytest": "205 passed in 79.13s (0:01:19)",
+  "independent_regression": "19 passed in 3.81s",
+  "review": "PASS",
+  "accuracy_verdict": "DIAGNOSTIC_ONLY: parent segment metrics exactly reproduced for init0",
+  "detection": "FAIL",
+  "confirmed_v08": false,
+  "blocker": null,
+  "remaining_work": [
+    "Isolate finite-injection covariance reset and process-noise discretization effects in matched-model Monte Carlo",
+    "Measure maneuver-conditioned observability with independent alignment and sensor seeds",
+    "Expand Monte Carlo before turning provisional targets into gates"
+  ]
+}

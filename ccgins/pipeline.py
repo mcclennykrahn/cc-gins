@@ -147,7 +147,9 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
     estimates feed inference (guard uses its own estimates). Mutually exclusive with pred.
 
     log_covariance adds full internal 15x15 covariance at the existing every-tenth-sample
-    log epochs to extra['covariance']; otherwise that entry is None.
+    log epochs to extra['covariance'] and body-frame bias estimates to
+    extra['bias_est']; otherwise those entries are None. Diagnostics never
+    feed truth or bias errors back into the filter.
     """
     if model is not None and pred is not None:
         raise ValueError("supply model or precomputed pred, not both")
@@ -240,6 +242,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
     logs = {k: [] for k in ("t", "pe", "pt", "P", "ve", "vt", "vb", "tg")}
     gq = {"t": [], "q": [], "g": []}
     full_cov = []  # opt-in parity diagnostics
+    bias_est = []
     t0 = time.perf_counter()
 
     attitude_window = deque(maxlen=WINDOW)
@@ -519,6 +522,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
         if kk % 10 == 0:
             if log_covariance:
                 full_cov.append(A.P.copy())
+                bias_est.append(np.r_[A.bg, A.ba])
             logs["t"].append(t)
             logs["pe"].append(A.p.copy())
             logs["pt"].append(truth.p[kk].copy())
@@ -535,6 +539,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
         gnss_t=np.array(gq["t"]), stat_q=np.array(gq["q"]), stat_g=np.array(gq["g"]),
         alarm_time=alarm_time, kappa_hist=np.array(cal.history), runtime_per_step_us=rt,
         extra={"recovery_times": recovery_times, "gnss_aci": gnss_cal_trace, "covariance": np.array(full_cov) if log_covariance else None,
+               "bias_est": np.array(bias_est) if log_covariance else None,
                "motion": motion, "range_alarm_time": range_alarm_time, "range_trace": range_trace,
                "fallback_frac": n_fallback / max(n_pseudo, 1), "vb_est": np.array(logs["vb"]),
                "since_gnss": np.array(logs["tg"]),

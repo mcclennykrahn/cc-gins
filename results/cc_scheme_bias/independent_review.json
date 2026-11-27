@@ -1,0 +1,49 @@
+{
+  "candidate_id": "scheme_bias_consistency_audit",
+  "reviewer": "independent review subagent",
+  "verdict": "PASS",
+  "findings": [],
+  "scope": "Opt-in bias diagnostics and offline example-sim covariance/bias budget. No claim of complete observability audit or DETECTION closure.",
+  "checks": [
+    {
+      "command": "OPENBLAS_NUM_THREADS=1 PYTHONPATH=. /tmp/ccgins-accuracy-venv/bin/python -m pytest tests/test_scheme_audit.py tests/test_filters.py tests/test_earth.py -q",
+      "result": "19 passed in 3.81s"
+    },
+    {
+      "description": "Independent analytic fixture using non-isotropic position covariance and distinct gyro/accel bias errors",
+      "result": "PASS: position NEES/dimension=2; gyro=14/3; accel=77/3; unit conversions checked"
+    }
+  ],
+  "assessment": [
+    "Bias estimates are copied from online filter states only, at same logged epochs as covariance and position. Truth is used only by offline diagnostic.",
+    "Bias marginal NEES uses correct covariance blocks 9:12 and 12:15 for additive body-frame biases; position NEES uses transformed nav-frame P_pos.",
+    "Opt-in logging preserves position estimates and covariance bitwise in regression.",
+    "Example-specific hardcoded segment/checkpoint windows match config; script is not a general arbitrary-scenario analyzer."
+  ],
+  "limitations": [
+    "Time samples and repeated alignment runs on same sensor trajectory are correlated. Coverage is descriptive, not an independent Monte Carlo acceptance test.",
+    "Bias error versus its marginal covariance does not isolate reset Jacobian, Q discretization, multipath mismatch, NHC approximation or formal observability as causes.",
+    "No algorithm change or accuracy improvement should be claimed from diagnostic-only changes."
+  ],
+  "sha256": {
+    "ccgins/pipeline.py": "0b49d418bed90f81d2016e86c4deec80375c293325a3569fd18ce349f5412a6b",
+    "scripts/audit_bias.py": "d76bf47244f74b562701a5888ee03ec621a7c6898b47545961b155a75d42479c",
+    "tests/test_scheme_audit.py": "40e1a90a203e811085f0839043440238d9b24f99b7464cfa2a140272c0690941",
+    "results/cc_scheme_bias/bias_budget.json": "38b4aa92166eb57abcd666214e7891e93632b8595b2a804ab94392d1af719c34",
+    "results/cc_scheme_bias/report.md": "b8ec1e3e01d3c650b805637a6de17cfc1e1ecfbf03161b4574474971edbe17d7"
+  },
+  "report_review": {
+    "verdict": "PASS after minor citation correction",
+    "report": "results/cc_scheme_bias/report.md",
+    "checks": [
+      "All 24 tabulated rows independently compared to bias_budget.json at 6-decimal rounding precision.",
+      "All init0 segment n, rmse_h, rmse_v, max_h, end_h and horizontal_sse_fraction compared to parent after_budget.json within 1e-12.",
+      "119.9s seed900/init0 bias residual and sigma values verified against JSON.",
+      "All six overall horizontal RMSE values verified.",
+      "Reported available-segment coverage and held-out contrast verified.",
+      "All cited code locations checked; bias_est return citation corrected to pipeline.py542 and re-reviewed.",
+      "Report explicitly retains incomplete audit, no causality/observability claim, no new accuracy promotion, DETECTION FAIL and confirmed_v08=false."
+    ],
+    "findings": []
+  }
+}
