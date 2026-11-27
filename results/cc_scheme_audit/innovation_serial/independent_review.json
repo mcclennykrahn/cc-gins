@@ -1,0 +1,25 @@
+{
+  "candidate_id": "scheme_innovation_serial",
+  "verdict": "PASS",
+  "scope": [
+    "source",
+    "numeric evidence",
+    "final report",
+    "targeted tests"
+  ],
+  "findings": [],
+  "targeted_tests": "2 passed in1.73s",
+  "numeric_checks": {
+    "traces": 16,
+    "independent_seeds": 8,
+    "fixes": 1440,
+    "whitening_and_nis": "PASS",
+    "moments_and_summary": "PASS",
+    "baseline_replay": "PASS"
+  },
+  "full_regression": "231 passed in85.11s (0:01:25); independently read pytest.txt",
+  "audit_complete": false,
+  "confirmed_v08": false,
+  "detection": "FAIL",
+  "report": "/workspace/ccgins-v08/results/cc_scheme_audit/innovation_serial/report.md"
+}

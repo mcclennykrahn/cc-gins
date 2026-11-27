@@ -1,0 +1,12 @@
+{
+  "exact_before_after_budgets": true,
+  "exact_signed_error_histories": true,
+  "seeds": [
+    900,
+    99001,
+    99002
+  ],
+  "production_changes": false,
+  "regression": "231 passed in 85.11s (0:01:25)",
+  "instrumented_native_replay_traces": 16
+}
