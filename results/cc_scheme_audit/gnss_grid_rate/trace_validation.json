@@ -1,0 +1,11 @@
+{
+  "trace_validation": "PASS",
+  "trace_digests": {
+    "900": "4cecad03590614e6eff6f662a925b16cbf51edd64eae4486ce93a00403cbd4b0",
+    "93001": "403bdb597810c5847ef31a584ca6439ea182a1d2bdbdc7deafe4dc2c1608eb07",
+    "93002": "efebca9964335587b717f72f7a98df06d1701616ef07f87757a7424e416827ab",
+    "93003": "263f6ed74f9c7f3ac5e4109971f0c869ca43b51b1b33b7c6c1a98e946b1edd1e",
+    "93004": "67f7b1ecbe0bff512fbefdea50c47c0565fa0a0c84af3a7f476a36cc8219458a"
+  },
+  "fixed_entry_native_exact": true
+}

@@ -46,11 +46,27 @@ def test_multipath_uses_actual_rounded_epoch_spacing():
     np.testing.assert_array_equal(g1.pos, g2.pos)
 
 
-def test_gnss_rate_above_grid_rejected():
+@pytest.mark.parametrize("rate", [10.1, 15., 100.])
+def test_gnss_rate_above_grid_rejected(rate):
     from ccgins.sim import GnssSpec, simulate_gnss
     truth = SimpleNamespace(dt=.1)
     with pytest.raises(ValueError, match='grid'):
-        simulate_gnss(truth, GnssSpec(rate_hz=100.))
+        simulate_gnss(truth, GnssSpec(rate_hz=rate))
+
+
+@pytest.mark.parametrize("rate", [0., -1., np.nan, np.inf])
+def test_invalid_gnss_rate_rejected(rate):
+    from ccgins.sim import GnssSpec, simulate_gnss
+    with pytest.raises(ValueError, match="finite and positive"):
+        simulate_gnss(SimpleNamespace(dt=.1), GnssSpec(rate_hz=rate))
+
+
+def test_gnss_rate_at_grid_limit():
+    from ccgins.sim import GnssSpec, simulate_gnss
+    truth = SimpleNamespace(dt=.1, t=np.arange(4)*.1,
+                            p=np.zeros((4, 3)), R=np.tile(np.eye(3), (4, 1, 1)))
+    gnss = simulate_gnss(truth, GnssSpec(rate_hz=10.))
+    np.testing.assert_array_equal(gnss.idx, [1, 2, 3])
 
 
 def test_bias_diagnostics_are_optional_and_do_not_change_navigation():

@@ -1,0 +1,8 @@
+{
+  "command": "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 /tmp/ccgins-accuracy-venv/bin/python -m pytest -q",
+  "result": "227 passed in 85.43s (0:01:25)",
+  "independent_review": "PASS",
+  "audit_complete": false,
+  "confirmed_v08": false,
+  "detection": "FAIL"
+}

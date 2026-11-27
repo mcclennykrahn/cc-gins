@@ -1,0 +1,9 @@
+{
+  "paired_budget_exact": true,
+  "paired_error_csv_exact": true,
+  "sha256": {
+    "900": "4cecad03590614e6eff6f662a925b16cbf51edd64eae4486ce93a00403cbd4b0",
+    "94001": "ec69d669d2872ab9c3fe5e562eee11c8da39db14309a09e646dc1ce702d5c047",
+    "94002": "d3f765f0b8bd7fe6b1ce1fdd571bca3d9a2bab93f8a057311f642943ab30877d"
+  }
+}

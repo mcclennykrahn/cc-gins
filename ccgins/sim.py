@@ -187,10 +187,12 @@ def simulate_imu(truth: Truth, spec: ImuSpec, seed: int = 0, noise: bool = True)
 
 
 def simulate_gnss(truth: Truth, spec: GnssSpec, seed: int = 0) -> GnssData:
-    rng = np.random.default_rng(seed + 20_000)
-    step = int(round(1.0 / (spec.rate_hz * truth.dt)))
-    if step < 1:
+    if not np.isfinite(spec.rate_hz) or spec.rate_hz <= 0:
+        raise ValueError("GNSS rate must be finite and positive")
+    if spec.rate_hz > 1.0 / truth.dt:
         raise ValueError("GNSS rate exceeds IMU grid resolution")
+    step = int(round(1.0 / (spec.rate_hz * truth.dt)))
+    rng = np.random.default_rng(seed + 20_000)
     idx = np.arange(step, len(truth.t), step)
     t = truth.t[idx]
     m = len(idx)
