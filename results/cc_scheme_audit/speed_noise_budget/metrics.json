@@ -1,0 +1,537 @@
+{
+  "config": {
+    "scenario": {
+      "seed": 900,
+      "duration": 180.0,
+      "dt": 0.01,
+      "vmax": 20.0
+    },
+    "imu": {
+      "gyro_arw": 0.3,
+      "accel_vrw": 0.1,
+      "gyro_bias_sigma": 30.0,
+      "accel_bias_sigma": 5.0
+    },
+    "gnss": {
+      "rate_hz": 1.0,
+      "sigma_h": 1.0,
+      "sigma_v": 2.0,
+      "mp_sigma": 0.5,
+      "mp_tau": 30.0,
+      "lever_arm": [
+        0.5,
+        0.0,
+        1.2
+      ],
+      "outages": [
+        {
+          "start": 60.0,
+          "duration": 30.0
+        },
+        {
+          "start": 120.0,
+          "duration": 60.0
+        }
+      ]
+    },
+    "filter": {
+      "name": "inekf",
+      "pseudo": "nhc",
+      "monitor": "none",
+      "adaptive_r": false,
+      "aci": false
+    },
+    "metrics": {
+      "t_start": 30.0
+    }
+  },
+  "scoring_start": 30.0,
+  "online_filter_changed": false,
+  "rows": [
+    {
+      "seed": 900,
+      "segments": [
+        {
+          "segment": "available_30_60",
+          "n": 3000,
+          "mean_speed": 16.93047472686874,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 2.142270391080837e-06,
+              "measured_second_moment": 2.1167995709848424e-06,
+              "expected_to_nominal": 1.2842693285760252,
+              "measured_to_expected": 0.9881103616975522,
+              "standardized_second_moment": 0.9881103616975521
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.1262211507198802,
+              "measured_second_moment": 0.12687668018158937,
+              "expected_to_nominal": 1.9159898068458792,
+              "measured_to_expected": 1.0051934993301082,
+              "standardized_second_moment": 1.0051934993301086
+            }
+          }
+        },
+        {
+          "segment": "outage_60_90",
+          "n": 3000,
+          "mean_speed": 10.13139364065889,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.516388896059335e-06,
+              "measured_second_moment": 1.4929417927618599e-06,
+              "expected_to_nominal": 0.9090597328471298,
+              "measured_to_expected": 0.984537539572858,
+              "standardized_second_moment": 0.9826115977255182
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.052205277098794245,
+              "measured_second_moment": 0.051772911269666905,
+              "expected_to_nominal": 0.7924565590979057,
+              "measured_to_expected": 0.9917179669727809,
+              "standardized_second_moment": 0.9911958527407445
+            }
+          }
+        },
+        {
+          "segment": "available_90_120",
+          "n": 3000,
+          "mean_speed": 6.883236558555963,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.2455158711745475e-06,
+              "measured_second_moment": 1.2271100858569432e-06,
+              "expected_to_nominal": 0.746674107182654,
+              "measured_to_expected": 0.9852223598722614,
+              "standardized_second_moment": 0.9868610536004542
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.026080612072250528,
+              "measured_second_moment": 0.025470392348859762,
+              "expected_to_nominal": 0.39589392587325817,
+              "measured_to_expected": 0.9766025535865382,
+              "standardized_second_moment": 0.9877543963201993
+            }
+          }
+        },
+        {
+          "segment": "outage_120_180",
+          "n": 6000,
+          "mean_speed": 8.954236362475886,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.4086646866617318e-06,
+              "measured_second_moment": 1.3723117168690494e-06,
+              "expected_to_nominal": 0.8444801640632644,
+              "measured_to_expected": 0.974193312193527,
+              "standardized_second_moment": 0.9734395326704819
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.03959987927762098,
+              "measured_second_moment": 0.03965847586708938,
+              "expected_to_nominal": 0.6011113400212327,
+              "measured_to_expected": 1.0014797163662443,
+              "standardized_second_moment": 1.0073562936364016
+            }
+          }
+        }
+      ]
+    },
+    {
+      "seed": 91001,
+      "segments": [
+        {
+          "segment": "available_30_60",
+          "n": 3000,
+          "mean_speed": 15.096436035381734,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.9723814225376488e-06,
+              "measured_second_moment": 1.9939678356871616e-06,
+              "expected_to_nominal": 1.182422618435316,
+              "measured_to_expected": 1.01094434012755,
+              "standardized_second_moment": 1.0097023971577472
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.1059079736155765,
+              "measured_second_moment": 0.10818995875642515,
+              "expected_to_nominal": 1.6076433842809725,
+              "measured_to_expected": 1.0215468681246964,
+              "standardized_second_moment": 1.011253047375135
+            }
+          }
+        },
+        {
+          "segment": "outage_60_90",
+          "n": 3000,
+          "mean_speed": 2.943399087594672,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 9.703689153877766e-07,
+              "measured_second_moment": 9.698119329889337e-07,
+              "expected_to_nominal": 0.5817263033763699,
+              "measured_to_expected": 0.9994260096443626,
+              "standardized_second_moment": 0.9989041499432747
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.011925385813180983,
+              "measured_second_moment": 0.012089225264741394,
+              "expected_to_nominal": 0.1810228914127658,
+              "measured_to_expected": 1.013738712870767,
+              "standardized_second_moment": 1.0013371747676143
+            }
+          }
+        },
+        {
+          "segment": "available_90_120",
+          "n": 3000,
+          "mean_speed": 9.702175648874858,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.467484597910759e-06,
+              "measured_second_moment": 1.4776296948644145e-06,
+              "expected_to_nominal": 0.8797421030982231,
+              "measured_to_expected": 1.006913256171887,
+              "standardized_second_moment": 1.006611052300489
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.0444491575561176,
+              "measured_second_moment": 0.04441891459181685,
+              "expected_to_nominal": 0.6747215685698406,
+              "measured_to_expected": 0.9993196054556812,
+              "standardized_second_moment": 0.9983535102944222
+            }
+          }
+        },
+        {
+          "segment": "outage_120_180",
+          "n": 6000,
+          "mean_speed": 7.613384573922396,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.3051883346678383e-06,
+              "measured_second_moment": 1.3035435522193704e-06,
+              "expected_to_nominal": 0.782447142623965,
+              "measured_to_expected": 0.9987398121751628,
+              "standardized_second_moment": 0.9975283449337058
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.031553731316161376,
+              "measured_second_moment": 0.031192402784603383,
+              "expected_to_nominal": 0.4789738266916047,
+              "measured_to_expected": 0.9885487859442814,
+              "standardized_second_moment": 0.9893672896983905
+            }
+          }
+        }
+      ]
+    },
+    {
+      "seed": 91002,
+      "segments": [
+        {
+          "segment": "available_30_60",
+          "n": 3000,
+          "mean_speed": 15.623038122791181,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 2.0195332099919653e-06,
+              "measured_second_moment": 2.0329065730710407e-06,
+              "expected_to_nominal": 1.2106896358329482,
+              "measured_to_expected": 1.0066220070127634,
+              "standardized_second_moment": 1.0085260796223474
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.11120601865260396,
+              "measured_second_moment": 0.10830636318093259,
+              "expected_to_nominal": 1.6880657241919983,
+              "measured_to_expected": 0.9739253728637692,
+              "standardized_second_moment": 0.9805478422427251
+            }
+          }
+        },
+        {
+          "segment": "outage_60_90",
+          "n": 3000,
+          "mean_speed": 9.16932974050535,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.4283299976194051e-06,
+              "measured_second_moment": 1.4118798508702784e-06,
+              "expected_to_nominal": 0.8562693181331705,
+              "measured_to_expected": 0.988482950875117,
+              "standardized_second_moment": 0.9871999880802691
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.04189714807106526,
+              "measured_second_moment": 0.04181961057642319,
+              "expected_to_nominal": 0.6359830201376073,
+              "measured_to_expected": 0.9981493371694284,
+              "standardized_second_moment": 0.9970706402056324
+            }
+          }
+        },
+        {
+          "segment": "available_90_120",
+          "n": 3000,
+          "mean_speed": 2.274175634181425,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 9.204701519777064e-07,
+              "measured_second_moment": 8.918627717337504e-07,
+              "expected_to_nominal": 0.5518125018094757,
+              "measured_to_expected": 0.9689209039722899,
+              "standardized_second_moment": 0.9723985996449032
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.008482908174472536,
+              "measured_second_moment": 0.00838255868463774,
+              "expected_to_nominal": 0.12876736982670406,
+              "measured_to_expected": 0.9881703906524916,
+              "standardized_second_moment": 0.9896895720793379
+            }
+          }
+        },
+        {
+          "segment": "outage_120_180",
+          "n": 6000,
+          "mean_speed": 4.485097103873571,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.0703145656945934e-06,
+              "measured_second_moment": 1.0537146279574341e-06,
+              "expected_to_nominal": 0.6416427050351119,
+              "measured_to_expected": 0.9844905990545064,
+              "standardized_second_moment": 0.9846379673666307
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.014929445713449408,
+              "measured_second_moment": 0.015025433156432526,
+              "expected_to_nominal": 0.22662339588639685,
+              "measured_to_expected": 1.0064294043345927,
+              "standardized_second_moment": 0.9888859240693372
+            }
+          }
+        }
+      ]
+    },
+    {
+      "seed": 91003,
+      "segments": [
+        {
+          "segment": "available_30_60",
+          "n": 3000,
+          "mean_speed": 1.2220100442471007,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 8.448945351771837e-07,
+              "measured_second_moment": 8.49517291973738e-07,
+              "expected_to_nominal": 0.5065056875766762,
+              "measured_to_expected": 1.0054714009904027,
+              "standardized_second_moment": 1.006220502713145
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.004014764772655076,
+              "measured_second_moment": 0.0039598467637106645,
+              "expected_to_nominal": 0.060942625997462786,
+              "measured_to_expected": 0.9863209896334493,
+              "standardized_second_moment": 0.9724442114682212
+            }
+          }
+        },
+        {
+          "segment": "outage_60_90",
+          "n": 3000,
+          "mean_speed": 1.038655038688134,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 8.304608676198497e-07,
+              "measured_second_moment": 8.514394153380861e-07,
+              "expected_to_nominal": 0.4978528505585655,
+              "measured_to_expected": 1.0252613320340573,
+              "standardized_second_moment": 1.0225383594198538
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.0028213346623443473,
+              "measured_second_moment": 0.0028815487722040835,
+              "expected_to_nominal": 0.04282680377989396,
+              "measured_to_expected": 1.0213424201897772,
+              "standardized_second_moment": 1.0194735024862522
+            }
+          }
+        },
+        {
+          "segment": "available_90_120",
+          "n": 3000,
+          "mean_speed": 4.866558820218413,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.0868887660807346e-06,
+              "measured_second_moment": 1.0969684483386505e-06,
+              "expected_to_nominal": 0.6515787697308737,
+              "measured_to_expected": 1.0092738857668597,
+              "standardized_second_moment": 1.00927388576686
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.012995508224848299,
+              "measured_second_moment": 0.012785479245018435,
+              "expected_to_nominal": 0.19726694893512348,
+              "measured_to_expected": 0.9838383404330218,
+              "standardized_second_moment": 0.9838383404330215
+            }
+          }
+        },
+        {
+          "segment": "outage_120_180",
+          "n": 6000,
+          "mean_speed": 12.624397487594154,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.7384124344950488e-06,
+              "measured_second_moment": 1.7275960832232475e-06,
+              "expected_to_nominal": 1.0421605878195253,
+              "measured_to_expected": 0.9937780292770725,
+              "standardized_second_moment": 0.991806068742195
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.07689323090759628,
+              "measured_second_moment": 0.07617784292809125,
+              "expected_to_nominal": 1.1672104539861134,
+              "measured_to_expected": 0.9906963464655982,
+              "standardized_second_moment": 0.9926826565982451
+            }
+          }
+        }
+      ]
+    },
+    {
+      "seed": 91004,
+      "segments": [
+        {
+          "segment": "available_30_60",
+          "n": 3000,
+          "mean_speed": 18.844081329469514,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 2.3422692819312626e-06,
+              "measured_second_moment": 2.3700365768217264e-06,
+              "expected_to_nominal": 1.4041666311470775,
+              "measured_to_expected": 1.0118548687397586,
+              "standardized_second_moment": 1.0118761446174658
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.15488051929084037,
+              "measured_second_moment": 0.15513166113441199,
+              "expected_to_nominal": 2.351028290803784,
+              "measured_to_expected": 1.00162151989625,
+              "standardized_second_moment": 1.0016058585061522
+            }
+          }
+        },
+        {
+          "segment": "outage_60_90",
+          "n": 3000,
+          "mean_speed": 18.864930933071776,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 2.3445000066884108e-06,
+              "measured_second_moment": 2.3219484754479135e-06,
+              "expected_to_nominal": 1.405503927969191,
+              "measured_to_expected": 0.9903810914155845,
+              "standardized_second_moment": 0.9903494829667875
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.15520973069431956,
+              "measured_second_moment": 0.15622443214405773,
+              "expected_to_nominal": 2.3560255966417207,
+              "measured_to_expected": 1.0065376149111205,
+              "standardized_second_moment": 1.0066822900951578
+            }
+          }
+        },
+        {
+          "segment": "available_90_120",
+          "n": 3000,
+          "mean_speed": 12.89535489833238,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.7508035421728137e-06,
+              "measured_second_moment": 1.7488739422269966e-06,
+              "expected_to_nominal": 1.0495889309474007,
+              "measured_to_expected": 0.9988978775177583,
+              "standardized_second_moment": 0.9982628352681115
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.07572248166348175,
+              "measured_second_moment": 0.07485043099726717,
+              "expected_to_nominal": 1.1494389188249887,
+              "measured_to_expected": 0.9884835963236115,
+              "standardized_second_moment": 0.9883533327813081
+            }
+          }
+        },
+        {
+          "segment": "outage_120_180",
+          "n": 6000,
+          "mean_speed": 9.915362682976015,
+          "channels": {
+            "gyro": {
+              "nominal_sample_variance": 1.6680849907520163e-06,
+              "expected_sample_variance": 1.4869883126288075e-06,
+              "measured_second_moment": 1.4661821889273558e-06,
+              "expected_to_nominal": 0.8914343818647,
+              "measured_to_expected": 0.9860078767770077,
+              "standardized_second_moment": 0.9869172266660509
+            },
+            "accel": {
+              "nominal_sample_variance": 0.06587777777777777,
+              "expected_sample_variance": 0.04673023341601786,
+              "measured_second_moment": 0.04670008793757147,
+              "expected_to_nominal": 0.7093474460181495,
+              "measured_to_expected": 0.9993549041756754,
+              "standardized_second_moment": 0.9976855463082797
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

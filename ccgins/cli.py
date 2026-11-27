@@ -204,10 +204,10 @@ def _predictions(raw: dict, truth, imu, cfg: Config, config_path: Path):
 
 
 def _extend_metrics(log, outages, t_start: float) -> dict:
-    metrics = summarize(log, outages, t_start=t_start)
     mask = log.t >= t_start
     if not np.any(mask):
         raise CliError(f"metrics.t_start={t_start} is after the last logged epoch")
+    metrics = summarize(log, outages, t_start=t_start)
     err = log.p_est - log.p_true
     eh = np.linalg.norm(err[:, :2], axis=1)
     nees_h = np.einsum("ni,nij,nj->n", err[:, :2],
@@ -225,7 +225,7 @@ def _extend_metrics(log, outages, t_start: float) -> dict:
     })
     segs = []
     for start, duration in outages:
-        seg = (log.t >= start) & (log.t < start + duration)
+        seg = mask & (log.t >= start) & (log.t < start + duration)
         if not np.any(seg):
             continue
         segs.append({

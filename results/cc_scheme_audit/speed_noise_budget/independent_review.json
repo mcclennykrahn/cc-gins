@@ -1,0 +1,40 @@
+{
+  "verdict": "PASS",
+  "reviewer": "independent child agent /root/review",
+  "reviewed_at": "2026-11-27T12:35:14.812258+00:00",
+  "scope": [
+    "ccgins/cli.py",
+    "tests/test_cli.py",
+    "scripts/audit_nhc_model.py",
+    "scripts/audit_nhc_outage.py",
+    "tests/test_nhc_outage_audit.py",
+    "scripts/audit_speed_noise.py"
+  ],
+  "source_sha256": {
+    "ccgins/cli.py": "5425dcaf18bf41799b6e558adac33589325a0b64bd536845ad1a1fd1d2e3e9a6",
+    "tests/test_cli.py": "1fce832ed350245ce651b6ee3790d63884b970cf41240d6bc65934f3f2eedd9a",
+    "scripts/audit_nhc_model.py": "40c2708bc8401a26acfd6540d4efeec527019774d372de74dcf4d390adc207e7",
+    "scripts/audit_nhc_outage.py": "e77450c2bbd19763d5e89d9d5bacabab1e84560a98e58c8b7508931dad05b0c3",
+    "tests/test_nhc_outage_audit.py": "958faf39f7b1ec067204d5f426c53c4e0209bd60f8b7378944be331d283cddf7",
+    "scripts/audit_speed_noise.py": "6b883d49bfd1802378f14c8188099e885436e02640ab5ca901b4c72cb4857ba0"
+  },
+  "findings": [],
+  "checks": [
+    "CLI scoring mask correctly intersects t_start and half-open outage; empty windows rejected before reductions. Boundary fixture excludes reacquisition and entirely unscored gaps.",
+    "NHC scheduling matches native WINDOW and pseudo_every; fixed zeros/variances go through learned_nhc unchanged. Exact replay and causal-prefix assertions cover both entry histories. Truth values are never passed as pseudo measurements.",
+    "All 70 factorial trace metrics and 20 NHC/multipath trace metrics verified by rerunning standalone Cholesky-based evidence verifiers. Source snapshots match current scripts.",
+    "Parent versus proposed CLI equality on all 70 traces and independent boundary oracle PASS.",
+    "Independent aggregate recount: long-gap in-gap benefit 10/10 for each entry history; pre-entry benefit 8/10; short-gap 8/10 and 6/10. Report agrees.",
+    "Fresh independent reconstruction of raw IMU minus exact truth minus stored bias for all five speed-noise seeds. Direct ARW/VRW unit conversions, additive vibration standard deviations, nominal 12m/s variance and standardized second moments match metrics to rtol 1e-12.",
+    "Speed-noise report table/ranges/refs checked; no production filter changed and no attribution or accuracy gain overclaimed."
+  ],
+  "tests": {
+    "command": "OPENBLAS_NUM_THREADS=1 /tmp/ccgins-accuracy-venv/bin/python -m pytest tests/test_cli.py tests/test_nhc_outage_audit.py -q",
+    "result": "4 passed in 13.53s"
+  },
+  "limitations": [
+    "No independent rerun of all 90 navigation trajectories; saved signed errors/covariance were fully reconstructed and focused replay tests were freshly run.",
+    "Full-suite regression is owned by parent and must pass before commit/push.",
+    "This signs off this bounded candidate only. Whole-scheme audit remains incomplete; DETECTION FAIL and confirmed_v08=false."
+  ]
+}

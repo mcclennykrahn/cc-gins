@@ -6,10 +6,13 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
+import numpy as np
+import pytest
 import yaml
 
-from ccgins.cli import _build_inputs, _filter_config, load_config
+from ccgins.cli import CliError, _build_inputs, _extend_metrics, _filter_config, load_config
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs" / "example_sim.yaml"
@@ -74,3 +77,22 @@ def test_example_config_parses_and_builds_inputs():
     assert truth.dt == 0.01
     assert gnss_spec.outages == [(60.0, 30.0), (120.0, 60.0)]
     assert len(gnss.t) >= 1
+
+
+def test_outage_details_use_same_scoring_window_as_summary():
+    t = np.arange(1., 11.)
+    error = np.zeros((len(t), 3))
+    error[:5, 0] = [100., 50., 2., 3., 200.]
+    log = SimpleNamespace(t=t, p_est=error, p_true=np.zeros_like(error),
+                          P_pos=np.repeat(np.eye(3)[None], len(t), axis=0),
+                          runtime_per_step_us=0.)
+    metrics = _extend_metrics(log, [(1., 4.), (1., 1.)], t_start=3.)
+    assert metrics["max_err_outage_4s"] == 3.
+    assert metrics["max_err_outage_1s"] is None
+    assert len(metrics["outage_metrics"]) == 1
+    outage = metrics["outage_metrics"][0]
+    assert outage["max_err_h"] == outage["end_err_h"] == 3.
+    assert outage["anees_pos"] == pytest.approx((4. + 9.) / 6.)
+    assert outage["coverage95_h"] == .5
+    with pytest.raises(CliError, match="after the last logged epoch"):
+        _extend_metrics(log, [], t_start=11.)

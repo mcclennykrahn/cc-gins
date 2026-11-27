@@ -1,0 +1,286 @@
+{
+  "verdict": "PASS",
+  "production_key_parity_rows": 70,
+  "nominal": [
+    {
+      "seed": 900,
+      "init_seed": 0,
+      "before_after_equal": true,
+      "rmse_h": 7.019109904490951,
+      "max_err_outage_60s": 27.68418553540728,
+      "outage_metrics": [
+        {
+          "start_s": 60.0,
+          "duration_s": 30.0,
+          "max_err_h": 2.5188317150008754,
+          "end_err_h": 1.712984307911281,
+          "anees_pos": 1.1184566026386022,
+          "coverage95_h": 1.0
+        },
+        {
+          "start_s": 120.0,
+          "duration_s": 60.0,
+          "max_err_h": 27.68418553540728,
+          "end_err_h": 27.68418553540728,
+          "anees_pos": 2.107593103263844,
+          "coverage95_h": 1.0
+        }
+      ]
+    },
+    {
+      "seed": 900,
+      "init_seed": 1701,
+      "before_after_equal": true,
+      "rmse_h": 6.817714011515672,
+      "max_err_outage_60s": 26.810379641636622,
+      "outage_metrics": [
+        {
+          "start_s": 60.0,
+          "duration_s": 30.0,
+          "max_err_h": 2.4583193148253843,
+          "end_err_h": 1.547116366726854,
+          "anees_pos": 1.0031468846017104,
+          "coverage95_h": 1.0
+        },
+        {
+          "start_s": 120.0,
+          "duration_s": 60.0,
+          "max_err_h": 26.810379641636622,
+          "end_err_h": 26.810379641636622,
+          "anees_pos": 1.861159664929841,
+          "coverage95_h": 1.0
+        }
+      ]
+    },
+    {
+      "seed": 80301,
+      "init_seed": 0,
+      "before_after_equal": true,
+      "rmse_h": 5.364449416843908,
+      "max_err_outage_60s": 13.551885089877281,
+      "outage_metrics": [
+        {
+          "start_s": 60.0,
+          "duration_s": 30.0,
+          "max_err_h": 9.361627116341943,
+          "end_err_h": 9.333812796576883,
+          "anees_pos": 0.8534268553872835,
+          "coverage95_h": 1.0
+        },
+        {
+          "start_s": 120.0,
+          "duration_s": 60.0,
+          "max_err_h": 13.551885089877281,
+          "end_err_h": 6.7170472665490575,
+          "anees_pos": 2.489163660767701,
+          "coverage95_h": 0.26666666666666666
+        }
+      ]
+    },
+    {
+      "seed": 80301,
+      "init_seed": 1701,
+      "before_after_equal": true,
+      "rmse_h": 5.4524461893756335,
+      "max_err_outage_60s": 13.649990450855855,
+      "outage_metrics": [
+        {
+          "start_s": 60.0,
+          "duration_s": 30.0,
+          "max_err_h": 10.001666294415852,
+          "end_err_h": 9.982844854905501,
+          "anees_pos": 0.9751695226074863,
+          "coverage95_h": 1.0
+        },
+        {
+          "start_s": 120.0,
+          "duration_s": 60.0,
+          "max_err_h": 13.649990450855855,
+          "end_err_h": 6.755206994000363,
+          "anees_pos": 2.4800295217112427,
+          "coverage95_h": 0.27
+        }
+      ]
+    },
+    {
+      "seed": 80302,
+      "init_seed": 0,
+      "before_after_equal": true,
+      "rmse_h": 6.663351509437637,
+      "max_err_outage_60s": 20.920578597185653,
+      "outage_metrics": [
+        {
+          "start_s": 60.0,
+          "duration_s": 30.0,
+          "max_err_h": 2.5526965804233432,
+          "end_err_h": 2.2614525613068555,
+          "anees_pos": 0.6618645150660426,
+          "coverage95_h": 1.0
+        },
+        {
+          "start_s": 120.0,
+          "duration_s": 60.0,
+          "max_err_h": 20.920578597185653,
+          "end_err_h": 12.78880027766732,
+          "anees_pos": 0.5832199812263655,
+          "coverage95_h": 1.0
+        }
+      ]
+    },
+    {
+      "seed": 80302,
+      "init_seed": 1701,
+      "before_after_equal": true,
+      "rmse_h": 6.310913221702757,
+      "max_err_outage_60s": 19.950048691945266,
+      "outage_metrics": [
+        {
+          "start_s": 60.0,
+          "duration_s": 30.0,
+          "max_err_h": 2.4142308649376094,
+          "end_err_h": 2.119934683973091,
+          "anees_pos": 0.5745305329447686,
+          "coverage95_h": 1.0
+        },
+        {
+          "start_s": 120.0,
+          "duration_s": 60.0,
+          "max_err_h": 19.950048691945266,
+          "end_err_h": 12.235142467484083,
+          "anees_pos": 0.5251942278649218,
+          "coverage95_h": 1.0
+        }
+      ]
+    },
+    {
+      "seed": 80303,
+      "init_seed": 0,
+      "before_after_equal": true,
+      "rmse_h": 4.605670152467755,
+      "max_err_outage_60s": 13.948552835400141,
+      "outage_metrics": [
+        {
+          "start_s": 60.0,
+          "duration_s": 30.0,
+          "max_err_h": 3.607031369280477,
+          "end_err_h": 1.7325630075734115,
+          "anees_pos": 0.5790591564611676,
+          "coverage95_h": 1.0
+        },
+        {
+          "start_s": 120.0,
+          "duration_s": 60.0,
+          "max_err_h": 13.948552835400141,
+          "end_err_h": 5.878262132338372,
+          "anees_pos": 4.715374543796817,
+          "coverage95_h": 0.44166666666666665
+        }
+      ]
+    },
+    {
+      "seed": 80303,
+      "init_seed": 1701,
+      "before_after_equal": true,
+      "rmse_h": 4.564487158328506,
+      "max_err_outage_60s": 13.920975778451636,
+      "outage_metrics": [
+        {
+          "start_s": 60.0,
+          "duration_s": 30.0,
+          "max_err_h": 3.378189787753332,
+          "end_err_h": 1.6310035678598207,
+          "anees_pos": 0.532578502384898,
+          "coverage95_h": 1.0
+        },
+        {
+          "start_s": 120.0,
+          "duration_s": 60.0,
+          "max_err_h": 13.920975778451636,
+          "end_err_h": 5.810657101589627,
+          "anees_pos": 4.669983663348244,
+          "coverage95_h": 0.44166666666666665
+        }
+      ]
+    },
+    {
+      "seed": 80304,
+      "init_seed": 0,
+      "before_after_equal": true,
+      "rmse_h": 4.0367030524306005,
+      "max_err_outage_60s": 3.862122862977253,
+      "outage_metrics": [
+        {
+          "start_s": 60.0,
+          "duration_s": 30.0,
+          "max_err_h": 19.126237802417858,
+          "end_err_h": 19.126237802417858,
+          "anees_pos": 0.4431816311763981,
+          "coverage95_h": 1.0
+        },
+        {
+          "start_s": 120.0,
+          "duration_s": 60.0,
+          "max_err_h": 3.862122862977253,
+          "end_err_h": 2.242688773910895,
+          "anees_pos": 2.419470539975158,
+          "coverage95_h": 0.6083333333333333
+        }
+      ]
+    },
+    {
+      "seed": 80304,
+      "init_seed": 1701,
+      "before_after_equal": true,
+      "rmse_h": 4.179281375667537,
+      "max_err_outage_60s": 3.8948795767343065,
+      "outage_metrics": [
+        {
+          "start_s": 60.0,
+          "duration_s": 30.0,
+          "max_err_h": 19.690271615829804,
+          "end_err_h": 19.690271615829804,
+          "anees_pos": 0.5543262191550891,
+          "coverage95_h": 1.0
+        },
+        {
+          "start_s": 120.0,
+          "duration_s": 60.0,
+          "max_err_h": 3.8948795767343065,
+          "end_err_h": 2.487780405941294,
+          "anees_pos": 2.5388266192525752,
+          "coverage95_h": 0.56
+        }
+      ]
+    }
+  ],
+  "fixture": {
+    "before": [
+      {
+        "start_s": 1.0,
+        "duration_s": 4.0,
+        "max_err_h": 100.0,
+        "end_err_h": 3.0,
+        "anees_pos": 1042.75,
+        "coverage95_h": 0.25
+      },
+      {
+        "start_s": 1.0,
+        "duration_s": 1.0,
+        "max_err_h": 100.0,
+        "end_err_h": 100.0,
+        "anees_pos": 3333.3333333333335,
+        "coverage95_h": 0.0
+      }
+    ],
+    "after": [
+      {
+        "start_s": 1.0,
+        "duration_s": 4.0,
+        "max_err_h": 3.0,
+        "end_err_h": 3.0,
+        "anees_pos": 2.1666666666666665,
+        "coverage95_h": 0.5
+      }
+    ]
+  }
+}
