@@ -191,11 +191,19 @@ def test_audit_cli_honors_configured_scoring_and_fractional_duration(tmp_path, m
     row = result['rows'][0]
     assert 't>=0.33;' in result['scoring']
     assert row['segments']['overall']['n'] == 1  # navigation logs every tenth IMU step
+    assert row['segments']['outage_0.331_0.601']['n'] == 1
     assert row['gnss_only']['n'] == 2  # .33 and .63; .60 remains in the gap
     assert len(row['bins']) == 1
     assert row['bins'][0]['start'] == .33
     assert row['bins'][0]['n'] == 1  # .60 is logged; .63 is not
     assert row['pure_ins_truth_initialized'][0]['propagated_duration'] == pytest.approx(.24)
+
+    config['gnss']['outages'] = []
+    path.write_text(yaml.safe_dump(config))
+    main()
+    segments = json.loads((out / 'budget.json').read_text())['rows'][0]['segments']
+    assert segments['available_0.33_0.63']['n'] == 1
+    assert 'terminal_available' not in segments
 
 
 @pytest.mark.parametrize('start', [-1., float('nan'), float('inf')])

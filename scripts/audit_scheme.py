@@ -9,8 +9,9 @@ from ccgins.filters import mechanize
 from ccgins.timing import at_or_after, in_window
 
 
-def segment_masks(t, outages, t_start=30.):
-    """Half-open outages; terminal reacquisition is a separate available sample."""
+def segment_masks(t, outages, t_start=30., *, scenario_end=None):
+    """Half-open outages, with a separate row for a logged scenario endpoint."""
+    end = float(t[-1]) if scenario_end is None else scenario_end
     selected = at_or_after(t, t_start)
     outage = np.zeros(len(t), dtype=bool)
     masks = {}
@@ -21,20 +22,24 @@ def segment_masks(t, outages, t_start=30.):
     masks['available'] = selected & ~outage
     masks['overall'] = selected
     # Disjoint available intervals expose recovery transients.
-    boundaries = sorted({t_start, float(t[-1])} | {float(x) for sd in outages for x in (sd[0], sum(sd)) if t_start <= x <= t[-1]})
+    boundaries = sorted({t_start, end} | {
+        float(x) for start, duration in outages for x in (start, start + duration)
+        if t_start <= x <= end
+    })
     for a, b in zip(boundaries[:-1], boundaries[1:]):
         mask = selected & ~outage & in_window(t, a, b)
         if mask.any():
             masks[f'available_{a:g}_{b:g}'] = mask
-    if selected[-1] and not outage[-1]:
-        masks['terminal_available'] = t == t[-1]
+    terminal = masks['available'] & at_or_after(t, end)
+    if terminal.any():
+        masks['terminal_available'] = terminal
     return masks
 
 
-def budget(t, error, outages, t_start=30.):
+def budget(t, error, outages, t_start=30., *, scenario_end=None):
     if not len(t) or not at_or_after(t, t_start).any():
         raise ValueError('no epochs in scoring window')
-    masks = segment_masks(t, outages, t_start)
+    masks = segment_masks(t, outages, t_start, scenario_end=scenario_end)
     total = np.sum(error[masks['overall'], :2]**2)
     rows = {}
     for name, mask in masks.items():
@@ -104,7 +109,8 @@ def main():
         ant = truth.p[gnss.idx] + np.einsum('nij,j->ni', truth.R[gnss.idx], gs.lever_arm)
         ge = gnss.pos-ant
         gmask = gnss.valid & at_or_after(gnss.t, t_start)
-        row = dict(seed=seed, segments=budget(log.t, error, gs.outages, t_start),
+        row = dict(seed=seed, segments=budget(log.t, error, gs.outages, t_start,
+                                             scenario_end=truth.t[-1]),
                    gnss_only=(budget(gnss.t[gmask], ge[gmask], [], t_start)['overall']
                               if gmask.any() else None))
         row['pure_ins_truth_initialized'] = pure_ins_budget(truth, imu, gs.outages)
