@@ -1,0 +1,8 @@
+{
+  "pytest": "260 passed in 103.98s (0:01:43)",
+  "paired_metrics_exact": true,
+  "paired_csv_byte_identical": true,
+  "production_changed": false,
+  "confirmed_v08": false,
+  "detection": "FAIL"
+}

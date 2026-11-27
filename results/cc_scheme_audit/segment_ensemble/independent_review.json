@@ -1,0 +1,31 @@
+{
+  "reviewer": "independent review_ensemble subagent",
+  "verdict": "PASS",
+  "scope": "Bounded finite-ensemble diagnostic, paired numerical evidence and final report; not whole-scheme completion or V0.8 acceptance",
+  "initial_review": "/workspace/ccgins-v08/reviews/segment_ensemble_initial.json",
+  "resolved": [
+    "Initial prose FAIL: proposed30s working envelope excluded held-out10400217.141542m RMS31.024997m peak. Final report explicitly includes this counterexample, labels16-draw range sample-only and disclaims reliable upper guarantee."
+  ],
+  "focused_tests": "2 passed in 2.04s",
+  "regression": "260 passed in 103.98s (0:01:43), parent-run artifact independently inspected",
+  "numerical_checks": [
+    "Independently recomputed112 segment rows (H/V RMSE, H max/end,SSE fractions,count) across all16 signed saved traces with standalone masks/formulas, rtol1e-12.",
+    "Independently recomputed all16 runs10s H-RMSE bins.",
+    "Rebuilt GNSS antenna H/V metrics and raw pure-INS propagation for first/last ensemble seeds104101/104116.",
+    "Before/after JSON metrics exact and raw CSV bytes identical for900/104001/104002.",
+    "Reviewed descriptive ranges/counts and source references; report copies identical."
+  ],
+  "limitations": [
+    "16 draws are descriptive and do not establish tail probabilities.",
+    "Independent init draws remain perturbations around truth, not causal deployable alignment.",
+    "No new production bug or improvement claimed; no RTS metric.",
+    "DETECTION remains FAIL; confirmed_v08=false."
+  ],
+  "reviewed_sha256": {
+    "scripts/audit_segment_ensemble.py": "6d33f385d4def2520b274e808f7af6f79f20f4b8cd1aa3565cbfeb7e7958bfa3",
+    "tests/test_segment_ensemble.py": "30335bc671bd3b961df5f0be623df361fc1c004bdb74f760d00f2a4f9a9c17aa",
+    "results/cc_scheme_audit/segment_ensemble/report.md": "9f6c6548c4f43aa0a7119d2eb52f5a72153d15a4ff572d4982008d30fcf14514",
+    "results/cc_scheme_audit/segment_ensemble/summary.json": "64852faa243d83a02a3dddb517e9228300abf58332881e161e4930f98e9750f5",
+    "results/cc_scheme_audit/segment_ensemble/validation.json": "4fae429f725cbb6e05d282b18347a1d85d734b12dceff4849b0596dd13a32fe5"
+  }
+}
