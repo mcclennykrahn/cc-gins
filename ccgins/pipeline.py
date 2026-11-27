@@ -530,7 +530,8 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
             logs["ve"].append(A.v.copy())
             logs["vt"].append(truth.v[kk].copy())
             logs["vb"].append(A.R.T @ A.v)
-            logs["tg"].append(tau)
+            # Match the posterior state above, including a fix accepted at t.
+            logs["tg"].append(t - t_last_gnss)
 
     rt = (time.perf_counter() - t0) / (n - 1) * 1e6
     return RunLog(

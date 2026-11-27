@@ -46,6 +46,25 @@ def test_multipath_uses_actual_rounded_epoch_spacing():
     np.testing.assert_array_equal(g1.pos, g2.pos)
 
 
+def test_logged_gnss_age_matches_posterior_and_ignores_rejected_fixes():
+    from ccgins.pipeline import Config, run
+    from ccgins.sim import GnssSpec, generate_trajectory, simulate_gnss
+
+    truth = generate_trajectory(5., dt=.01, seed=900)
+    spec = ImuSpec()
+    gs = GnssSpec(outages=[(2., 1.)])
+    imu = simulate_imu(truth, spec, seed=900)
+    gnss = simulate_gnss(truth, gs, seed=900)
+    gnss.pos[gnss.t == 3., 0] += 1e6
+
+    log = run(truth, imu, gnss, spec, gs, Config(pseudo="nhc"))
+    epochs = [1., 2., 3., 4., 4.1]
+    idx = np.searchsorted(log.t, epochs)
+    np.testing.assert_allclose(log.t[idx], epochs)
+    # A missing fix at 2 s and a rejected fix at 3 s preserve the 1 s reference.
+    np.testing.assert_allclose(log.extra["since_gnss"][idx], [0., 1., 2., 0., .1])
+
+
 @pytest.mark.parametrize("rate", [10.1, 15., 100.])
 def test_gnss_rate_above_grid_rejected(rate):
     from ccgins.sim import GnssSpec, simulate_gnss
