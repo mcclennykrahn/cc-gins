@@ -1,0 +1,337 @@
+{
+  "config": {
+    "scenario": {
+      "seed": 900,
+      "duration": 180.0,
+      "dt": 0.01,
+      "vmax": 20.0
+    },
+    "imu": {
+      "gyro_arw": 0.3,
+      "accel_vrw": 0.1,
+      "gyro_bias_sigma": 30.0,
+      "accel_bias_sigma": 5.0
+    },
+    "gnss": {
+      "rate_hz": 1.0,
+      "sigma_h": 1.0,
+      "sigma_v": 2.0,
+      "mp_sigma": 0.5,
+      "mp_tau": 30.0,
+      "lever_arm": [
+        0.5,
+        0.0,
+        1.2
+      ],
+      "outages": [
+        {
+          "start": 60.0,
+          "duration": 30.0
+        },
+        {
+          "start": 120.0,
+          "duration": 60.0
+        }
+      ]
+    },
+    "filter": {
+      "name": "inekf",
+      "pseudo": "nhc",
+      "monitor": "none",
+      "adaptive_r": false,
+      "aci": false
+    },
+    "metrics": {
+      "t_start": 30.0
+    }
+  },
+  "candidate": {
+    "adaptive_r": true
+  },
+  "development_seeds": [
+    900,
+    901,
+    902
+  ],
+  "held_out_seeds": [
+    49401,
+    49402,
+    49403,
+    49404,
+    49405
+  ],
+  "rows": [
+    {
+      "seed": 900,
+      "variant": "baseline",
+      "metrics": {
+        "rmse_h": 7.173488834950148,
+        "rmse_3d": 7.213088772593652,
+        "runtime_us": 60.29966116668422,
+        "anees_pos": 2.2718093177866368,
+        "coverage95_h": 0.8067954696868754,
+        "max_err_outage_30s": 2.577817677235589,
+        "end_err_outage_30s": 1.7805404655767225,
+        "max_err_outage_60s": 28.257610207375503,
+        "end_err_outage_60s": 28.257610207375503,
+        "coverage95_h_outage": 0.9688888888888889,
+        "anees_pos_outage": 1.9217377486264544
+      }
+    },
+    {
+      "seed": 900,
+      "variant": "candidate",
+      "metrics": {
+        "rmse_h": 7.174571247517643,
+        "rmse_3d": 7.208098869913918,
+        "runtime_us": 61.394564111095754,
+        "anees_pos": 2.60126153546345,
+        "coverage95_h": 0.4350433044636909,
+        "max_err_outage_30s": 2.8212299675168118,
+        "end_err_outage_30s": 2.058084663599984,
+        "max_err_outage_60s": 27.856134874119494,
+        "end_err_outage_60s": 27.856134874119494,
+        "coverage95_h_outage": 0.41333333333333333,
+        "anees_pos_outage": 2.179675803757205
+      }
+    },
+    {
+      "seed": 901,
+      "variant": "baseline",
+      "metrics": {
+        "rmse_h": 5.619520812040485,
+        "rmse_3d": 5.640943031958081,
+        "runtime_us": 60.81567538886804,
+        "anees_pos": 1.8567719674377676,
+        "coverage95_h": 0.6495669553630913,
+        "max_err_outage_30s": 7.447921615799307,
+        "end_err_outage_30s": 7.447921615799307,
+        "max_err_outage_60s": 16.195447047837508,
+        "end_err_outage_60s": 16.016954474027035,
+        "coverage95_h_outage": 0.5244444444444445,
+        "anees_pos_outage": 2.204711097887717
+      }
+    },
+    {
+      "seed": 901,
+      "variant": "candidate",
+      "metrics": {
+        "rmse_h": 5.353776022699646,
+        "rmse_3d": 5.373477989808739,
+        "runtime_us": 62.40495588887522,
+        "anees_pos": 2.3893168326807452,
+        "coverage95_h": 0.5089940039973351,
+        "max_err_outage_30s": 6.580939067269036,
+        "end_err_outage_30s": 6.580939067269036,
+        "max_err_outage_60s": 15.504894916122932,
+        "end_err_outage_60s": 15.382467779010376,
+        "coverage95_h_outage": 0.35555555555555557,
+        "anees_pos_outage": 2.7837354760995723
+      }
+    },
+    {
+      "seed": 902,
+      "variant": "baseline",
+      "metrics": {
+        "rmse_h": 3.258814319405001,
+        "rmse_3d": 3.274009775464273,
+        "runtime_us": 60.8171688333338,
+        "anees_pos": 0.9230743865546368,
+        "coverage95_h": 0.9287141905396402,
+        "max_err_outage_30s": 2.064283027063013,
+        "end_err_outage_30s": 1.9648374475655774,
+        "max_err_outage_60s": 9.031707328033276,
+        "end_err_outage_60s": 5.984682027997067,
+        "coverage95_h_outage": 0.9588888888888889,
+        "anees_pos_outage": 0.7214887012996556
+      }
+    },
+    {
+      "seed": 902,
+      "variant": "candidate",
+      "metrics": {
+        "rmse_h": 3.123959544531648,
+        "rmse_3d": 3.1433948809175507,
+        "runtime_us": 59.79745961111702,
+        "anees_pos": 0.901292212857219,
+        "coverage95_h": 0.9173884077281812,
+        "max_err_outage_30s": 3.2759677292541793,
+        "end_err_outage_30s": 0.4472525142219221,
+        "max_err_outage_60s": 8.807645975206261,
+        "end_err_outage_60s": 5.6835377343858005,
+        "coverage95_h_outage": 0.9677777777777777,
+        "anees_pos_outage": 0.8071700049781424
+      }
+    },
+    {
+      "seed": 49401,
+      "variant": "baseline",
+      "metrics": {
+        "rmse_h": 3.567376588306256,
+        "rmse_3d": 3.655780381195117,
+        "runtime_us": 62.62516194439942,
+        "anees_pos": 2.5710496511363146,
+        "coverage95_h": 0.5749500333111259,
+        "max_err_outage_30s": 10.10336253749485,
+        "end_err_outage_30s": 10.10336253749485,
+        "max_err_outage_60s": 9.531950212797963,
+        "end_err_outage_60s": 7.416404916211555,
+        "coverage95_h_outage": 0.6666666666666666,
+        "anees_pos_outage": 1.9190732157240917
+      }
+    },
+    {
+      "seed": 49401,
+      "variant": "candidate",
+      "metrics": {
+        "rmse_h": 4.236559043780349,
+        "rmse_3d": 4.296137203796276,
+        "runtime_us": 63.73973211106609,
+        "anees_pos": 3.3333041057429074,
+        "coverage95_h": 0.5796135909393737,
+        "max_err_outage_30s": 10.73539571498465,
+        "end_err_outage_30s": 10.73539571498465,
+        "max_err_outage_60s": 12.41841360453169,
+        "end_err_outage_60s": 9.785699468249584,
+        "coverage95_h_outage": 0.6666666666666666,
+        "anees_pos_outage": 2.227484234532652
+      }
+    },
+    {
+      "seed": 49402,
+      "variant": "baseline",
+      "metrics": {
+        "rmse_h": 2.632006786934206,
+        "rmse_3d": 2.6503814740469185,
+        "runtime_us": 62.47001344445379,
+        "anees_pos": 1.156447661974407,
+        "coverage95_h": 0.9227181878747501,
+        "max_err_outage_30s": 4.534163211108307,
+        "end_err_outage_30s": 2.7073934747873483,
+        "max_err_outage_60s": 8.29424470832477,
+        "end_err_outage_60s": 3.1497529879166524,
+        "coverage95_h_outage": 0.8922222222222222,
+        "anees_pos_outage": 1.150060464251318
+      }
+    },
+    {
+      "seed": 49402,
+      "variant": "candidate",
+      "metrics": {
+        "rmse_h": 2.7879464357962016,
+        "rmse_3d": 2.8010071197231374,
+        "runtime_us": 64.19774416665153,
+        "anees_pos": 1.504222299816269,
+        "coverage95_h": 0.770819453697535,
+        "max_err_outage_30s": 4.659848456071945,
+        "end_err_outage_30s": 3.145492217144739,
+        "max_err_outage_60s": 8.32704240583084,
+        "end_err_outage_60s": 4.060017240151034,
+        "coverage95_h_outage": 0.8355555555555556,
+        "anees_pos_outage": 1.227826312852893
+      }
+    },
+    {
+      "seed": 49403,
+      "variant": "baseline",
+      "metrics": {
+        "rmse_h": 2.8574801154460414,
+        "rmse_3d": 2.9221229534440933,
+        "runtime_us": 60.29150738888549,
+        "anees_pos": 2.3177166286193245,
+        "coverage95_h": 0.7788141239173884,
+        "max_err_outage_30s": 0.9838414470043739,
+        "end_err_outage_30s": 0.9838414470043739,
+        "max_err_outage_60s": 6.877682367488544,
+        "end_err_outage_60s": 4.116617775889954,
+        "coverage95_h_outage": 0.9777777777777777,
+        "anees_pos_outage": 0.9574054988320495
+      }
+    },
+    {
+      "seed": 49403,
+      "variant": "candidate",
+      "metrics": {
+        "rmse_h": 3.1503236987176986,
+        "rmse_3d": 3.2074116574230356,
+        "runtime_us": 58.81430516668237,
+        "anees_pos": 3.8926188609122927,
+        "coverage95_h": 0.491672218520986,
+        "max_err_outage_30s": 3.275046927180454,
+        "end_err_outage_30s": 3.2617470613597193,
+        "max_err_outage_60s": 6.4016823329021095,
+        "end_err_outage_60s": 6.4016823329021095,
+        "coverage95_h_outage": 0.6711111111111111,
+        "anees_pos_outage": 1.9113209324534959
+      }
+    },
+    {
+      "seed": 49404,
+      "variant": "baseline",
+      "metrics": {
+        "rmse_h": 3.596592588674142,
+        "rmse_3d": 3.8088245630152233,
+        "runtime_us": 58.54395166670656,
+        "anees_pos": 2.44749785752564,
+        "coverage95_h": 0.8620919387075283,
+        "max_err_outage_30s": 17.61184106396262,
+        "end_err_outage_30s": 17.61184106396262,
+        "max_err_outage_60s": 3.8125287233943213,
+        "end_err_outage_60s": 3.709176930965714,
+        "coverage95_h_outage": 1.0,
+        "anees_pos_outage": 1.7394631323133494
+      }
+    },
+    {
+      "seed": 49404,
+      "variant": "candidate",
+      "metrics": {
+        "rmse_h": 3.583190444601662,
+        "rmse_3d": 3.7840220701013054,
+        "runtime_us": 57.812509777805744,
+        "anees_pos": 2.2424734148166556,
+        "coverage95_h": 0.8707528314457028,
+        "max_err_outage_30s": 16.876600231467073,
+        "end_err_outage_30s": 16.876600231467073,
+        "max_err_outage_60s": 4.2604829390384005,
+        "end_err_outage_60s": 4.166427390092858,
+        "coverage95_h_outage": 1.0,
+        "anees_pos_outage": 1.5850856986879822
+      }
+    },
+    {
+      "seed": 49405,
+      "variant": "baseline",
+      "metrics": {
+        "rmse_h": 2.8665735965198533,
+        "rmse_3d": 2.906960901346474,
+        "runtime_us": 58.14839499998925,
+        "anees_pos": 1.4166625063253424,
+        "coverage95_h": 0.8147901399067289,
+        "max_err_outage_30s": 5.971734962075353,
+        "end_err_outage_30s": 2.1835732322441403,
+        "max_err_outage_60s": 9.29724355459558,
+        "end_err_outage_60s": 9.29724355459558,
+        "coverage95_h_outage": 0.9011111111111111,
+        "anees_pos_outage": 1.225846450080059
+      }
+    },
+    {
+      "seed": 49405,
+      "variant": "candidate",
+      "metrics": {
+        "rmse_h": 2.7558548196188966,
+        "rmse_3d": 2.7900560847062486,
+        "runtime_us": 57.396647555580984,
+        "anees_pos": 1.6415246441495241,
+        "coverage95_h": 0.7968021319120586,
+        "max_err_outage_30s": 5.707738951003199,
+        "end_err_outage_30s": 2.2056369200855985,
+        "max_err_outage_60s": 8.930979003030417,
+        "end_err_outage_60s": 8.930979003030417,
+        "coverage95_h_outage": 0.8766666666666667,
+        "anees_pos_outage": 1.2737132504151298
+      }
+    }
+  ]
+}

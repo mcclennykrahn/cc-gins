@@ -1,0 +1,8 @@
+{
+  "python": "Python 3.13.5",
+  "base_commit": "ff0579dbc8ef814908cc52496dd742df1b3427fe",
+  "OPENBLAS_NUM_THREADS": "1",
+  "OMP_NUM_THREADS": "1",
+  "executable": "/tmp/ccgins-accuracy-venv/bin/python",
+  "evaluation_exit_code": 0
+}

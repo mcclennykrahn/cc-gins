@@ -1,0 +1,13 @@
+{
+  "candidate_id": "gnss_adaptive_r",
+  "new_work": true,
+  "selfcheck": "PASS: 16 unique finite paired rows; recomputed summary; exact development baseline parity except runtime_us",
+  "pytest": "199 passed in 75.33s (0:01:15)",
+  "independent_review": "PASS",
+  "independent_regression": "24 passed in 6.10s",
+  "diff_check": "PASS",
+  "accuracy_verdict": "NOT_IMPROVED",
+  "promoted": false,
+  "confirmed_v08": false,
+  "detection": "FAIL"
+}

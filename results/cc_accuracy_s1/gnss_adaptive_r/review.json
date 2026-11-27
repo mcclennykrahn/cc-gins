@@ -1,0 +1,24 @@
+{
+  "candidate_id": "gnss_adaptive_r",
+  "independent_reviewer": "accuracy_review (read-only sub-agent)",
+  "implementation_review": "PASS",
+  "evidence_review": "PASS",
+  "blocking_findings": [],
+  "independent_regression": "24 passed in 6.10s",
+  "accuracy_verdict": "NOT_IMPROVED",
+  "promoted": false,
+  "confirmed_v08": false,
+  "detection": "FAIL",
+  "checks": [
+    "16 unique paired rows; all metrics finite",
+    "three development baselines exactly match prior trial except runtime_us",
+    "config changes only adaptive_r",
+    "held-out horizontal RMSE worsens on 3/5 seeds; terminal outage end error on 4/5"
+  ],
+  "limitations": [
+    "single synthetic trajectory/outage pattern",
+    "five held-out seeds",
+    "current innovation used for R matching",
+    "no real-data or detection validation"
+  ]
+}

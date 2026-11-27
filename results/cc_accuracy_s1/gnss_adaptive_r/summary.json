@@ -1,0 +1,70 @@
+{
+  "candidate_id": "gnss_adaptive_r",
+  "verdict": "NOT_IMPROVED",
+  "promoted": false,
+  "selfcheck": "PASS",
+  "development": {
+    "baseline": {
+      "rmse_h": 5.3506079887985445,
+      "rmse_3d": 5.376013860005336,
+      "anees_pos": 1.683885223926347,
+      "coverage95_h": 0.795025538529869,
+      "max_err_outage_30s": 4.0300074400326364,
+      "end_err_outage_30s": 3.7310998429805355,
+      "max_err_outage_60s": 17.828254861082097,
+      "end_err_outage_60s": 16.753082236466536,
+      "coverage95_h_outage": 0.8174074074074075,
+      "anees_pos_outage": 1.615979182604609,
+      "pooled_rmse_h": 5.587421199756636
+    },
+    "candidate": {
+      "rmse_h": 5.217435604916312,
+      "rmse_3d": 5.241657246880069,
+      "anees_pos": 1.9639568603338047,
+      "coverage95_h": 0.6204752387297358,
+      "max_err_outage_30s": 4.226045588013343,
+      "end_err_outage_30s": 3.028758748363648,
+      "max_err_outage_60s": 17.389558588482895,
+      "end_err_outage_60s": 16.30738012917189,
+      "coverage95_h_outage": 0.5788888888888889,
+      "anees_pos_outage": 1.923527094944973,
+      "pooled_rmse_h": 5.4740756760939675
+    },
+    "worse_seeds": [
+      900
+    ]
+  },
+  "held_out": {
+    "baseline": {
+      "rmse_h": 3.1040059351761,
+      "rmse_3d": 3.188814054609565,
+      "anees_pos": 1.9818748611162058,
+      "coverage95_h": 0.7906728847435043,
+      "max_err_outage_30s": 7.8409886443291,
+      "end_err_outage_30s": 6.718002351098666,
+      "max_err_outage_60s": 7.5627299133202355,
+      "end_err_outage_60s": 5.537839233115891,
+      "coverage95_h_outage": 0.8875555555555555,
+      "anees_pos_outage": 1.3983697522401735,
+      "pooled_rmse_h": 3.129586250372511
+    },
+    "candidate": {
+      "rmse_h": 3.3027748885029617,
+      "rmse_3d": 3.3757268271500003,
+      "anees_pos": 2.5228286650875296,
+      "coverage95_h": 0.7019320453031312,
+      "max_err_outage_30s": 8.250926056141463,
+      "end_err_outage_30s": 7.244974429008356,
+      "max_err_outage_60s": 8.06772005706669,
+      "end_err_outage_60s": 6.668961086885202,
+      "coverage95_h_outage": 0.8099999999999999,
+      "anees_pos_outage": 1.6450860857884304,
+      "pooled_rmse_h": 3.349017969975961
+    },
+    "worse_seeds": [
+      49401,
+      49402,
+      49403
+    ]
+  }
+}

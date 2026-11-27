@@ -1,0 +1,16 @@
+{
+  "results/cc_accuracy_s1/gnss_adaptive_r/protocol.md": "daa91f09e3da7676ad039e1f224997f7c19f55320ca3feb659da98c0484c6b1a",
+  "results/cc_accuracy_s1/gnss_adaptive_r/review.json": "4fa0b6bde34545b321aabef652cc90b28e67589a812c8c7c466df4607faeed0e",
+  "results/cc_accuracy_s1/gnss_adaptive_r/paired_metrics.json": "bb4cbe1befd09b0dd905321902f109116cc679ac7e1be1a38bf29d187cba194d",
+  "results/cc_accuracy_s1/gnss_adaptive_r/selfcheck.json": "6765390ca6ecff294db4b72582bf611b2289ecfe2e5593ea2cd3d4f364030407",
+  "results/cc_accuracy_s1/gnss_adaptive_r/validation.json": "e0dfeebf7060a8f1656026449878d3e3dab55761be24dcdada0cc3dd28336482",
+  "results/cc_accuracy_s1/gnss_adaptive_r/summary.json": "e477b773abc5086d09595070abb820c34d440edde6cc771d57298678aee63d3b",
+  "results/cc_accuracy_s1/gnss_adaptive_r/report.md": "840861c0af0ac72c1a19317ecaaebcf1068734872e57db5408b124648c2d8d69",
+  "results/cc_accuracy_s1/gnss_adaptive_r/environment.json": "1165b53d2df0e01427c4bdc82b59d67fc0f04be7a2594832d447581da7915dec",
+  "scripts/evaluate_gnss_adaptive_accuracy.py": "006dde1eff9c8d3f627aa046b16f504805b3d68ccc17fd77263b0d921073c582",
+  "configs/example_sim_gnss_adaptive.yaml": "68ba6efec56c4298031f68f50c1e1e30ac4ab0fa1cbf7b1724d24e8cce92c13e",
+  "configs/example_sim.yaml": "ed7962763844b552bcc3205cbacb671fb97319424960c9d56b44a703dc9c03da",
+  "ccgins/adaptive.py": "c061141c1142c04a3fc65c13578d3d028cce106de5fa886442b9e41ad8172dcb",
+  "ccgins/pipeline.py": "5813a3c989f39d1c3e9c0bff92d6a257b810d5f95fbebc0f99a27797a0a7bc35",
+  "ccgins/filters.py": "c31cf8203e8c37eae3168b5090d4e236bd0eb26fc61d17ad3c1b9374af86ff42"
+}

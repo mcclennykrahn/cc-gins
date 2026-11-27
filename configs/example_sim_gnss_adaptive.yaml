@@ -1,0 +1,39 @@
+# Example cc-gins simulation / GNSS-outage scenario.
+# Run with:
+#   python -m ccgins.cli run --config configs/example_sim.yaml --out results/cli_demo
+scenario:
+  seed: 900
+  duration: 180.0       # seconds
+  dt: 0.01              # 100 Hz IMU
+  vmax: 20.0            # m/s
+
+imu:
+  gyro_arw: 0.3         # deg/sqrt(h)
+  accel_vrw: 0.1        # m/s/sqrt(h)
+  gyro_bias_sigma: 30.0 # deg/h
+  accel_bias_sigma: 5.0 # mg
+
+gnss:
+  rate_hz: 1.0
+  sigma_h: 1.0          # m
+  sigma_v: 2.0          # m
+  mp_sigma: 0.5         # correlated multipath error, m
+  mp_tau: 30.0          # s
+  lever_arm: [0.5, 0.0, 1.2]
+  outages:
+    - {start: 60.0, duration: 30.0}
+    - {start: 120.0, duration: 60.0}
+
+filter:
+  name: inekf
+  pseudo: nhc           # none | nhc | learned_nhc | learned_vel | hybrid
+  monitor: none         # none | single | dual
+  adaptive_r: true # experimental accuracy candidate; not promoted
+  aci: false
+
+# Optional: learned pseudo-measurements (requires results/motionnet.pt).
+# learning:
+#   model: results/motionnet.pt
+
+metrics:
+  t_start: 30.0         # skip initial convergence in the report

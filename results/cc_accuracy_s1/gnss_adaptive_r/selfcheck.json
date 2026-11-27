@@ -1,0 +1,11 @@
+{
+  "verdict": "PASS",
+  "checks": [
+    "16 unique paired rows",
+    "all metrics finite",
+    "development baseline parity with previous evaluation excluding runtime_us",
+    "summary recomputed from rows",
+    "only adaptive_r configuration changed"
+  ],
+  "candidate_id": "gnss_adaptive_r"
+}
