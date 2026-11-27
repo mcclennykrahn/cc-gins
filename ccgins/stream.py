@@ -118,7 +118,7 @@ class StreamingNavigator:
 
         cfg = Config() if cfg is None else cfg
         R0, v0, p0, P0 = initial_state(truth, cfg.init_seed, cfg.p0_bias)
-        noise = NoiseParams.from_spec(imu_spec)
+        noise = NoiseParams.from_spec(imu_spec, dt=truth.dt)
         return cls(R0, v0, p0, P0, noise, kind=cfg.filter,
                    motion_cfg=cfg, imu_spec=imu_spec, dt=truth.dt,
                    lever_arm=getattr(gnss_spec, "lever_arm", None),

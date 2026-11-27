@@ -88,7 +88,7 @@ class LearnedStreamingNavigator(StreamingNavigator):
         if cfg.earth_rate_enu is not None or cfg.local_gravity is not None:
             earth = dict(w_ie=None if cfg.earth_rate_enu is None else np.asarray(cfg.earth_rate_enu),
                          g=np.array([0., 0., -(9.81 if cfg.local_gravity is None else cfg.local_gravity)]))
-        return cls(R, v, p, P, NoiseParams.from_spec(imu_spec), kind=cfg.filter,
+        return cls(R, v, p, P, NoiseParams.from_spec(imu_spec, dt=truth.dt), kind=cfg.filter,
             model=model, delay=delay, **options, motion_cfg=cfg, imu_spec=imu_spec, dt=truth.dt,
             lever_arm=gnss_spec.lever_arm, gate=cfg.gnss_gate,
             max_consecutive_rejects=cfg.max_consecutive_rejects,

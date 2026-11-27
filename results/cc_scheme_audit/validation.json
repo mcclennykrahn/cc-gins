@@ -1,0 +1,15 @@
+{
+  "candidate_id": "scheme_noise_discretization_audit",
+  "new_work": true,
+  "audit_complete": false,
+  "implementation_review": "PASS after initial FAIL findings fixed",
+  "pytest": "202 passed in 75.00s; final 5 audit tests passed in 0.10s (two added after full suite)",
+  "independent_regression": "30 passed; final 5 audit tests passed",
+  "accuracy_verdict": "MIXED: seed900 and49501 improve overall;49502 regresses",
+  "detection": "FAIL",
+  "confirmed_v08": false,
+  "baseline_commit": "cfad1613baebbc5d4aee5fabbe51e1b4345b3398",
+  "reproduce": "OPENBLAS_NUM_THREADS=1 PYTHONPATH=. python scripts/audit_scheme.py --out OUTPUT",
+  "evidence": "/workspace/ccgins-v08/results/cc_scheme_audit/",
+  "review": "/workspace/ccgins-v08/reviews/cc_scheme_audit_final.json"
+}

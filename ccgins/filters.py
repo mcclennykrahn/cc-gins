@@ -52,12 +52,16 @@ class NoiseParams:
     accel_bias_rw: float # m/s^3/sqrt(Hz)
 
     @classmethod
-    def from_spec(cls, spec, vmax_eff: float = 12.0):
+    def from_spec(cls, spec, vmax_eff: float = 12.0, dt: float = 0.01):
+        if not np.isfinite(dt) or dt <= 0:
+            raise ValueError("positive finite IMU dt required")
         d = spec.densities()
+        # simulate_imu adds base and vibration sample standard deviations.
+        # Convert that same sum to a density at the nominal speed and actual dt.
         # vibration (white, speed dependent) is folded into the white-noise density at a nominal speed
-        vib_a = spec.vib_accel_per_mps * vmax_eff * np.sqrt(0.01)
-        vib_g = spec.vib_gyro_per_mps * np.pi / 180 * vmax_eff * np.sqrt(0.01)
-        return cls(gyro=float(np.hypot(d["gyro"], vib_g)), accel=float(np.hypot(d["accel"], vib_a)),
+        vib_a = spec.vib_accel_per_mps * vmax_eff * np.sqrt(dt)
+        vib_g = spec.vib_gyro_per_mps * np.pi / 180 * vmax_eff * np.sqrt(dt)
+        return cls(gyro=float(d["gyro"] + vib_g), accel=float(d["accel"] + vib_a),
                    gyro_bias_rw=d["gyro_bias_rw"], accel_bias_rw=d["accel_bias_rw"])
 
 

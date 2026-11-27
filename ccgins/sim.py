@@ -189,12 +189,15 @@ def simulate_imu(truth: Truth, spec: ImuSpec, seed: int = 0, noise: bool = True)
 def simulate_gnss(truth: Truth, spec: GnssSpec, seed: int = 0) -> GnssData:
     rng = np.random.default_rng(seed + 20_000)
     step = int(round(1.0 / (spec.rate_hz * truth.dt)))
+    if step < 1:
+        raise ValueError("GNSS rate exceeds IMU grid resolution")
     idx = np.arange(step, len(truth.t), step)
     t = truth.t[idx]
     m = len(idx)
     sig = np.array([spec.sigma_h, spec.sigma_h, spec.sigma_v])
     white = rng.standard_normal((m, 3)) * sig
-    a = np.exp(-1.0 / (spec.rate_hz * spec.mp_tau))
+    # Epochs are rounded to the IMU grid: use elapsed time, not requested rate.
+    a = np.exp(-step * truth.dt / spec.mp_tau)
     mp = np.zeros((m, 3))
     for k in range(1, m):
         mp[k] = a * mp[k - 1] + np.sqrt(1 - a * a) * spec.mp_sigma * rng.standard_normal(3)

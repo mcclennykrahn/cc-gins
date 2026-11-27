@@ -17,7 +17,7 @@ def save_artifact(path, sc, cfg, lag=1., delay=1.01):
     R, v, p, P = initial_state(sc.truth, cfg.init_seed, cfg.p0_bias)
     ii = np.flatnonzero(sc.gnss.valid & (sc.gnss.idx > 0))
     meta = dict(version=1, source='synthetic IMU and synthetic GNSS', config=asdict(cfg),
-                noise=asdict(NoiseParams.from_spec(sc.imu_spec)), dt=sc.truth.dt, delay=delay)
+                noise=asdict(NoiseParams.from_spec(sc.imu_spec, dt=sc.truth.dt)), dt=sc.truth.dt, delay=delay)
     np.savez_compressed(path, metadata=json.dumps(meta), t=sc.truth.t,
         accel=sc.imu.accel, gyro=sc.imu.gyro, gnss_t=sc.gnss.t[ii],
         arrival=sc.gnss.t[ii]+lag, pos=sc.gnss.pos[ii],

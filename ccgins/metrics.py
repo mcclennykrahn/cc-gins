@@ -27,10 +27,14 @@ def summarize(log, outages, t_start: float = 60.0) -> dict:
     out["coverage95_h"] = float(np.mean(nees_h[m] <= CHI2_2_95))
     in_out = np.zeros_like(m)
     for (s, d) in outages:
-        w = (log.t >= s) & (log.t < s + d)
+        w = m & (log.t >= s) & (log.t < s + d)
         in_out |= w
-        out[f"max_err_outage_{int(d)}s"] = float(eh[w].max())
-        out[f"end_err_outage_{int(d)}s"] = float(eh[w][-1])
+        # Preserve historical keys for unique durations; distinguish repeats.
+        suffix = f"{int(d)}s"
+        if sum(int(other_d) == int(d) for _, other_d in outages) > 1:
+            suffix += f"_start_{s:g}s"
+        out[f"max_err_outage_{suffix}"] = float(eh[w].max()) if w.any() else None
+        out[f"end_err_outage_{suffix}"] = float(eh[w][-1]) if w.any() else None
     if in_out.any():
         out["coverage95_h_outage"] = float(np.mean(nees_h[in_out] <= CHI2_2_95))
         out["anees_pos_outage"] = float(np.mean(nees_3[in_out]) / 3.0)

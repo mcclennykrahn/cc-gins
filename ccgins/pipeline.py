@@ -158,7 +158,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
     if cfg.gnss_aci and (cfg.adaptive_r or cfg.baseline_range_anchor is not None):
         raise ValueError("GNSS ACI cannot be combined with adaptive R or scalar range coupling")
     nhc_var = cfg.nhc_variances()
-    noise = NoiseParams.from_spec(imu_spec)
+    noise = NoiseParams.from_spec(imu_spec, dt=truth.dt)
     C_vb = None if cfg.mount_py is None else mount_matrix(*cfg.mount_py)
 
     def bvm(F, ch):

@@ -1,0 +1,60 @@
+{
+  "reviewer": "independent_audit subagent",
+  "verdict": "PASS",
+  "scope": "Bounded code changes, regression coverage and measured before/after segment evidence; not a certification of whole-scheme completion",
+  "initial_review": "/workspace/ccgins-v08/reviews/cc_scheme_audit_initial.json",
+  "resolved": [
+    "AUD-NOISE: from_spec uses actual dt and same additive standard deviations as simulator at fixed nominal12m/s; batch/stream/replay factories pass dt",
+    "AUD-METRIC-START: outage windows intersect scoring mask",
+    "AUD-METRIC-KEY: repeated integer-duration events distinguished by start; empty windows return null",
+    "AUD-GNSS-RATE: multipath coefficient follows realized grid period and zero-step requests rejected"
+  ],
+  "independent_regression": [
+    {
+      "result": "30 passed in 11.42s",
+      "command": "OPENBLAS_NUM_THREADS=1 PYTHONPATH=. /tmp/ccgins-accuracy-venv/bin/python -m pytest tests/test_scheme_audit.py tests/test_filters.py tests/test_earth.py tests/test_stream_motion.py -q",
+      "note": "Before final two MP tests added"
+    },
+    {
+      "result": "5 passed in 0.11s",
+      "command": "OPENBLAS_NUM_THREADS=1 PYTHONPATH=. /tmp/ccgins-accuracy-venv/bin/python -m pytest tests/test_scheme_audit.py -q",
+      "note": "Final new audit tests including non-grid MP and excessive rate"
+    }
+  ],
+  "evidence_review": {
+    "method": "Independently loaded errors CSV and recomputed H/V RMSE for overall, available and each outage for all3 seeds, before and after, agreement rtol1e-12",
+    "result": "PASS",
+    "seed900_overall_h_m": [
+      7.173488834950147,
+      7.0350644030499785
+    ],
+    "seed900_long_outage_sse_fraction": [
+      0.9846835734230928,
+      0.9844233445370786
+    ],
+    "seed900_long_outage_max_h_m": [
+      28.257610207375503,
+      27.795254601763205
+    ],
+    "heldout_caution": "Seed49502 overall regresses3.418303 to3.474680; 30s outage3.003114 to3.431730. Do not claim broad accuracy improvement."
+  },
+  "limitations": [
+    "Nominal12m/s covariance remains approximation to speed-dependent simulator noise; no truth speed used in filter.",
+    "Default alignment perturbation seed0 is shared across scenario/sensor seeds; no claim of held-out alignment diversity.",
+    "First-order Phi/Qd, covariance reset approximations, correlated multipath consistency, and maneuver/bias observability need quantitative follow-up.",
+    "RTS not implemented; no postprocessing metric claimed.",
+    "Whole-scheme audit completion not established; final delivery should explicitly state residual work.",
+    "DETECTION remains FAIL, confirmed_v08 must remain false."
+  ],
+  "reviewed_sha256": {
+    "ccgins/filters.py": "852153d60eeb9eecfe3856c47110585d22a922e69da535ab81101a77884660c0",
+    "ccgins/metrics.py": "3ac7be7a37357972cf01fe5cbf00c1ddb51b99322966938c705772fce61e9792",
+    "ccgins/pipeline.py": "75c0b35b70312c732c7387e68d9362a36b06c28d1080170afaa501eb8e14d11e",
+    "ccgins/sim.py": "af46c9a8d05ae5ad2c9a3e9bfb7789dd1dd3ad0ece725e5127d906a0387a3471",
+    "ccgins/stream.py": "c81d40c8f7287b4d7d34872db1186a1bd683a35a9535b30eba16aa6380c1fff2",
+    "ccgins/stream_learning.py": "4633e2a51cee2e20bd679ccc4f07dec22b9e39f6c55295a05443f9a21d0ab1ba",
+    "ccgins/stream_replay.py": "d686b5b07d4cfa746a4580abd5c7be483db2b09bb4c7a1344a2c3572eda64e01",
+    "scripts/audit_scheme.py": "9af43e6945e2a9f5426f80e197dfd77cd6ab27711d4b545651f6f6a2727c707b",
+    "tests/test_scheme_audit.py": "358854d7d4b3acd8f357d02def8225b469934daf2eae4592a8acb4bd0ff9d6ea"
+  }
+}
