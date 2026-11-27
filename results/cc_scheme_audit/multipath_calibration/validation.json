@@ -1,0 +1,11 @@
+{
+  "candidate_id": "scheme_multipath_calibration",
+  "row_count": 24,
+  "seed900_parent_segment_parity": true,
+  "algorithm_changed": false,
+  "confirmed_v08": false,
+  "detection": "FAIL",
+  "audit_complete": false,
+  "calibration_sha256": "ef23af2665945b0a60557d3a8b7d8e7c7b8a4455a0b16a6b0869be90afe3d800",
+  "pytest": "215 passed in 185.00s (0:03:04)"
+}
