@@ -1,0 +1,6 @@
+{
+  "verdict": "PASS",
+  "traces": 30,
+  "method": "Independent Cholesky NEES, disjoint masks, H/V/peaks/end/SSE, 10s bins, oracle/fixed12 schedules",
+  "limitations": "Saved trace validation does not independently rerun 30 full navigation trajectories."
+}

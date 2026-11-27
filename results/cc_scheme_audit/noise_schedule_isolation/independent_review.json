@@ -1,0 +1,48 @@
+{
+  "verdict": "PASS",
+  "reviewer": "independent child /root/independent_review",
+  "reviewed_at": "2026-11-27T12:55:01.362430+00:00",
+  "scope": [
+    "scripts/audit_noise_schedule.py",
+    "tests/test_noise_schedule_audit.py",
+    "30 paired diagnostic traces and summaries",
+    "report.md and aggregate.json"
+  ],
+  "findings": [],
+  "source_sha256": {
+    "scripts/audit_noise_schedule.py": "532cf4c25268510b5508895f14a95213901922808cacece8fb23a4d72694133a",
+    "tests/test_noise_schedule_audit.py": "882324ad4bbd0d3e5588913c3c1bb2fb23d386f0ceee70384e0eb9c1a417ce13"
+  },
+  "checks": [
+    "Matched IMU[k] propagation interval; oracle abs truth forward speed matches simulator conditional sample noise.",
+    "Prior-state schedule reads abs((R.T@v)[0]) before propagation and accesses no truth values; focused sentinel test confirms.",
+    "No production code edited; instrumentation scoped with context manager, restored after success and exception.",
+    "Monitor none guard ensures exactly one filter propagation per IMU step; all 30 traces contain18000 scheduled steps.",
+    "All 30 traces independently reconstructed with Cholesky position NEES; segment and10s bin H/V/peaks/end/SSE metrics agree.",
+    "Fresh native plus fixed12/oracle/prior_state rerun seed900/init0 exactly reproduces every trace array.",
+    "All30 H/V report table rows and four consistency rows match saved metrics at reported precision.",
+    "All six aggregate rows independently recomputed: overall improves6/10, short gap6/10, long gap2/10 for each schedule.",
+    "Widened fixed12 segment ranges match new draws; provisional targets explicitly not guarantees.",
+    "Code source references checked; minor nominal-R source reference corrected from177 to179 before final signoff.",
+    "Conclusion appropriately declines promotion and retains DETECTION FAIL, confirmed_v08=false, open residual plan."
+  ],
+  "tests": {
+    "command": "OPENBLAS_NUM_THREADS=1 /tmp/ccgins-accuracy-venv/bin/python -m pytest tests/test_noise_schedule_audit.py tests/test_calibration_audit.py tests/test_scheme_audit.py -q",
+    "result": "11 passed in 1.69s"
+  },
+  "limitations": [
+    "Prior-state schedule ignores speed-estimation uncertainty and is an unpromoted diagnostic.",
+    "Oracle uses privileged truth and cannot count as online accuracy gain.",
+    "Only five independent sensor/trajectory draws; alignments share sensor realizations; time samples correlated.",
+    "Whole-scheme completion and DETECTION not established by this bounded review."
+  ],
+  "resolved_minor_notes": [
+    "Nominal GNSS R citation corrected to pipeline.py:179."
+  ],
+  "evidence_paths": [
+    "/workspace/ccgins-v08/results/cc_scheme_audit/noise_schedule_isolation/independent_trace_validation.json",
+    "/workspace/ccgins-v08/reviews/verify_noise_schedule.py",
+    "/workspace/ccgins-v08/reviews/noise_schedule_rerun/result.json"
+  ],
+  "report_sha256": "56982c800b61e2898d3a38791672f336aaec4e0a38617283c272fbe51808048f"
+}

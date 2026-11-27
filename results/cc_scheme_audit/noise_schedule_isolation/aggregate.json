@@ -1,0 +1,42 @@
+{
+  "oracle": {
+    "overall": {
+      "improved_pairs": 6,
+      "pairs": 10,
+      "minimum_delta_m": -0.6090467742114551,
+      "maximum_delta_m": 0.7195255899998134
+    },
+    "outage_60_90": {
+      "improved_pairs": 6,
+      "pairs": 10,
+      "minimum_delta_m": -1.6236054544986391,
+      "maximum_delta_m": 1.769402408527495
+    },
+    "outage_120_180": {
+      "improved_pairs": 2,
+      "pairs": 10,
+      "minimum_delta_m": -0.6036978001949223,
+      "maximum_delta_m": 1.131825629595335
+    }
+  },
+  "prior_state": {
+    "overall": {
+      "improved_pairs": 6,
+      "pairs": 10,
+      "minimum_delta_m": -0.5819352579764168,
+      "maximum_delta_m": 0.7438260432517838
+    },
+    "outage_60_90": {
+      "improved_pairs": 6,
+      "pairs": 10,
+      "minimum_delta_m": -1.5429147046252094,
+      "maximum_delta_m": 1.8021553003941604
+    },
+    "outage_120_180": {
+      "improved_pairs": 2,
+      "pairs": 10,
+      "minimum_delta_m": -0.6418960827188798,
+      "maximum_delta_m": 1.1708242389952943
+    }
+  }
+}
