@@ -1,0 +1,13 @@
+{
+  "candidate_id": "scheme_covariance_reset",
+  "baseline": "842052cdf0496efaf7e6cd98cd652cb85f6a3666",
+  "full_regression": "209 passed in 80.25s",
+  "independent_regression": "35 passed in 3.91s",
+  "independent_implementation_review": "PASS",
+  "independent_evidence_review": "PASS",
+  "discretization_rereview": "PASS, 48 unique frozen-model cases reproduced",
+  "accuracy_improvement_demonstrated": false,
+  "detection": "FAIL",
+  "confirmed_v08": false,
+  "audit_complete": false
+}

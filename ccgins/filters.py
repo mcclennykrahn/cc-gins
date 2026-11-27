@@ -10,6 +10,7 @@ import copy
 from dataclasses import dataclass
 
 import numpy as np
+from scipy.linalg import expm
 
 from .geometry import skew, so3_exp, so3_left_jacobian
 from .sim import G_NAV
@@ -110,7 +111,9 @@ class NavFilter:
         K = self.P @ H.T @ Sinv
         dx = K @ r
         IKH = np.eye(15) - K @ H
-        self.P = IKH @ self.P @ IKH.T + K @ Rm @ K.T
+        posterior = IKH @ self.P @ IKH.T + K @ Rm @ K.T
+        reset = self._reset_jacobian(dx)
+        self.P = reset @ posterior @ reset.T
         self.P = 0.5 * (self.P + self.P.T)
         self._inject(dx)
         return UpdateInfo(nis, True, len(r))
@@ -160,6 +163,9 @@ class NavFilter:
     def _inject(self, dx):
         raise NotImplementedError
 
+    def _reset_jacobian(self, dx):
+        raise NotImplementedError
+
     def _H_gnss(self, lever):
         raise NotImplementedError
 
@@ -195,6 +201,12 @@ class ESKF(NavFilter):
         self.p = self.p + dx[6:9]
         self.bg = self.bg + dx[9:12]
         self.ba = self.ba + dx[12:15]
+
+    def _reset_jacobian(self, dx):
+        # Log(Exp(-phi) Exp(phi + error)) has derivative J_r(phi).
+        reset = np.eye(15)
+        reset[:3, :3] = so3_left_jacobian(-dx[:3])
+        return reset
 
     def _H_gnss(self, lever):
         H = np.zeros((3, 15))
@@ -251,6 +263,21 @@ class InEKF(NavFilter):
         self.p = dR @ self.p + Jl @ dx[6:9]
         self.bg = self.bg + dx[9:12]
         self.ba = self.ba + dx[12:15]
+
+    def _reset_jacobian(self, dx):
+        # Log(Exp(dx + error) Exp(-dx)) has derivative integral exp(s ad_dx) ds.
+        # The augmented exponential evaluates the integral even for singular ad_dx.
+        reset = np.eye(15)
+        augmented = np.zeros((18, 18))
+        rotation = skew(dx[:3])
+        augmented[:3, :3] = rotation
+        augmented[3:6, 3:6] = rotation
+        augmented[6:9, 6:9] = rotation
+        augmented[3:6, :3] = skew(dx[3:6])
+        augmented[6:9, :3] = skew(dx[6:9])
+        augmented[:9, 9:] = np.eye(9)
+        reset[:9, :9] = expm(augmented)[:9, 9:]
+        return reset
 
     def _H_gnss(self, lever):
         H = np.zeros((3, 15))
