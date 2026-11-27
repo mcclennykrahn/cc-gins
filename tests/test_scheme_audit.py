@@ -129,3 +129,83 @@ def test_timing_preserves_nonfinite_ordered_comparisons():
     np.testing.assert_array_equal(at_or_after(t, np.inf), [False, False, True, False])
     np.testing.assert_array_equal(in_window(t, 0., np.inf), [True, True, False, False])
     assert not in_window(t, 0., np.nan).any()
+
+
+@pytest.mark.parametrize('bounds,actual', [((.331, .27), (.36, .6)),
+                                         ((.33, .27), (.33, .6))])
+def test_pure_ins_uses_only_contained_complete_steps(bounds, actual):
+    from scripts.audit_scheme import pure_ins_budget
+    t = np.arange(22) * .03
+    truth = SimpleNamespace(t=t, dt=.03, R=np.tile(np.eye(3), (22, 1, 1)),
+                            p=np.zeros((22, 3)), v=np.zeros((22, 3)),
+                            v_body=np.zeros((22, 3)))
+    # Constant 2m/s² horizontal error: p(T)=T². Vertical gravity cancels.
+    imu = SimpleNamespace(gyro=np.zeros((22, 3)),
+                          accel=np.tile([2., 0., 9.81], (22, 1)))
+    row = pure_ins_budget(truth, imu, [bounds])[0]
+    assert row['actual_start'] == pytest.approx(actual[0])
+    assert row['actual_end'] == pytest.approx(actual[1])
+    assert row['end_h'] == pytest.approx((actual[1] - actual[0])**2)
+    assert row['end_v'] == pytest.approx(0.)
+    assert row['propagated_duration'] == pytest.approx(row['n_steps'] * truth.dt)
+
+
+@pytest.mark.parametrize('outage', [(-.01, .3), (.5, .5), (.331, .01), (.3, 0),
+                                     (.3, np.nan), (.3, np.inf)])
+def test_pure_ins_rejects_unrepresentable_intervals(outage):
+    from scripts.audit_scheme import pure_ins_budget
+    truth = SimpleNamespace(t=np.arange(22)*.03)
+    with pytest.raises(ValueError, match='pure INS outage'):
+        pure_ins_budget(truth, None, [outage])
+
+
+def test_budget_nondefault_scoring_start_and_empty_window():
+    from scripts.audit_scheme import budget
+    t = np.arange(22)*.03
+    e = np.zeros((22, 3))
+    e[:11, 0] = 1000.
+    e[11:, 0] = 2.
+    rows = budget(t, e, [(.33, .27)], t_start=.33)
+    assert rows['overall']['n'] == 11
+    assert rows['overall']['rmse_h'] == 2.
+    assert rows['outage_0.33_0.6']['n'] == 9
+    with pytest.raises(ValueError, match='no epochs'):
+        budget(t, e, [], 1.)
+
+
+def test_audit_cli_honors_configured_scoring_and_fractional_duration(tmp_path, monkeypatch):
+    import json
+    import sys
+    import yaml
+    from scripts.audit_scheme import main
+    config = dict(scenario=dict(seed=9, duration=.63, dt=.03),
+                  gnss=dict(rate_hz=1/.03, outages=[dict(start=.331, duration=.27)]),
+                  metrics=dict(t_start=.33))
+    path = tmp_path / 'scenario.yaml'
+    path.write_text(yaml.safe_dump(config))
+    out = tmp_path / 'evidence'
+    monkeypatch.setattr(sys, 'argv', ['audit_scheme', '--config', str(path),
+                                     '--out', str(out), '--seeds', '9'])
+    main()
+    result = json.loads((out / 'budget.json').read_text())
+    row = result['rows'][0]
+    assert 't>=0.33;' in result['scoring']
+    assert row['segments']['overall']['n'] == 1  # navigation logs every tenth IMU step
+    assert row['gnss_only']['n'] == 2  # .33 and .63; .60 remains in the gap
+    assert len(row['bins']) == 1
+    assert row['bins'][0]['start'] == .33
+    assert row['bins'][0]['n'] == 1  # .60 is logged; .63 is not
+    assert row['pure_ins_truth_initialized'][0]['propagated_duration'] == pytest.approx(.24)
+
+
+@pytest.mark.parametrize('start', [-1., float('nan'), float('inf')])
+def test_audit_cli_rejects_invalid_scoring_start(tmp_path, monkeypatch, start):
+    import sys
+    import yaml
+    from scripts.audit_scheme import main
+    config = tmp_path / 'invalid.yaml'
+    config.write_text(yaml.safe_dump(dict(metrics=dict(t_start=start))))
+    monkeypatch.setattr(sys, 'argv', ['audit_scheme', '--config', str(config),
+                                     '--out', str(tmp_path / 'evidence')])
+    with pytest.raises(ValueError, match='metrics.t_start'):
+        main()
