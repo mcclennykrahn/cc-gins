@@ -1,0 +1,11 @@
+{
+  "candidate_id": "nhc_cadence_1hz",
+  "selfcheck": "PASS: 16 unique paired rows; finite metrics; full recomputation",
+  "pytest": "199 passed in 75.96s (0:01:15)",
+  "independent_review": "PASS after corrected rerun",
+  "diff_check": "PASS",
+  "new_work": true,
+  "promoted": false,
+  "confirmed_v08": false,
+  "detection": "FAIL"
+}

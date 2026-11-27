@@ -1,0 +1,13 @@
+{
+  "candidate_id": "nhc_cadence_1hz",
+  "initial_review": "FAIL: motion_every controls stationary aiding, not NHC",
+  "fix": "Use pseudo_every=100; corrected full paired rerun",
+  "independent_reviewer": "cadence_review agent (read-only)",
+  "implementation_rereview": "PASS",
+  "evidence_rereview": "PASS",
+  "independent_regression": "35 passed in 7.22s (test_stream_parity + test_nhc_accuracy)",
+  "accuracy_verdict": "NOT_IMPROVED",
+  "blocking_findings": [],
+  "confirmed_v08": false,
+  "detection": "FAIL"
+}

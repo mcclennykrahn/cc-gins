@@ -1,0 +1,33 @@
+{
+  "development": {
+    "baseline": {
+      "rmse_h": 5.3506079887985445,
+      "coverage95_h": 0.795025538529869,
+      "anees_pos": 1.683885223926347,
+      "pooled_rmse_h": 5.587421199756636
+    },
+    "candidate": {
+      "rmse_h": 6.18638571722758,
+      "coverage95_h": 0.9282700421940927,
+      "anees_pos": 1.2003082769222488,
+      "pooled_rmse_h": 6.366486082079899
+    }
+  },
+  "held_out": {
+    "baseline": {
+      "rmse_h": 4.731050353486336,
+      "coverage95_h": 0.7179213857428381,
+      "anees_pos": 2.3006039403418397,
+      "pooled_rmse_h": 5.895178780615117
+    },
+    "candidate": {
+      "rmse_h": 5.611192185404602,
+      "coverage95_h": 0.8222518321119253,
+      "anees_pos": 1.4836844378399467,
+      "pooled_rmse_h": 7.156867262366694
+    }
+  },
+  "verdict": "NOT_IMPROVED",
+  "selfcheck": "PASS",
+  "candidate_id": "nhc_cadence_1hz"
+}

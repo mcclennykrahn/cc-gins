@@ -1,0 +1,10 @@
+{
+  "scripts/evaluate_nhc_cadence.py": "e71281a78500d70c98222961990c3a7fd0c0f398e2180d48a2d13cf3c45813f4",
+  "configs/example_sim_nhc_cadence.yaml": "3efdca2dc60daf8279f304706e4ad0cbbf007a60ec3573bb87474d0d04fbf939",
+  "results/cc_accuracy_s1/nhc_cadence_1hz/paired_metrics.json": "dd8373306c491fd7857b00f31b9d59ab5d86f45814f54f0ee000babe45e6ca63",
+  "results/cc_accuracy_s1/nhc_cadence_1hz/protocol.md": "926ca38558f80ed76aced5adb53c6f99b16775727048529146c250391a5c4079",
+  "results/cc_accuracy_s1/nhc_cadence_1hz/report.md": "b87a206c0ddf88f07b068cf6729c8f2fe6ca1abb8515575447205e775c693ee4",
+  "results/cc_accuracy_s1/nhc_cadence_1hz/review.json": "4fd70b9c53b28f05df44934dd6fef6f6cc9da28d1799184952e4c43b6a150254",
+  "results/cc_accuracy_s1/nhc_cadence_1hz/summary.json": "6d62cd3c425d24fddbc66fca178c32b516a783728965d6ac1350a3a9ccdbdd00",
+  "results/cc_accuracy_s1/nhc_cadence_1hz/validation.json": "3cb24d226e42c92a50a6fa34f96fd80a872cb6effd0f58e7f603de0e2dd49b19"
+}
