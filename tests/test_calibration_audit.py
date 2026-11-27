@@ -37,3 +37,18 @@ def test_position_consistency_uses_full_covariance_and_half_open_windows():
         assert row['position_95pct_coverage'] == 1.
     assert result['segments']['terminal_available']['n'] == 1
     assert len(result['checkpoints']) == 5
+
+
+def test_position_consistency_respects_changed_outages_and_scoring_start():
+    t = np.arange(10., 101., 10.)
+    error = np.column_stack([t / 10, np.zeros((len(t), 2))])
+    log = SimpleNamespace(t=t, p_est=error, p_true=np.zeros_like(error),
+                          P_pos=np.tile(np.eye(3), (len(t), 1, 1)))
+    result = position_consistency(log, [(40., 20.)], t_start=20.)['segments']
+    assert 'outage_60_90' not in result
+    assert result['outage_40_60']['n'] == 2
+    np.testing.assert_allclose(result['outage_40_60']['position_nees_per_dim'], (16+25)/6)
+    np.testing.assert_allclose(result['available']['position_nees_per_dim'],
+                               np.mean(np.array([2, 3, 6, 7, 8, 9, 10])**2)/3)
+    assert result['overall']['n'] == 9
+    assert result['terminal_available']['position_nees_per_dim'] == 100/3

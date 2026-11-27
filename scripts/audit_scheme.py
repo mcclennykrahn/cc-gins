@@ -8,7 +8,7 @@ from ccgins.pipeline import run
 from ccgins.filters import mechanize
 
 
-def budget(t, error, outages, t_start=30.):
+def segment_masks(t, outages, t_start=30.):
     """Half-open outages; terminal reacquisition is a separate available sample."""
     selected = t >= t_start
     outage = np.zeros(len(t), dtype=bool)
@@ -27,7 +27,12 @@ def budget(t, error, outages, t_start=30.):
             masks[f'available_{a:g}_{b:g}'] = mask
     if selected[-1] and not outage[-1]:
         masks['terminal_available'] = t == t[-1]
-    total = np.sum(error[selected, :2]**2)
+    return masks
+
+
+def budget(t, error, outages, t_start=30.):
+    masks = segment_masks(t, outages, t_start)
+    total = np.sum(error[masks['overall'], :2]**2)
     rows = {}
     for name, mask in masks.items():
         e = error[mask]

@@ -9,19 +9,18 @@ import numpy as np
 from ccgins.cli import load_config, _build_inputs, _filter_config
 from ccgins.pipeline import run
 from ccgins.sim import simulate_gnss
-from scripts.audit_scheme import budget
+from scripts.audit_scheme import budget, segment_masks
 
 
-def position_consistency(log, outages):
+def position_consistency(log, outages, t_start=30.):
     error = log.p_est - log.p_true
     nees = np.einsum('ni,ni->n', error,
                      np.linalg.solve(log.P_pos, error[..., None])[..., 0])
-    rows = budget(log.t, error, outages)
-    masks = {'available_30_60': (log.t >= 30) & (log.t < 60),
-             'outage_60_90': (log.t >= 60) & (log.t < 90),
-             'available_90_120': (log.t >= 90) & (log.t < 120),
-             'outage_120_180': (log.t >= 120) & (log.t < 180)}
+    rows = budget(log.t, error, outages, t_start)
+    masks = segment_masks(log.t, outages, t_start)
     for name, mask in masks.items():
+        if not mask.any():
+            continue
         rows[name].update(position_nees_per_dim=float(nees[mask].mean()/3),
                           position_95pct_coverage=float(np.mean(nees[mask] <= 7.814727903251179)))
     checkpoints = []
