@@ -1,0 +1,22 @@
+{
+  "candidate_id": "scheme_earth_model",
+  "verdict": "PASS",
+  "scope": "Earth-model synthesis/configuration/INS-budget patch; whole audit remains incomplete",
+  "findings": [],
+  "checks": [
+    "Reviewed complete implementation diff and tests",
+    "Independently propagated noiseless held-out118001 over60s for gravity9.793/9.81, with and without rotation; max position error3.83e-11m",
+    "Independently compared signed default traces on900/118001/118002: max delta0m",
+    "Reviewed configured-Earth paired segment budgets; correctness fix can worsen horizontal accuracy",
+    "Independent targeted regression:23 passed in5.28s",
+    "Final report docs/scheme_earth_model_audit.md reviewed against measured budgets and cited source lines; no blocking findings"
+  ],
+  "evidence": "/workspace/ccgins-v08/results/cc_scheme_audit/earth_model/independent_check.json",
+  "confirmed_v08": false,
+  "detection": "FAIL",
+  "limitations": [
+    "Only three paired online scenarios; no operational tail validation",
+    "Fixed local ENU omits geodetic transport; no new smoothing claim"
+  ],
+  "report_review": "PASS"
+}

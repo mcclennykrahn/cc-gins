@@ -133,7 +133,8 @@ def _build_inputs(raw: dict, *, seed_override: int | None = None,
                          spoof_start=None if spoof_start is None else float(spoof_start),
                          spoof_rate=spoof_rate, spoof_dir_deg=spoof_dir, **gnss_kwargs)
 
-    truth = generate_trajectory(duration, dt=dt, seed=seed, vmax=vmax)
+    earth = _filter_config(raw).earth_model()
+    truth = generate_trajectory(duration, dt=dt, seed=seed, vmax=vmax, earth=earth)
     imu = simulate_imu(truth, imu_spec, seed=seed)
     gnss = simulate_gnss(truth, gnss_spec, seed=seed)
     return truth, imu, gnss, imu_spec, gnss_spec

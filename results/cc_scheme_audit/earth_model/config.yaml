@@ -1,0 +1,38 @@
+scenario:
+  seed: 900
+  duration: 180.0
+  dt: 0.01
+  vmax: 20.0
+imu:
+  gyro_arw: 0.3
+  accel_vrw: 0.1
+  gyro_bias_sigma: 30.0
+  accel_bias_sigma: 5.0
+gnss:
+  rate_hz: 1.0
+  sigma_h: 1.0
+  sigma_v: 2.0
+  mp_sigma: 0.5
+  mp_tau: 30.0
+  lever_arm:
+  - 0.5
+  - 0.0
+  - 1.2
+  outages:
+  - start: 60.0
+    duration: 30.0
+  - start: 120.0
+    duration: 60.0
+filter:
+  name: inekf
+  pseudo: nhc
+  monitor: none
+  adaptive_r: false
+  aci: false
+  earth_rate_enu:
+  - 0.0
+  - 6.315156837317562e-05
+  - 3.646057499999999e-05
+  local_gravity: 9.793247269215307
+metrics:
+  t_start: 30.0

@@ -4,6 +4,41 @@ from ccgins.filters import ESKF, InEKF, NoiseParams, set_earth
 from ccgins.data.i2nav import earth_rate_enu, local_gravity
 from ccgins.geometry import so3_log
 
+
+@pytest.mark.parametrize('rate', [None, [0., 6.315e-5, 3.646e-5]])
+def test_configured_simulator_earth_closes_noiseless_mechanization(rate):
+    from ccgins.cli import _build_inputs
+    from ccgins.pipeline import Config
+    from ccgins.filters import mechanize
+    from ccgins.sim import simulate_imu
+    from scripts.audit_scheme import pure_ins_budget
+
+    raw = {'scenario': {'duration': 60., 'dt': .1, 'seed': 900},
+           'filter': {'local_gravity': 9.793, 'earth_rate_enu': rate}}
+    truth, _, _, spec, _ = _build_inputs(raw)
+    earth = Config(local_gravity=9.793, earth_rate_enu=rate).earth_model()
+    imu = simulate_imu(truth, spec, noise=False)
+    R, v, p = truth.R[0].copy(), truth.v[0].copy(), truth.p[0].copy()
+    for k in range(len(truth.t)-1):
+        R, v, p = mechanize(R, v, p, imu.gyro[k], imu.accel[k], truth.dt, earth)
+    np.testing.assert_allclose(R, truth.R[-1], atol=1e-12, rtol=0)
+    np.testing.assert_allclose(v, truth.v[-1], atol=1e-10, rtol=0)
+    np.testing.assert_allclose(p, truth.p[-1], atol=1e-8, rtol=0)
+    row = pure_ins_budget(truth, imu, [(0., 60.)], earth=earth)[0]
+    assert row['end_h'] < 1e-8
+    assert row['end_v'] < 1e-8
+
+
+@pytest.mark.parametrize('kwargs', [
+    {'earth_rate_enu': [0., 1.]},
+    {'earth_rate_enu': [0., float('nan'), 0.]},
+    {'local_gravity': 0.}, {'local_gravity': float('inf')},
+])
+def test_config_rejects_invalid_explicit_earth(kwargs):
+    from ccgins.pipeline import Config
+    with pytest.raises(ValueError):
+        Config(**kwargs).earth_model()
+
 @pytest.mark.parametrize('cls', [ESKF, InEKF])
 def test_earth_covariance_linearization(cls):
     earth = dict(w_ie=earth_rate_enu(30), g=np.array([0,0,-local_gravity(30)]))

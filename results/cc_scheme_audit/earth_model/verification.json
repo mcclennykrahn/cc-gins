@@ -1,0 +1,24 @@
+{
+  "900": {
+    "default_trace_identical": true,
+    "max_abs_delta": 0.0
+  },
+  "118001": {
+    "default_trace_identical": true,
+    "max_abs_delta": 0.0
+  },
+  "118002": {
+    "default_trace_identical": true,
+    "max_abs_delta": 0.0
+  },
+  "parent": {
+    "rotation_frobenius": 0.01856256102230292,
+    "velocity_mps": 10.546720286932793,
+    "position_m": 664.683494586532
+  },
+  "candidate": {
+    "rotation_frobenius": 7.746295891730688e-13,
+    "velocity_mps": 2.288475926616521e-10,
+    "position_m": 1.4013122926834241e-08
+  }
+}

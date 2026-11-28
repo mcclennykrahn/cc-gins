@@ -12,7 +12,7 @@ import numpy as np
 
 from .timing import in_window
 
-from .geometry import euler_to_rot, so3_log
+from .geometry import euler_to_rot, so3_exp, so3_log
 
 G_NAV = np.array([0.0, 0.0, -9.81])
 DEG = np.pi / 180.0
@@ -100,7 +100,8 @@ def _smooth(x: np.ndarray, tau_samples: float) -> np.ndarray:
 
 
 def generate_trajectory(duration: float = 600.0, dt: float = 0.01, seed: int = 0,
-                        vmax: float = 20.0) -> Truth:
+                        vmax: float = 20.0, *, earth: dict | None = None) -> Truth:
+    """Generate local ENU truth and invert mechanization for the given Earth model."""
     if not np.isfinite([duration, dt, vmax]).all() or duration <= 0 or dt <= 0 or vmax < 0:
         raise ValueError("trajectory requires finite positive duration and dt and nonnegative vmax")
     rng = np.random.default_rng(seed)
@@ -162,14 +163,24 @@ def generate_trajectory(duration: float = 600.0, dt: float = 0.01, seed: int = 0
     v = np.einsum("nij,nj->ni", R, v_body)
 
     # positions + IMU by inverting mechanization
+    gravity = G_NAV if earth is None else earth["g"]
+    earth_rate = None if earth is None else earth["w_ie"]
+    if earth_rate is not None:
+        earth_increment = so3_exp(earth_rate * dt)
+        coriolis = 2.0 * np.cross(earth_rate, v)
     p = np.zeros((n, 3))
     gyro = np.zeros((n, 3))
     accel = np.zeros((n, 3))
     for k in range(n - 1):
         a = (v[k + 1] - v[k]) / dt
         p[k + 1] = p[k] + v[k] * dt + 0.5 * a * dt * dt
-        gyro[k] = so3_log(R[k].T @ R[k + 1]) / dt
-        accel[k] = R[k].T @ (a - G_NAV)
+        next_attitude = R[k + 1]
+        specific_force = a - gravity
+        if earth_rate is not None:
+            next_attitude = earth_increment @ next_attitude
+            specific_force += coriolis[k]
+        gyro[k] = so3_log(R[k].T @ next_attitude) / dt
+        accel[k] = R[k].T @ specific_force
     gyro[-1] = gyro[-2]
     accel[-1] = accel[-2]
     return Truth(t=t, R=R, v=v, p=p, v_body=v_body, gyro=gyro, accel=accel, dt=dt)

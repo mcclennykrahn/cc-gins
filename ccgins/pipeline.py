@@ -90,6 +90,18 @@ class Config:
     motion_every: int = 10
     label: str = ""
 
+    def earth_model(self) -> dict | None:
+        """Resolve an explicit fixed local ENU Earth model, if configured."""
+        if self.earth_rate_enu is None and self.local_gravity is None:
+            return None
+        w = None if self.earth_rate_enu is None else np.asarray(self.earth_rate_enu, dtype=float)
+        if w is not None and (w.shape != (3,) or not np.isfinite(w).all()):
+            raise ValueError("Earth rate must be a finite ENU 3-vector")
+        gravity = 9.81 if self.local_gravity is None else float(self.local_gravity)
+        if not np.isfinite(gravity) or gravity <= 0:
+            raise ValueError("local gravity must be finite and positive")
+        return {"w_ie": w, "g": np.array([0., 0., -gravity])}
+
     def nhc_variances(self) -> np.ndarray:
         """Fixed lateral/vertical vehicle-frame variances (also used by fallback)."""
         sigmas = np.array([self.nhc_sigma, self.nhc_sigma if self.nhc_vertical_sigma is None
@@ -170,10 +182,7 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
         ch = list(ch)
         return h[ch], H[ch]
     R0, v0, p0, P0 = initial_state(truth, cfg.init_seed, cfg.p0_bias)
-    earth = None
-    if cfg.earth_rate_enu is not None or cfg.local_gravity is not None:
-        earth = {"w_ie": None if cfg.earth_rate_enu is None else np.asarray(cfg.earth_rate_enu),
-                 "g": np.array([0., 0., -(9.81 if cfg.local_gravity is None else cfg.local_gravity)])}
+    earth = cfg.earth_model()
     A = make_filter(cfg.filter, R0, v0, p0, P0, noise, earth=earth)
     lever = gnss_spec.lever_arm
     Rm = np.diag(gnss.sigma**2)

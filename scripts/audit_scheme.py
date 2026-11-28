@@ -6,6 +6,7 @@ import numpy as np
 from ccgins.cli import load_config, _build_inputs, _filter_config
 from ccgins.pipeline import run
 from ccgins.filters import mechanize
+from ccgins.sim import G_NAV
 from ccgins.timing import at_or_after, in_window
 
 
@@ -70,12 +71,14 @@ def contained_steps(truth, start, duration):
     return first, last
 
 
-def pure_ins_budget(truth, imu, outages):
+def pure_ins_budget(truth, imu, outages, *, earth=None):
     """Propagate complete steps inside requested outages; report actual grid bounds.
 
     Narrow off-grid bounds rather than inventing fractional IMU samples.
     This is an exact-truth-initialized diagnostic, never an online result.
     """
+    if earth is None:
+        earth = {'w_ie': None, 'g': G_NAV}
     rows = []
     for start, duration in outages:
         first, last = contained_steps(truth, start, duration)
@@ -83,7 +86,7 @@ def pure_ins_budget(truth, imu, outages):
         errors = []
         for k in range(first, last):
             R, v, p = mechanize(R, v, p, imu.gyro[k], imu.accel[k], truth.dt,
-                                earth={'w_ie': None, 'g': np.array([0., 0., -9.81])})
+                                earth=earth)
             errors.append(p - truth.p[k + 1])
         e = np.asarray(errors)
         rows.append(dict(start=start, duration=duration,
@@ -108,9 +111,10 @@ def main():
     if not np.isfinite(t_start) or t_start < 0:
         raise ValueError('metrics.t_start must be finite and non-negative')
     result = dict(config=raw, scoring=f'IMU origin, same logged epoch; t>={t_start:g}; half-open outages', rows=[])
+    cfg = _filter_config(raw)
     for seed in args.seeds:
         truth, imu, gnss, spec, gs = _build_inputs(raw, seed_override=seed)
-        log = run(truth, imu, gnss, spec, gs, _filter_config(raw))
+        log = run(truth, imu, gnss, spec, gs, cfg)
         error = log.p_est-log.p_true
         ant = truth.p[gnss.idx] + np.einsum('nij,j->ni', truth.R[gnss.idx], gs.lever_arm)
         ge = gnss.pos-ant
@@ -119,7 +123,8 @@ def main():
                                              scenario_end=truth.t[-1]),
                    gnss_only=(budget(gnss.t[gmask], ge[gmask], [], t_start)['overall']
                               if gmask.any() else None))
-        row['pure_ins_truth_initialized'] = pure_ins_budget(truth, imu, gs.outages)
+        row['pure_ins_truth_initialized'] = pure_ins_budget(truth, imu, gs.outages,
+                                                           earth=cfg.earth_model())
         row['bins'] = []
         for s in np.arange(t_start, truth.t[-1], 10.):
             m = in_window(log.t, s, min(s + 10., truth.t[-1]))
