@@ -18,6 +18,15 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs" / "example_sim.yaml"
 
 
+@pytest.mark.parametrize("vmax", [1.0, 4.0])
+def test_simulated_forward_speed_respects_low_scenario_ceiling(vmax):
+    truth, *_ = _build_inputs({"scenario": {"seed": 900, "duration": 60, "vmax": vmax}})
+    speed = truth.v_body[:, 0]
+    assert np.all(speed >= 0.0)
+    assert speed.max() == pytest.approx(vmax)
+    assert np.all(speed <= vmax + 1e-12)
+
+
 def _smoke_config(path: Path) -> Path:
     raw = {
         "scenario": {"seed": 3, "duration": 30.0, "dt": 0.01, "vmax": 15.0},

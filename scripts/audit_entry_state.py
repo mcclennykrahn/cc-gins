@@ -19,6 +19,7 @@ from scripts.audit_scheme import budget, contained_steps
 
 
 ARMS = {'attitude': ('R',), 'gyro_bias': ('bg',), 'accel_bias': ('ba',),
+        'biases': ('bg', 'ba'),
         'attitude_and_biases': ('R', 'bg', 'ba'),
         'heading': ('R',), 'tilt': ('R',), 'velocity': ('v',)}
 

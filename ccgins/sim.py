@@ -118,7 +118,7 @@ def generate_trajectory(duration: float = 600.0, dt: float = 0.01, seed: int = 0
         elif rng.random() < 0.1:
             tgt = 0.0
         else:
-            tgt = rng.uniform(4, vmax)
+            tgt = rng.uniform(min(4.0, vmax), vmax)
         u_target[i:i + seg] = tgt
         i += seg
     u = np.empty(n)
