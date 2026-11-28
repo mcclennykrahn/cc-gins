@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from ccgins.geometry import skew, so3_exp, so3_left_jacobian, so3_log
 
@@ -10,6 +11,22 @@ def test_exp_log_roundtrip():
         R = so3_exp(phi)
         assert np.allclose(R @ R.T, np.eye(3), atol=1e-12)
         assert np.allclose(so3_exp(so3_log(R)), R, atol=1e-9)
+
+
+@pytest.mark.parametrize("offset", [
+    -np.pi / 3 - 1e-9, -np.pi / 3 + 1e-9, -.001000001, -9e-6, -1e-8,
+    0., 1e-8, 9e-6, .001000001, np.pi / 3 - 1e-9, np.pi / 3 + 1e-9,
+])
+def test_exp_log_roundtrip_large_rotation(offset):
+    axis = np.array([-2., 1., .75])
+    axis /= np.linalg.norm(axis)
+    R = so3_exp(axis * (np.pi + offset))
+    phi = so3_log(R)
+    np.testing.assert_allclose(so3_exp(phi), R, atol=2e-14, rtol=0)
+    if offset:
+        principal_axis = axis if offset < 0 else -axis
+        np.testing.assert_allclose(phi, principal_axis * (np.pi - abs(offset)),
+                                   atol=2e-14, rtol=0)
 
 
 def test_left_jacobian_numeric():
