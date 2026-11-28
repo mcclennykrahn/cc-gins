@@ -12,6 +12,7 @@ import numpy as np
 
 from ccgins.cli import load_config, _build_inputs
 from ccgins.filters import mechanize
+from scripts.audit_scheme import contained_steps
 
 
 def components(truth, imu):
@@ -31,10 +32,7 @@ def components(truth, imu):
 
 
 def integrate(truth, gyro, accel, start, duration):
-    first = int(round(start / truth.dt))
-    last = int(round((start + duration) / truth.dt))
-    if first < 0 or last >= len(truth.t) or last <= first:
-        raise ValueError('integration interval outside truth')
+    first, last = contained_steps(truth, start, duration)
     R, v, p = (x[first].copy() for x in (truth.R, truth.v, truth.p))
     errors = []
     for k in range(first, last):
@@ -64,7 +62,11 @@ def main():
     for seed in args.seeds:
         truth, imu, _, _, gs = _build_inputs(raw, seed_override=seed)
         for start, duration in gs.outages:
-            row = dict(seed=seed, start=start, duration=duration, components={})
+            first, last = contained_steps(truth, start, duration)
+            row = dict(seed=seed, start=start, duration=duration,
+                       actual_start=float(truth.t[first]), actual_end=float(truth.t[last]),
+                       propagated_duration=float(truth.t[last] - truth.t[first]),
+                       n_steps=last-first, components={})
             traces = {}
             for name, (dg, da) in components(truth, imu).items():
                 # Use original arrays for all to avoid subtraction/addition rounding.

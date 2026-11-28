@@ -236,3 +236,35 @@ def test_audit_cli_rejects_invalid_scoring_start(tmp_path, monkeypatch, start):
                                      '--out', str(tmp_path / 'evidence')])
     with pytest.raises(ValueError, match='metrics.t_start'):
         main()
+
+
+@pytest.mark.parametrize('start,duration,first,last', [
+    (.331, .27, 12, 20), (.33, .27, 11, 20),
+])
+def test_component_replay_contains_steps_and_matches_budget(start, duration, first, last):
+    from scripts.audit_ins_components import integrate, metrics
+    from scripts.audit_scheme import pure_ins_budget
+    t = np.arange(22)*.03
+    truth = SimpleNamespace(t=t, dt=.03, R=np.tile(np.eye(3), (22, 1, 1)),
+                            p=np.zeros((22, 3)), v=np.zeros((22, 3)),
+                            v_body=np.zeros((22, 3)))
+    gyro = np.zeros((22, 3))
+    accel = np.tile([2., 0., 9.81], (22, 1))
+    # Samples outside the contained interval must never enter the replay.
+    accel[:first] = 1e6
+    accel[last:] = 1e6
+    epochs, errors = integrate(truth, gyro, accel, start, duration)
+    np.testing.assert_array_equal(epochs, t[first+1:last+1])
+    assert metrics(errors)['end_h'] == pytest.approx((t[last]-t[first])**2)
+    row = pure_ins_budget(truth, SimpleNamespace(gyro=gyro, accel=accel), [(start, duration)])[0]
+    assert metrics(errors)['rmse_h'] == row['rmse_h']
+    assert metrics(errors)['end_h'] == row['end_h']
+
+
+@pytest.mark.parametrize('start,duration', [(-.01, .3), (.5, .5), (.331, .01),
+                                            (.3, 0), (.3, np.nan), (.3, np.inf)])
+def test_component_replay_rejects_unrepresentable_interval(start, duration):
+    from scripts.audit_ins_components import integrate
+    truth = SimpleNamespace(t=np.arange(22)*.03, dt=.03)
+    with pytest.raises(ValueError, match='pure INS outage'):
+        integrate(truth, None, None, start, duration)

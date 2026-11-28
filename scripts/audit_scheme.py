@@ -54,6 +54,22 @@ def budget(t, error, outages, t_start=30., *, scenario_end=None):
     return rows
 
 
+def contained_steps(truth, start, duration):
+    """Indices bounding complete IMU steps contained in a requested interval."""
+    end = start + duration
+    if duration <= 0 or not np.isfinite([start, end]).all():
+        raise ValueError("pure INS outage must have finite bounds and positive duration")
+    if not at_or_after(start, truth.t[0]) or not at_or_after(truth.t[-1], end):
+        raise ValueError("pure INS outage must lie within the truth trajectory")
+    first = int(np.flatnonzero(at_or_after(truth.t, start))[0])
+    last = int(np.flatnonzero(at_or_after(truth.t, end))[0])
+    if not at_or_after(end, truth.t[last]):
+        last -= 1
+    if last <= first:
+        raise ValueError("pure INS outage contains no complete IMU step")
+    return first, last
+
+
 def pure_ins_budget(truth, imu, outages):
     """Propagate complete steps inside requested outages; report actual grid bounds.
 
@@ -62,17 +78,7 @@ def pure_ins_budget(truth, imu, outages):
     """
     rows = []
     for start, duration in outages:
-        end = start + duration
-        if duration <= 0 or not np.isfinite([start, end]).all():
-            raise ValueError("pure INS outage must have finite bounds and positive duration")
-        if not at_or_after(start, truth.t[0]) or not at_or_after(truth.t[-1], end):
-            raise ValueError("pure INS outage must lie within the truth trajectory")
-        first = int(np.flatnonzero(at_or_after(truth.t, start))[0])
-        last = int(np.flatnonzero(at_or_after(truth.t, end))[0])
-        if not at_or_after(end, truth.t[last]):
-            last -= 1
-        if last <= first:
-            raise ValueError("pure INS outage contains no complete IMU step")
+        first, last = contained_steps(truth, start, duration)
         R, v, p = truth.R[first].copy(), truth.v[first].copy(), truth.p[first].copy()
         errors = []
         for k in range(first, last):
