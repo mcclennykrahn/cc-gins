@@ -13,12 +13,27 @@ from unittest.mock import patch
 import numpy as np
 
 from ccgins import pipeline
+from ccgins.geometry import so3_exp, rot_to_yaw
 from ccgins.cli import _build_inputs, _filter_config, load_config
 from scripts.audit_scheme import budget, contained_steps
 
 
 ARMS = {'attitude': ('R',), 'gyro_bias': ('bg',), 'accel_bias': ('ba',),
-        'attitude_and_biases': ('R', 'bg', 'ba')}
+        'attitude_and_biases': ('R', 'bg', 'ba'),
+        'heading': ('R',), 'tilt': ('R',), 'velocity': ('v',)}
+
+
+def partial_attitude(estimated, truth, arm):
+    """ZYX split; replace yaw or yaw-free tilt, refusing vertical forward axes."""
+    if arm not in ('heading', 'tilt'):
+        raise ValueError('partial attitude requires heading or tilt')
+    for R in (estimated, truth):
+        if np.hypot(R[0, 0], R[1, 0]) < 1e-6:
+            raise ValueError('heading undefined for vertical forward axis')
+    delta = rot_to_yaw(truth) - rot_to_yaw(estimated)
+    if arm == 'heading':
+        return so3_exp(np.array([0., 0., delta])) @ estimated
+    return so3_exp(np.array([0., 0., -delta])) @ truth
 
 
 def replay(truth, imu, gnss, spec, gs, cfg, start, duration, arm):
@@ -42,16 +57,21 @@ def replay(truth, imu, gnss, spec, gs, cfg, start, duration, arm):
         def propagate(gyro, accel, dt):
             nonlocal step
             if step == first:
-                target = dict(R=truth.R[first], bg=imu.gyro_bias[first],
-                              ba=imu.accel_bias[first])
+                truth_state = dict(R=truth.R[first], bg=imu.gyro_bias[first],
+                              ba=imu.accel_bias[first], v=truth.v[first])
+                target = dict(truth_state)
+                if arm in ('heading', 'tilt'):
+                    target['R'] = partial_attitude(filt.R, truth.R[first], arm)
                 covariance = filt.P.copy()
                 evidence.update(epoch=float(truth.t[first]), imu_index=first,
                     fields=list(ARMS[arm]),
                     before={name: getattr(filt, name).tolist() for name in target},
-                    truth={name: value.tolist() for name, value in target.items()})
+                    truth={name: value.tolist() for name, value in truth_state.items()},
+                    target={name: value.tolist() for name, value in target.items()})
                 for name in ARMS[arm]:
                     setattr(filt, name, target[name].copy())
                 np.testing.assert_array_equal(filt.P, covariance)
+                evidence['after'] = {name: getattr(filt, name).tolist() for name in target}
                 evidence['covariance_unchanged'] = True
             native_propagate(gyro, accel, dt)
             step += 1
@@ -82,6 +102,7 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--config', default='configs/example_sim.yaml')
     parser.add_argument('--seeds', type=int, nargs='+', default=[900, 110001, 110002])
+    parser.add_argument('--arms', nargs='+', choices=list(ARMS), default=list(ARMS))
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     raw = load_config(args.config)
@@ -96,7 +117,7 @@ def main():
         np.savez_compressed(args.out / f'online_{seed}.npz', t=native.t,
                             error=native.p_est-native.p_true)
         for start, duration in gs.outages:
-            for arm in ARMS:
+            for arm in args.arms:
                 altered, entry = replay(truth, imu, gnss, spec, gs, cfg, start, duration, arm)
                 n_prefix = verify_prefix(native, altered, start)
                 result['rows'].append(dict(seed=seed, start=start, duration=duration,
