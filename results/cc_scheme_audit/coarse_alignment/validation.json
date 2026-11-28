@@ -1,0 +1,12 @@
+{
+  "before_after_byte_equality": {
+    "budget.json": true,
+    "errors_900.csv": true,
+    "errors_115001.csv": true,
+    "errors_115002.csv": true
+  },
+  "production_changed": false,
+  "confirmed_v08": false,
+  "pytest": "325 passed in 78.30s (0:01:18)",
+  "independent_review": "PASS"
+}

@@ -1,0 +1,14 @@
+{
+  "candidate_id": "scheme_coarse_alignment",
+  "verdict": "PASS",
+  "reviewer": "independent_review sub-agent",
+  "scope": "Bounded diagnostic, tests, source and measured report",
+  "checks": [
+    "Five new tests pass",
+    "Before/after budgets and all three histories byte-identical",
+    "Independent regeneration reproduces measured tilt errors",
+    "Drift formulas, units, scoring and heading ambiguity correct"
+  ],
+  "caveat": "4.99s sample spans acceleration onset at5s; disclosed in report",
+  "confirmed_v08": false
+}

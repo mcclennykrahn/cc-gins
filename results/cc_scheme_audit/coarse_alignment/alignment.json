@@ -1,0 +1,80 @@
+{
+  "candidate_id": "scheme_coarse_alignment",
+  "production_changed": false,
+  "window": "0 <= t < 5 s; estimate available at 5 s",
+  "heading": "unobservable from gravity; no heading estimate supplied",
+  "rows": [
+    {
+      "seed": 900,
+      "samples": 500,
+      "max_prefix_speed_mps": 0.0,
+      "max_prefix_angular_rate_deg_s": 0.5207809530721889,
+      "ideal_tilt_error_deg": 0.33111335678621034,
+      "measured_tilt_error_deg": 0.3433960810485009,
+      "oracle_debiased_tilt_error_deg": 0.3345109542662525,
+      "mean_accel_bias_mps2": [
+        -0.002558969923563912,
+        0.027385694996336217,
+        0.07858579260046523
+      ],
+      "mean_gyro_deg_s": [
+        0.025270399980395167,
+        -0.12953997081735014,
+        0.0011290852947259907
+      ],
+      "true_mean_gyro_deg_s": [
+        0.033658431606253716,
+        -0.1265569282412202,
+        0.00023715323668194128
+      ]
+    },
+    {
+      "seed": 115001,
+      "samples": 500,
+      "max_prefix_speed_mps": 0.0,
+      "max_prefix_angular_rate_deg_s": 0.7111463152781328,
+      "ideal_tilt_error_deg": 0.07531081327422018,
+      "measured_tilt_error_deg": 0.2973102136275123,
+      "oracle_debiased_tilt_error_deg": 0.06890099655316125,
+      "mean_accel_bias_mps2": [
+        0.043920124219822596,
+        0.02125991584104371,
+        -0.01914115861517169
+      ],
+      "mean_gyro_deg_s": [
+        0.03622101514339511,
+        -0.009483577785982444,
+        0.0098116489751752
+      ],
+      "true_mean_gyro_deg_s": [
+        0.033658431607442724,
+        -0.011600616061797402,
+        -5.532161142304082e-06
+      ]
+    },
+    {
+      "seed": 115002,
+      "samples": 500,
+      "max_prefix_speed_mps": 0.0,
+      "max_prefix_angular_rate_deg_s": 0.7930272117996059,
+      "ideal_tilt_error_deg": 0.2526618923881685,
+      "measured_tilt_error_deg": 0.2862466256597483,
+      "oracle_debiased_tilt_error_deg": 0.24952922217414145,
+      "mean_accel_bias_mps2": [
+        -0.08981341070012673,
+        0.015386140365584552,
+        0.043424554122504164
+      ],
+      "mean_gyro_deg_s": [
+        0.021643876399753993,
+        0.06860014629187201,
+        0.012495720090840386
+      ],
+      "true_mean_gyro_deg_s": [
+        0.033658431607130036,
+        0.07468260487821703,
+        -0.00015345641536125584
+      ]
+    }
+  ]
+}
