@@ -292,17 +292,22 @@ class StreamingNavigator:
             if not slow:
                 self._confirmations = 0
                 self._stop = False
-            self._previous_fix = (self.t, pos.copy(), cov.copy())
         force = self._rejects >= self.max_consecutive_rejects
         info = self.filter.update_gnss(pos, self.lever_arm, cov, gate=self.gate, force=force,
                                        robust_delta=self.robust_gnss_delta)
         if info.accepted:
-            if self.detector is not None and self.cfg.zupt_require_gnss_stop:
-                self._confirmations = self._confirmations + 1 if slow else 0
-                self._stop = self._confirmations >= 2
             self._rejects = 0
         else:
             self._rejects += 1
+        if self.detector is not None and self.cfg.zupt_require_gnss_stop:
+            if info.accepted and not force:
+                self._previous_fix = (self.t, pos.copy(), cov.copy())
+                self._confirmations = self._confirmations + 1 if slow else 0
+                self._stop = self._confirmations >= 2
+            else:
+                self._previous_fix = None
+                self._confirmations = 0
+                self._stop = False
 
     @staticmethod
     def _as_cov(cov) -> np.ndarray:

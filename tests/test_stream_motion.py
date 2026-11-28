@@ -130,3 +130,61 @@ def test_gnss_stop_confirmation_and_rejected_motion_revocation(kind):
     assert max(nav.motion['zupt_times']) <= 3.
     assert nav._rejects == 1  # moving fix vetoes rest even when filter rejects it
     assert not nav._stop
+
+
+@pytest.mark.parametrize('kind', ['eskf', 'inekf'])
+@pytest.mark.parametrize('rejected_epoch', [3, 4])
+@pytest.mark.parametrize('interruption', ['rejected', 'forced', 'excluded'])
+def test_untrusted_quiet_fix_breaks_stop_confirmation(kind, rejected_epoch, interruption, monkeypatch):
+    from ccgins.filters import NavFilter, UpdateInfo
+    from ccgins.sim import ImuSpec, GnssSpec, generate_trajectory, simulate_imu, simulate_gnss
+
+    truth = generate_trajectory(9, seed=0)
+    truth.v[:] = 0
+    truth.p[:] = 0
+    truth.R[:] = np.eye(3)
+    spec = ImuSpec()
+    gs = GnssSpec(lever_arm=np.zeros(3))
+    imu = simulate_imu(truth, spec, seed=0)
+    imu.gyro[:] = 0
+    imu.accel[:] = [0, 0, 9.81]
+    gnss = simulate_gnss(truth, gs, seed=0)
+    gnss.pos[:] = 0
+    gnss.sigma[:] = .01
+    # The fix looks stationary to the displacement guard but is rejected
+    # by navigation. Inject the gate outcome without moving the IMU.
+    gnss.pos[gnss.t == rejected_epoch, 0] = .05
+    update_gnss = NavFilter.update_gnss
+    forced_fixes = []
+
+    def reject_one(self, z, *args, force=False, **kwargs):
+        if z[0] == .05:
+            assert interruption != 'excluded'
+            return UpdateInfo(100., False, 3)
+        if force:
+            forced_fixes.append(z.copy())
+        return update_gnss(self, z, *args, force=force, **kwargs)
+
+    monkeypatch.setattr(NavFilter, 'update_gnss', reject_one)
+    monkeypatch.setattr('ccgins.pipeline.initial_state',
+                        lambda *_: (np.eye(3), np.zeros(3), np.zeros(3), np.eye(15)*.01))
+    cfg = Config(filter=kind, pseudo='none',
+                 monitor='single' if interruption == 'excluded' else 'none',
+                 zupt=True, max_consecutive_rejects=1 if interruption == 'forced' else 5,
+                 cusum_h=1e-6, cusum_k=-3., recovery_epochs=1, local_gravity=9.81)
+    batch = run(truth, imu, gnss, spec, gs, cfg)
+    if interruption == 'excluded':
+        assert batch.alarm_time == rejected_epoch
+    else:
+        nav = StreamingNavigator.from_truth(truth, spec, gs, cfg)
+        for j in np.flatnonzero(gnss.valid):
+            nav.push_gnss(*_gnss_args(gnss, j))
+        for t, accel, gyro in zip(imu.t, imu.accel, imu.gyro):
+            nav.push_imu(t, accel, gyro)
+        assert nav.motion == batch.extra['motion']
+        assert len(forced_fixes) == (2 if interruption == 'forced' else 0)
+
+    times = batch.extra['motion']['zupt_times']
+    assert any(t <= rejected_epoch for t in times) == (rejected_epoch == 4)
+    next_anchor = rejected_epoch + (1 if interruption == 'rejected' else 2)
+    assert min(t for t in times if t > rejected_epoch) > next_anchor + 2

@@ -433,7 +433,6 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                     if not slow_fix:
                         stop_confirmations = 0
                         stop_verified = False
-                    previous_fix = (t, zg.copy(), Rm.copy())
                 Rg = Rm if gnss_cal is None else gnss_cal.effective_cov(Rm)
                 # Monitor and update use the same PREVIOUS scale.
                 # integrity statistic
@@ -485,13 +484,20 @@ def run(truth, imu, gnss, imu_spec, gnss_spec, cfg: Config, pred=None, odometry=
                             accepted=bool(info.accepted), nis=float(info.nis)))
                     if info.accepted:
                         fix_accepted = True
-                        if detector is not None and cfg.zupt_require_gnss_stop:
+                        if detector is not None and cfg.zupt_require_gnss_stop and not force:
+                            previous_fix = (t, zg.copy(), Rm.copy())
                             stop_confirmations = stop_confirmations + 1 if slow_fix else 0
                             stop_verified = stop_confirmations >= 2
                         rejects = 0
                         t_last_gnss = t
                     else:
                         rejects += 1
+                if (detector is not None and cfg.zupt_require_gnss_stop
+                        and (not fix_accepted or forced)):
+                    # Stop evidence requires admission through the normal gate.
+                    previous_fix = None
+                    stop_confirmations = 0
+                    stop_verified = False
                 if grh is not None:
                     grh.observe(t, accepted=fix_accepted, q=q_obs, forced=forced,
                                 alarm=bool(was or cus.alarm), recovery=recovered)
