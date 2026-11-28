@@ -64,7 +64,8 @@ def experiment(raw, seed, init_seed, out):
         error = log.p_est - log.p_true
         row = dict(seed=seed, init_seed=init_seed, mode=mode,
                    fixed12_exact_native_replay=(mode == 'fixed12'),
-                   **position_consistency(log, gs.outages), bins=[])
+                   **position_consistency(log, gs.outages, raw['metrics']['t_start'],
+                                              scenario_end=truth.t[-1]), bins=[])
         for start in range(30, 180, 10):
             mask = (log.t >= start) & (log.t < start + 10)
             row['bins'].append(dict(start=start, **budget(

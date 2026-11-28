@@ -52,3 +52,14 @@ def test_position_consistency_respects_changed_outages_and_scoring_start():
                                np.mean(np.array([2, 3, 6, 7, 8, 9, 10])**2)/3)
     assert result['overall']['n'] == 9
     assert result['terminal_available']['position_nees_per_dim'] == 100/3
+
+
+def test_decimated_available_log_keeps_last_sample_in_available_interval():
+    t = np.array([30., 31., 32.])
+    error = np.ones((3, 3))
+    log = SimpleNamespace(t=t, p_est=error, p_true=np.zeros_like(error),
+                          P_pos=np.tile(np.eye(3), (len(t), 1, 1)))
+    segments = position_consistency(log, [], scenario_end=32.5)['segments']
+    assert segments['available_30_32.5']['n'] == 3
+    assert segments['available_30_32.5']['position_nees_per_dim'] == 1.
+    assert 'terminal_available' not in segments

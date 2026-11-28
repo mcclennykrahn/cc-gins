@@ -53,7 +53,8 @@ def main():
             measurements = gnss if model == 'nominal' else simulate_gnss(truth, replace(gs, mp_sigma=0.), seed=seed)
             log = run(truth, imu, measurements, spec, gs, cfg)
             result['rows'].append(dict(seed=seed, init_seed=cfg.init_seed, model=model,
-                                      **position_consistency(log, gs.outages, raw['metrics']['t_start'])))
+                                      **position_consistency(log, gs.outages, raw['metrics']['t_start'],
+                                              scenario_end=truth.t[-1])))
             (args.out/'checkpoints.json').write_text(json.dumps(result, indent=2, allow_nan=False)+'\n')
             print(seed, model, flush=True)
     result['ensemble'] = {}

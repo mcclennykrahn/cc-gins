@@ -12,12 +12,12 @@ from ccgins.sim import simulate_gnss
 from scripts.audit_scheme import budget, segment_masks
 
 
-def position_consistency(log, outages, t_start=30.):
+def position_consistency(log, outages, t_start=30., *, scenario_end=None):
     error = log.p_est - log.p_true
     nees = np.einsum('ni,ni->n', error,
                      np.linalg.solve(log.P_pos, error[..., None])[..., 0])
-    rows = budget(log.t, error, outages, t_start)
-    masks = segment_masks(log.t, outages, t_start)
+    rows = budget(log.t, error, outages, t_start, scenario_end=scenario_end)
+    masks = segment_masks(log.t, outages, t_start, scenario_end=scenario_end)
     for name, mask in masks.items():
         if not mask.any():
             continue
@@ -53,7 +53,8 @@ def main():
                 cfg.init_seed = init
                 log = run(truth, imu, gnss, spec, gs, cfg)
                 row = dict(seed=seed, init_seed=init, model=label,
-                           **position_consistency(log, gs.outages))
+                           **position_consistency(log, gs.outages, raw['metrics']['t_start'],
+                                              scenario_end=truth.t[-1]))
                 result['rows'].append(row)
                 (out/'calibration.json').write_text(json.dumps(result, indent=2, allow_nan=False)+'\n')
                 print(seed, init, label, row['segments']['overall']['rmse_h'], flush=True)

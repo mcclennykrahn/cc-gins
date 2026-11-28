@@ -81,7 +81,8 @@ def main():
                 error = log.p_est - log.p_true
                 row = dict(seed=seed, init_seed=init_seed, case=label,
                            skipped_interval=skip, update_epochs=len(pred[0]),
-                           **position_consistency(log, gnss_spec.outages), bins=[])
+                           **position_consistency(log, gnss_spec.outages, raw['metrics']['t_start'],
+                                              scenario_end=truth.t[-1]), bins=[])
                 for start in range(30, 180, 10):
                     mask = (log.t >= start) & (log.t < start + 10)
                     row['bins'].append(dict(start=start, **budget(

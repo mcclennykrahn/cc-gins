@@ -64,7 +64,8 @@ def main():
                     t=log.t, error=error, position_covariance=log.P_pos,
                 )
                 row = dict(seed=seed, init_seed=cfg.init_seed, multipath=multipath,
-                           pseudo=pseudo, **position_consistency(log, outages), bins=[])
+                           pseudo=pseudo, **position_consistency(log, outages, raw['metrics']['t_start'],
+                                              scenario_end=truth.t[-1]), bins=[])
                 for start in range(30, 180, 10):
                     mask = (log.t >= start) & (log.t < start + 10)
                     row['bins'].append(dict(start=start, **budget(
